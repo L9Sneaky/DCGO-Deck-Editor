@@ -739,53 +739,69 @@ HTML_TEMPLATE = Template(
     }
 
     .tester-header {
-      padding: 14px 18px 12px;
+      padding: 8px 12px;
       border-bottom: 1px solid var(--line);
       display: grid;
-      grid-template-columns: minmax(220px, 1fr) auto;
-      align-items: start;
-      gap: 14px;
+      grid-template-columns: minmax(160px, 1fr) auto;
+      align-items: center;
+      gap: 10px;
       background: rgba(1, 7, 13, 0.32);
+    }
+
+    .tester-header .eyebrow {
+      margin-bottom: 2px;
+      font-size: 10px;
     }
 
     .tester-title {
       margin: 0;
       font-family: var(--font-display);
-      font-size: clamp(25px, 2.6vw, 39px);
+      font-size: clamp(20px, 2vw, 30px);
       line-height: 0.92;
       letter-spacing: 0.02em;
     }
 
     .tester-subtitle {
-      margin: 5px 0 0;
+      margin: 3px 0 0;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       line-height: 1.35;
+      max-width: 72ch;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .tester-actions {
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 7px;
+      gap: 5px;
       flex-wrap: wrap;
-      max-width: 760px;
+      max-width: 520px;
     }
 
     .tester-actions .button,
     .tester-mini-actions .button,
     .tester-card-actions .button,
     .tester-stack-actions .button {
-      min-height: 28px;
-      padding: 5px 8px;
-      border-radius: 9px;
-      font-size: 11px;
+      min-height: 25px;
+      padding: 4px 7px;
+      border-radius: 8px;
+      font-size: 10px;
+    }
+
+    .tester-actions .button {
+      min-width: 32px;
+      font-size: 13px;
+      font-family: var(--font-display);
+      letter-spacing: 0.02em;
     }
 
     .tester-board {
       min-height: 0;
       overflow: hidden;
-      padding: 12px;
+      padding: 8px;
       display: grid;
       grid-template-columns: minmax(190px, 0.58fr) minmax(620px, 2fr) minmax(260px, 0.78fr);
       grid-template-areas: "piles playmat drawer";
@@ -813,7 +829,7 @@ HTML_TEMPLATE = Template(
       padding: 10px;
       display: grid;
       grid-template-rows: auto auto minmax(0, 1fr);
-      gap: 10px;
+      gap: 8px;
       overflow: auto;
     }
 
@@ -824,7 +840,7 @@ HTML_TEMPLATE = Template(
       grid-template-rows: minmax(92px, 0.58fr) minmax(300px, 1.7fr) minmax(128px, 0.75fr);
       gap: 10px;
       overflow: hidden;
-      padding: 10px;
+      padding: 8px;
       position: relative;
     }
 
@@ -866,8 +882,8 @@ HTML_TEMPLATE = Template(
     }
 
     .tester-zone-header {
-      min-height: 36px;
-      padding: 8px 10px;
+      min-height: 30px;
+      padding: 6px 8px;
       border-bottom: 1px solid rgba(95, 212, 255, 0.14);
       display: flex;
       align-items: center;
@@ -879,40 +895,40 @@ HTML_TEMPLATE = Template(
     .tester-zone-title {
       margin: 0;
       color: var(--accent);
-      font-size: 11px;
+      font-size: 10px;
       letter-spacing: 0.13em;
       text-transform: uppercase;
     }
 
     .tester-zone-meta {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       line-height: 1.2;
       text-align: right;
     }
 
     .tester-zone-body {
-      padding: 10px;
+      padding: 8px;
       min-height: 0;
       overflow: auto;
     }
 
     .tester-stats-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 7px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 5px;
     }
 
     .tester-stat {
-      padding: 8px 10px;
-      border-radius: 12px;
+      padding: 5px 6px;
+      border-radius: 10px;
       background: rgba(255,255,255,0.035);
       border: 1px solid rgba(255,255,255,0.06);
     }
 
     .tester-stat-label {
       color: var(--muted);
-      font-size: 10px;
+      font-size: 8px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
@@ -920,21 +936,21 @@ HTML_TEMPLATE = Template(
     .tester-stat-value {
       margin-top: 3px;
       font-family: var(--font-display);
-      font-size: 25px;
+      font-size: 18px;
       line-height: 0.9;
     }
 
     .tester-pile-list {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(62px, 1fr));
+      gap: 6px;
     }
 
     .tester-pile {
       min-width: 0;
-      min-height: 92px;
-      padding: 8px;
-      border-radius: 12px;
+      min-height: 62px;
+      padding: 6px;
+      border-radius: 10px;
       border: 1px solid rgba(95, 212, 255, 0.16);
       background:
         radial-gradient(circle at top, rgba(95, 212, 255, 0.10), transparent 50%),
@@ -942,7 +958,7 @@ HTML_TEMPLATE = Template(
       color: var(--text);
       display: grid;
       place-items: center;
-      gap: 4px;
+      gap: 2px;
       text-align: center;
       cursor: pointer;
       transition: border-color 0.12s ease, transform 0.12s ease, background 0.12s ease;
@@ -958,13 +974,13 @@ HTML_TEMPLATE = Template(
 
     .tester-pile-count {
       font-family: var(--font-display);
-      font-size: 28px;
+      font-size: 22px;
       line-height: 0.9;
     }
 
     .tester-pile-label {
       color: var(--muted);
-      font-size: 10px;
+      font-size: 8px;
       letter-spacing: 0.10em;
       text-transform: uppercase;
     }
@@ -972,7 +988,7 @@ HTML_TEMPLATE = Template(
     .tester-mini-actions {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 6px;
+      gap: 5px;
     }
 
     .tester-security-strip {
@@ -995,15 +1011,15 @@ HTML_TEMPLATE = Template(
     }
 
     .tester-hand-fan {
-      min-height: 112px;
+      min-height: 100px;
       align-items: flex-start;
     }
 
     .tester-fields {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      grid-auto-rows: minmax(135px, 1fr);
-      gap: 8px;
+      grid-auto-rows: minmax(128px, 1fr);
+      gap: 7px;
       min-height: 0;
       overflow: auto;
       padding: 4px;
@@ -1013,8 +1029,8 @@ HTML_TEMPLATE = Template(
     .tester-breeding-slot {
       position: relative;
       min-width: 0;
-      min-height: 132px;
-      border-radius: 13px;
+      min-height: 125px;
+      border-radius: 11px;
       border: 1px solid rgba(95, 212, 255, 0.16);
       background:
         linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012)),
@@ -1030,9 +1046,9 @@ HTML_TEMPLATE = Template(
     }
 
     .tester-field-label {
-      padding: 5px 7px;
+      padding: 4px 6px;
       color: var(--muted);
-      font-size: 10px;
+      font-size: 8px;
       letter-spacing: 0.10em;
       text-transform: uppercase;
       display: flex;
@@ -1053,7 +1069,7 @@ HTML_TEMPLATE = Template(
       position: absolute;
       left: 50%;
       bottom: 8px;
-      width: min(74px, calc(100% - 18px));
+      width: min(70px, calc(100% - 18px));
       aspect-ratio: 7 / 10;
       transform: translateX(-50%);
       border-radius: 8px;
@@ -1086,7 +1102,7 @@ HTML_TEMPLATE = Template(
       border: 1px dashed rgba(255,255,255,0.22);
       background: rgba(255,255,255,0.10);
       color: rgba(237,247,255,0.82);
-      font-size: 10px;
+      font-size: 9px;
       opacity: 0;
       pointer-events: auto;
       transition: opacity 0.12s ease;
@@ -1107,27 +1123,27 @@ HTML_TEMPLATE = Template(
       background: rgba(0,0,0,0.72);
       color: var(--text);
       font-family: var(--font-display);
-      font-size: 14px;
+      font-size: 12px;
       line-height: 1;
     }
 
     .tester-card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+      gap: 7px;
       align-content: start;
     }
 
     .tester-card-grid.compact {
-      grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
     }
 
     .tester-card {
       display: grid;
-      gap: 6px;
+      gap: 4px;
       min-width: 0;
-      padding: 6px;
-      border-radius: 12px;
+      padding: 5px;
+      border-radius: 10px;
       border: 1px solid rgba(255,255,255,0.07);
       background: rgba(255,255,255,0.035);
       cursor: grab;
@@ -1153,7 +1169,7 @@ HTML_TEMPLATE = Template(
       place-items: center;
       color: rgba(237, 247, 255, 0.78);
       font-family: var(--font-display);
-      font-size: 13px;
+      font-size: 11px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       text-align: center;
@@ -1166,7 +1182,7 @@ HTML_TEMPLATE = Template(
     .tester-card-name {
       min-width: 0;
       color: var(--text);
-      font-size: 10px;
+      font-size: 9px;
       line-height: 1.2;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1176,15 +1192,28 @@ HTML_TEMPLATE = Template(
     .tester-card-code {
       color: var(--accent);
       font-family: var(--font-mono);
-      font-size: 9px;
+      font-size: 8px;
       line-height: 1;
     }
 
     .tester-card-actions,
     .tester-stack-actions {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 5px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .tester-card-actions {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.12s ease, opacity 0.12s ease;
+    }
+
+    .tester-card:hover .tester-card-actions,
+    .tester-card:focus-within .tester-card-actions {
+      max-height: 74px;
+      opacity: 1;
     }
 
     .tester-empty {
@@ -2318,14 +2347,14 @@ HTML_TEMPLATE = Template(
           <p id="tester-subtitle" class="tester-subtitle"></p>
         </div>
         <div class="tester-actions">
-          <button id="tester-back-library" class="button" type="button">Back to Decks</button>
-          <button id="tester-edit-deck" class="button" type="button">Edit Deck</button>
-          <button id="tester-new-shuffle" class="button primary" type="button">New Shuffle</button>
-          <button id="tester-mulligan" class="button" type="button">Mulligan</button>
-          <button id="tester-draw" class="button" type="button">Draw 1</button>
-          <button id="tester-reveal-security" class="button success" type="button">Reveal Security</button>
-          <button id="tester-reveal-all-security" class="button" type="button">Reveal All</button>
-          <button id="tester-toggle-security" class="button" type="button">Show Security</button>
+          <button id="tester-back-library" class="button" type="button" title="Back to deck library" aria-label="Back to deck library">←</button>
+          <button id="tester-edit-deck" class="button" type="button" title="Edit deck" aria-label="Edit deck">✎</button>
+          <button id="tester-new-shuffle" class="button primary" type="button" title="Reset with a new random shuffle" aria-label="Reset with a new random shuffle">↻</button>
+          <button id="tester-mulligan" class="button" type="button" title="Mulligan / new hand" aria-label="Mulligan or new hand">M</button>
+          <button id="tester-draw" class="button" type="button" title="Draw one card" aria-label="Draw one card">+1</button>
+          <button id="tester-reveal-security" class="button success" type="button" title="Reveal one security" aria-label="Reveal one security">S</button>
+          <button id="tester-reveal-all-security" class="button" type="button" title="Reveal all security" aria-label="Reveal all security">All</button>
+          <button id="tester-toggle-security" class="button" type="button" title="Show or hide security" aria-label="Show or hide security">👁</button>
         </div>
       </div>
       <div class="tester-board">
@@ -2339,10 +2368,10 @@ HTML_TEMPLATE = Template(
           </div>
           <div id="tester-pile-list" class="tester-pile-list"></div>
           <div class="tester-mini-actions">
-            <button id="tester-hatch-egg" class="button" type="button">Hatch Egg</button>
-            <button id="tester-reveal-deck" class="button" type="button">Reveal Deck</button>
-            <button id="tester-trash-deck" class="button danger" type="button">Trash Deck</button>
-            <button id="tester-open-trash" class="button" type="button">Open Trash</button>
+            <button id="tester-hatch-egg" class="button" type="button" title="Hatch top egg" aria-label="Hatch top egg">Egg</button>
+            <button id="tester-reveal-deck" class="button" type="button" title="Reveal top deck card" aria-label="Reveal top deck card">Top</button>
+            <button id="tester-trash-deck" class="button danger" type="button" title="Trash top deck card" aria-label="Trash top deck card">Mill</button>
+            <button id="tester-open-trash" class="button" type="button" title="Open trash" aria-label="Open trash">Trash</button>
           </div>
         </aside>
 
@@ -3350,10 +3379,19 @@ HTML_TEMPLATE = Template(
       return expandedDeckCards(deck, true);
     }
 
+    function randomUnit() {
+      if (window.crypto && window.crypto.getRandomValues) {
+        const values = new Uint32Array(1);
+        window.crypto.getRandomValues(values);
+        return values[0] / 4294967296;
+      }
+      return Math.random();
+    }
+
     function shuffledCards(cards) {
       const shuffled = cards.slice();
       for (let index = shuffled.length - 1; index > 0; index -= 1) {
-        const swapIndex = Math.floor(Math.random() * (index + 1));
+        const swapIndex = Math.floor(randomUnit() * (index + 1));
         const current = shuffled[index];
         shuffled[index] = shuffled[swapIndex];
         shuffled[swapIndex] = current;
@@ -3486,7 +3524,7 @@ HTML_TEMPLATE = Template(
       }
       state.selectedDeckId = deck.id;
       state.selectedCardCode = deck.cards.length ? deck.cards[0].code : null;
-      ensureTestHand(deck);
+      if (!setupTestHand(deck)) return;
       window.location.hash = "test/" + encodeURIComponent(deck.id);
       render();
     }
@@ -3681,11 +3719,13 @@ HTML_TEMPLATE = Template(
       };
     }
 
-    function createTesterButton(label, onClick, extraClass) {
+    function createTesterButton(label, onClick, extraClass, title) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "button" + (extraClass ? " " + extraClass : "");
       button.textContent = label;
+      button.title = title || label;
+      button.setAttribute("aria-label", title || label);
       button.addEventListener("click", function(event) {
         event.stopPropagation();
         onClick();
@@ -3742,7 +3782,7 @@ HTML_TEMPLATE = Template(
         const actions = document.createElement("div");
         actions.className = "tester-card-actions";
         opts.actions.forEach(function(action) {
-          actions.appendChild(createTesterButton(action.label, action.onClick, action.primary ? "primary" : ""));
+          actions.appendChild(createTesterButton(action.label, action.onClick, action.primary ? "primary" : "", action.title));
         });
         item.appendChild(actions);
       }
@@ -3830,8 +3870,8 @@ HTML_TEMPLATE = Template(
             ref: { zone: "security", index: index },
             forceFaceUp: true,
             actions: [
-              { label: "Reveal", primary: true, onClick: function() { moveTesterCard(deck, { zone: "security", index: index }, { zone: "reveal" }); } },
-              { label: "Trash", onClick: function() { moveTesterCard(deck, { zone: "security", index: index }, { zone: "trash" }); } }
+              { label: "Rev", title: "Reveal this security", primary: true, onClick: function() { moveTesterCard(deck, { zone: "security", index: index }, { zone: "reveal" }); } },
+              { label: "×", title: "Move to trash", onClick: function() { moveTesterCard(deck, { zone: "security", index: index }, { zone: "trash" }); } }
             ]
           }));
         });
@@ -3851,9 +3891,9 @@ HTML_TEMPLATE = Template(
           const sourceIndex = fromRevealedSecurity ? index : index - state.testHand.revealedSecurity.length;
           const sourceZone = fromRevealedSecurity ? "revealedSecurity" : "reveal";
           return [
-            { label: "Field", primary: true, onClick: function() { moveTesterCard(deck, { zone: sourceZone, index: sourceIndex }, { zone: "field", fieldIndex: firstEmptyTesterField(), mode: "top" }); } },
-            { label: "Hand", onClick: function() { moveTesterCard(deck, { zone: sourceZone, index: sourceIndex }, { zone: "hand" }); } },
-            { label: "Trash", onClick: function() { moveTesterCard(deck, { zone: sourceZone, index: sourceIndex }, { zone: "trash" }); } }
+            { label: "BA", title: "Move to battle area", primary: true, onClick: function() { moveTesterCard(deck, { zone: sourceZone, index: sourceIndex }, { zone: "field", fieldIndex: firstEmptyTesterField(), mode: "top" }); } },
+            { label: "H", title: "Move to hand", onClick: function() { moveTesterCard(deck, { zone: sourceZone, index: sourceIndex }, { zone: "hand" }); } },
+            { label: "×", title: "Move to trash", onClick: function() { moveTesterCard(deck, { zone: sourceZone, index: sourceIndex }, { zone: "trash" }); } }
           ];
         },
         function(instance, index) {
@@ -3864,7 +3904,7 @@ HTML_TEMPLATE = Template(
 
       testerRevealSecurityBtn.disabled = !state.testHand.security.length;
       testerRevealAllSecurityBtn.disabled = !state.testHand.security.length;
-      testerToggleSecurityBtn.textContent = state.testHand.showSecurity ? "Hide Security" : "Show Security";
+      testerToggleSecurityBtn.textContent = state.testHand.showSecurity ? "🙈" : "👁";
       testerSecurityMetaEl.textContent = state.testHand.security.length + " hidden";
       testerRevealMetaEl.textContent = revealed.length + " shown";
     }
@@ -3965,9 +4005,9 @@ HTML_TEMPLATE = Template(
         "No cards in hand. Draw or start a new shuffle.",
         function(instance, index) {
           return [
-            { label: "Play", primary: true, onClick: function() { moveTesterCard(deck, { zone: "hand", index: index }, { zone: "field", fieldIndex: firstEmptyTesterField(), mode: "top" }); } },
-            { label: "Trash", onClick: function() { moveTesterCard(deck, { zone: "hand", index: index }, { zone: "trash" }); } },
-            { label: "Reveal", onClick: function() { moveTesterCard(deck, { zone: "hand", index: index }, { zone: "reveal" }); } }
+            { label: "▶", title: "Play to battle area", primary: true, onClick: function() { moveTesterCard(deck, { zone: "hand", index: index }, { zone: "field", fieldIndex: firstEmptyTesterField(), mode: "top" }); } },
+            { label: "×", title: "Move to trash", onClick: function() { moveTesterCard(deck, { zone: "hand", index: index }, { zone: "trash" }); } },
+            { label: "Rev", title: "Move to reveal area", onClick: function() { moveTesterCard(deck, { zone: "hand", index: index }, { zone: "reveal" }); } }
           ];
         },
         function(instance, index) { return { zone: "hand", index: index }; }
@@ -4011,16 +4051,16 @@ HTML_TEMPLATE = Template(
         return [];
       }
       const actions = [
-        { label: "Hand", onClick: function() { moveTesterCard(deck, ref, { zone: "hand" }); } },
-        { label: "Trash", onClick: function() { moveTesterCard(deck, ref, { zone: "trash" }); } },
-        { label: "Field", primary: true, onClick: function() { moveTesterCard(deck, ref, { zone: "field", fieldIndex: firstEmptyTesterField(), mode: "top" }); } },
-        { label: "Deck", onClick: function() { moveTesterCard(deck, ref, { zone: "stack", position: "top" }); } }
+        { label: "H", title: "Move to hand", onClick: function() { moveTesterCard(deck, ref, { zone: "hand" }); } },
+        { label: "×", title: "Move to trash", onClick: function() { moveTesterCard(deck, ref, { zone: "trash" }); } },
+        { label: "BA", title: "Move to battle area", primary: true, onClick: function() { moveTesterCard(deck, ref, { zone: "field", fieldIndex: firstEmptyTesterField(), mode: "top" }); } },
+        { label: "D", title: "Move to top of deck", onClick: function() { moveTesterCard(deck, ref, { zone: "stack", position: "top" }); } }
       ];
       if (drawerName !== "security") {
-        actions.push({ label: "Security", onClick: function() { moveTesterCard(deck, ref, { zone: "security", position: "top", faceUp: false }); } });
+        actions.push({ label: "Sec", title: "Move to security", onClick: function() { moveTesterCard(deck, ref, { zone: "security", position: "top", faceUp: false }); } });
       }
       if (drawerName !== "reveal" && drawerName !== "revealedSecurity") {
-        actions.push({ label: "Reveal", onClick: function() { moveTesterCard(deck, ref, { zone: "reveal" }); } });
+        actions.push({ label: "Rev", title: "Move to reveal area", onClick: function() { moveTesterCard(deck, ref, { zone: "reveal" }); } });
       }
       return actions;
     }
@@ -4037,11 +4077,11 @@ HTML_TEMPLATE = Template(
         stackActions = document.createElement("div");
         stackActions.className = "tester-stack-actions";
         if (source.stackZone === "field") {
-          stackActions.appendChild(createTesterButton("Suspend Top", function() { toggleTesterSuspend(deck, source.fieldIndex); }));
-          stackActions.appendChild(createTesterButton("Trash Stack", function() { moveTesterStack(deck, { zone: "field", fieldIndex: source.fieldIndex, index: 0 }, { zone: "trash" }); }, "danger"));
+          stackActions.appendChild(createTesterButton("↷", function() { toggleTesterSuspend(deck, source.fieldIndex); }, "", "Suspend or unsuspend top card"));
+          stackActions.appendChild(createTesterButton("× stack", function() { moveTesterStack(deck, { zone: "field", fieldIndex: source.fieldIndex, index: 0 }, { zone: "trash" }); }, "danger", "Trash this whole stack"));
         } else {
-          stackActions.appendChild(createTesterButton("Move Out", function() { moveBreedingToBattle(deck); }, "primary"));
-          stackActions.appendChild(createTesterButton("Trash Stack", function() { moveTesterStack(deck, { zone: "breeding", index: 0 }, { zone: "trash" }); }, "danger"));
+          stackActions.appendChild(createTesterButton("→ BA", function() { moveBreedingToBattle(deck); }, "primary", "Move breeding stack to battle area"));
+          stackActions.appendChild(createTesterButton("× stack", function() { moveTesterStack(deck, { zone: "breeding", index: 0 }, { zone: "trash" }); }, "danger", "Trash this whole stack"));
         }
       }
 
@@ -4062,7 +4102,7 @@ HTML_TEMPLATE = Template(
       const occupiedFields = state.testHand.fields.filter(function(stack) { return stack.length > 0; }).length;
       const revealedCount = state.testHand.revealedSecurity.length + state.testHand.reveal.length;
       testerTitleEl.textContent = deck.name;
-      testerSubtitleEl.textContent = deck.fileName + " · drag cards between zones, or use the card buttons";
+      testerSubtitleEl.textContent = deck.fileName + " · drag/drop";
       testerSessionMetaEl.textContent = stats.mainCount + " main / " + stats.eggCount + " egg";
 
       testerStatsGridEl.innerHTML = "";
