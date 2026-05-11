@@ -739,27 +739,27 @@ HTML_TEMPLATE = Template(
     }
 
     .tester-header {
-      padding: 18px 22px 14px;
+      padding: 14px 18px 12px;
       border-bottom: 1px solid var(--line);
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 18px;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto;
+      align-items: start;
+      gap: 14px;
+      background: rgba(1, 7, 13, 0.32);
     }
 
     .tester-title {
       margin: 0;
       font-family: var(--font-display);
-      font-size: 34px;
-      line-height: 0.94;
+      font-size: clamp(25px, 2.6vw, 39px);
+      line-height: 0.92;
       letter-spacing: 0.02em;
     }
 
     .tester-subtitle {
       margin: 5px 0 0;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
       line-height: 1.35;
     }
 
@@ -767,89 +767,132 @@ HTML_TEMPLATE = Template(
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 8px;
+      gap: 7px;
       flex-wrap: wrap;
+      max-width: 760px;
     }
 
-    .tester-actions .button {
-      min-height: 34px;
-      padding: 7px 11px;
-      border-radius: 11px;
-      font-size: 13px;
+    .tester-actions .button,
+    .tester-mini-actions .button,
+    .tester-card-actions .button,
+    .tester-stack-actions .button {
+      min-height: 28px;
+      padding: 5px 8px;
+      border-radius: 9px;
+      font-size: 11px;
     }
 
     .tester-board {
       min-height: 0;
-      overflow: auto;
-      padding: 16px 20px 22px;
+      overflow: hidden;
+      padding: 12px;
       display: grid;
-      grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.35fr);
-      grid-template-rows: auto minmax(220px, 1fr);
-      grid-template-areas:
-        "stats security"
-        "hand board";
-      gap: 14px;
+      grid-template-columns: minmax(190px, 0.58fr) minmax(620px, 2fr) minmax(260px, 0.78fr);
+      grid-template-areas: "piles playmat drawer";
+      gap: 10px;
       background:
-        radial-gradient(circle at top right, rgba(95, 212, 255, 0.10), transparent 32%),
-        radial-gradient(circle at bottom left, rgba(255, 191, 95, 0.08), transparent 28%);
+        radial-gradient(circle at top right, rgba(95, 212, 255, 0.12), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(255, 191, 95, 0.08), transparent 30%),
+        linear-gradient(135deg, rgba(3, 11, 20, 0.72), rgba(1, 6, 11, 0.92));
     }
 
-    .tester-zone {
+    .tester-panel {
       min-width: 0;
       min-height: 0;
-      border: 1px solid rgba(95, 212, 255, 0.16);
+      border: 1px solid rgba(95, 212, 255, 0.18);
       border-radius: 18px;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.010)),
-        rgba(4, 12, 20, 0.46);
+        rgba(4, 12, 20, 0.56);
       overflow: hidden;
       box-shadow: inset 0 0 0 1px rgba(0,0,0,0.14);
     }
 
-    .tester-zone.stats {
-      grid-area: stats;
+    .tester-piles {
+      grid-area: piles;
+      padding: 10px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 10px;
+      overflow: auto;
     }
 
-    .tester-zone.hand {
-      grid-area: hand;
+    .tester-playmat {
+      grid-area: playmat;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: minmax(92px, 0.58fr) minmax(300px, 1.7fr) minmax(128px, 0.75fr);
+      gap: 10px;
+      overflow: hidden;
+      padding: 10px;
+      position: relative;
     }
 
-    .tester-zone.security {
-      grid-area: security;
+    .tester-playmat::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0.28;
+      pointer-events: none;
+      background:
+        linear-gradient(120deg, transparent 0 23%, rgba(67, 118, 255, 0.18) 23.2% 23.45%, transparent 23.7% 100%),
+        linear-gradient(32deg, transparent 0 64%, rgba(67, 118, 255, 0.16) 64.1% 64.38%, transparent 64.8% 100%);
     }
 
-    .tester-zone.board {
-      grid-area: board;
+    .tester-top-row,
+    .tester-field-row,
+    .tester-hand-row {
+      position: relative;
+      z-index: 1;
+      min-height: 0;
+    }
+
+    .tester-top-row {
+      display: grid;
+      grid-template-columns: minmax(180px, 0.85fr) minmax(320px, 1.45fr);
+      gap: 10px;
+    }
+
+    .tester-field-row {
+      display: grid;
+      grid-template-columns: minmax(150px, 0.42fr) minmax(0, 1.58fr);
+      gap: 10px;
+    }
+
+    .tester-hand-row {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 8px;
     }
 
     .tester-zone-header {
-      min-height: 44px;
-      padding: 11px 13px;
+      min-height: 36px;
+      padding: 8px 10px;
       border-bottom: 1px solid rgba(95, 212, 255, 0.14);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
       background: rgba(2, 8, 14, 0.34);
     }
 
     .tester-zone-title {
       margin: 0;
       color: var(--accent);
-      font-size: 12px;
-      letter-spacing: 0.14em;
+      font-size: 11px;
+      letter-spacing: 0.13em;
       text-transform: uppercase;
     }
 
     .tester-zone-meta {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       line-height: 1.2;
       text-align: right;
     }
 
     .tester-zone-body {
-      padding: 12px;
+      padding: 10px;
       min-height: 0;
       overflow: auto;
     }
@@ -857,62 +900,174 @@ HTML_TEMPLATE = Template(
     .tester-stats-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
+      gap: 7px;
     }
 
     .tester-stat {
-      padding: 10px 12px;
-      border-radius: 14px;
+      padding: 8px 10px;
+      border-radius: 12px;
       background: rgba(255,255,255,0.035);
       border: 1px solid rgba(255,255,255,0.06);
     }
 
     .tester-stat-label {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
     .tester-stat-value {
-      margin-top: 4px;
+      margin-top: 3px;
       font-family: var(--font-display);
-      font-size: 30px;
+      font-size: 25px;
       line-height: 0.9;
     }
 
-    .tester-card-grid {
+    .tester-pile-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
-      gap: 10px;
-      align-content: start;
+      grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
+      gap: 8px;
     }
 
-    .tester-card-grid.compact {
-      grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
-    }
-
-    .tester-card {
-      display: grid;
-      gap: 7px;
+    .tester-pile {
       min-width: 0;
-      padding: 7px;
-      border-radius: 13px;
-      border: 1px solid rgba(255,255,255,0.07);
-      background: rgba(255,255,255,0.035);
-    }
-
-    .tester-card-thumb,
-    .tester-card-back {
-      position: relative;
-      aspect-ratio: 7 / 10;
-      overflow: hidden;
-      border-radius: 9px;
-      border: 1px solid rgba(255,255,255,0.10);
+      min-height: 92px;
+      padding: 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(95, 212, 255, 0.16);
       background:
-        linear-gradient(145deg, rgba(16, 39, 62, 1), rgba(8, 18, 27, 1));
+        radial-gradient(circle at top, rgba(95, 212, 255, 0.10), transparent 50%),
+        rgba(0,0,0,0.18);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      gap: 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.12s ease, transform 0.12s ease, background 0.12s ease;
     }
 
+    .tester-pile:hover,
+    .tester-drop-over {
+      border-color: rgba(95, 212, 255, 0.85) !important;
+      background:
+        radial-gradient(circle at top, rgba(95, 212, 255, 0.22), transparent 52%),
+        rgba(12, 34, 52, 0.42) !important;
+    }
+
+    .tester-pile-count {
+      font-family: var(--font-display);
+      font-size: 28px;
+      line-height: 0.9;
+    }
+
+    .tester-pile-label {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+    }
+
+    .tester-mini-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .tester-security-strip {
+      min-height: 0;
+    }
+
+    .tester-security-cards,
+    .tester-hand-fan {
+      display: flex;
+      min-height: 0;
+      align-items: center;
+      gap: 7px;
+      overflow: auto;
+      padding: 8px;
+    }
+
+    .tester-security-cards {
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .tester-hand-fan {
+      min-height: 112px;
+      align-items: flex-start;
+    }
+
+    .tester-fields {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-auto-rows: minmax(135px, 1fr);
+      gap: 8px;
+      min-height: 0;
+      overflow: auto;
+      padding: 4px;
+    }
+
+    .tester-field-slot,
+    .tester-breeding-slot {
+      position: relative;
+      min-width: 0;
+      min-height: 132px;
+      border-radius: 13px;
+      border: 1px solid rgba(95, 212, 255, 0.16);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012)),
+        rgba(0,0,0,0.20);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .tester-field-slot.empty,
+    .tester-breeding-slot.empty {
+      border-style: dashed;
+    }
+
+    .tester-field-label {
+      padding: 5px 7px;
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(0,0,0,0.18);
+    }
+
+    .tester-stack {
+      position: relative;
+      min-height: 0;
+      height: 100%;
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .tester-stack-card {
+      position: absolute;
+      left: 50%;
+      bottom: 8px;
+      width: min(74px, calc(100% - 18px));
+      aspect-ratio: 7 / 10;
+      transform: translateX(-50%);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.13);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.34);
+      background: rgba(2, 8, 14, 0.92);
+    }
+
+    .tester-stack-card.suspended {
+      transform: translateX(-50%) rotate(30deg);
+    }
+
+    .tester-stack-card img,
     .tester-card-thumb img {
       width: 100%;
       height: 100%;
@@ -920,12 +1075,85 @@ HTML_TEMPLATE = Template(
       object-fit: cover;
     }
 
+    .tester-source-drop {
+      position: absolute;
+      inset: auto 8px 8px 8px;
+      z-index: 20;
+      min-height: 25px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      border: 1px dashed rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.10);
+      color: rgba(237,247,255,0.82);
+      font-size: 10px;
+      opacity: 0;
+      pointer-events: auto;
+      transition: opacity 0.12s ease;
+    }
+
+    .tester-field-slot:hover .tester-source-drop,
+    .tester-source-drop.tester-drop-over {
+      opacity: 1;
+    }
+
+    .tester-stack-badge {
+      position: absolute;
+      top: 32px;
+      right: 7px;
+      z-index: 30;
+      padding: 3px 6px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.72);
+      color: var(--text);
+      font-family: var(--font-display);
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .tester-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+      gap: 8px;
+      align-content: start;
+    }
+
+    .tester-card-grid.compact {
+      grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+    }
+
+    .tester-card {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.035);
+      cursor: grab;
+    }
+
+    .tester-card:active {
+      cursor: grabbing;
+    }
+
+    .tester-card-thumb,
+    .tester-card-back {
+      position: relative;
+      aspect-ratio: 7 / 10;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background:
+        linear-gradient(145deg, rgba(16, 39, 62, 1), rgba(8, 18, 27, 1));
+    }
+
     .tester-card-back {
       display: grid;
       place-items: center;
       color: rgba(237, 247, 255, 0.78);
       font-family: var(--font-display);
-      font-size: 17px;
+      font-size: 13px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       text-align: center;
@@ -938,7 +1166,7 @@ HTML_TEMPLATE = Template(
     .tester-card-name {
       min-width: 0;
       color: var(--text);
-      font-size: 11px;
+      font-size: 10px;
       line-height: 1.2;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -948,63 +1176,79 @@ HTML_TEMPLATE = Template(
     .tester-card-code {
       color: var(--accent);
       font-family: var(--font-mono);
-      font-size: 10px;
+      font-size: 9px;
       line-height: 1;
     }
 
-    .tester-card-actions {
+    .tester-card-actions,
+    .tester-stack-actions {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 5px;
     }
 
-    .tester-card-actions .button {
-      min-height: 25px;
-      padding: 4px 5px;
-      border-radius: 8px;
-      font-size: 10px;
-    }
-
-    .tester-security-layout {
-      display: grid;
-      grid-template-columns: minmax(180px, 0.95fr) minmax(220px, 1.2fr);
-      gap: 12px;
-      min-height: 0;
-    }
-
-    .tester-subzone-title {
-      margin: 0 0 8px;
-      color: var(--muted);
-      font-size: 11px;
-      letter-spacing: 0.10em;
-      text-transform: uppercase;
-    }
-
     .tester-empty {
-      min-height: 110px;
+      min-height: 86px;
       display: grid;
       place-items: center;
       color: var(--muted);
       text-align: center;
       border: 1px dashed rgba(255,255,255,0.12);
-      border-radius: 14px;
+      border-radius: 13px;
       background: rgba(0,0,0,0.10);
-      padding: 14px;
-      font-size: 13px;
+      padding: 12px;
+      font-size: 12px;
       line-height: 1.35;
     }
 
-    @media (max-width: 1180px) {
+    .tester-drawer {
+      grid-area: drawer;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .tester-drawer .tester-card-grid {
+      padding: 10px;
+      overflow: auto;
+    }
+
+    @media (max-width: 1250px) {
       .tester-board {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(170px, 0.55fr) minmax(540px, 1.7fr);
         grid-template-areas:
-          "stats"
-          "security"
-          "hand"
-          "board";
+          "piles playmat"
+          "drawer drawer";
       }
 
-      .tester-security-layout {
+      .tester-drawer {
+        min-height: 260px;
+      }
+    }
+
+    @media (max-width: 920px) {
+      .tester-header {
+        grid-template-columns: 1fr;
+      }
+
+      .tester-actions {
+        justify-content: flex-start;
+      }
+
+      .tester-board {
+        overflow: auto;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "piles"
+          "playmat"
+          "drawer";
+      }
+
+      .tester-playmat {
+        min-height: 720px;
+      }
+
+      .tester-top-row,
+      .tester-field-row {
         grid-template-columns: 1fr;
       }
     }
@@ -2085,7 +2329,7 @@ HTML_TEMPLATE = Template(
         </div>
       </div>
       <div class="tester-board">
-        <section class="tester-zone stats">
+        <aside class="tester-panel tester-piles">
           <div class="tester-zone-header">
             <h3 class="tester-zone-title">Session</h3>
             <div id="tester-session-meta" class="tester-zone-meta"></div>
@@ -2093,46 +2337,66 @@ HTML_TEMPLATE = Template(
           <div class="tester-zone-body">
             <div id="tester-stats-grid" class="tester-stats-grid"></div>
           </div>
-        </section>
-
-        <section class="tester-zone security">
-          <div class="tester-zone-header">
-            <h3 class="tester-zone-title">Security</h3>
-            <div id="tester-security-meta" class="tester-zone-meta"></div>
+          <div id="tester-pile-list" class="tester-pile-list"></div>
+          <div class="tester-mini-actions">
+            <button id="tester-hatch-egg" class="button" type="button">Hatch Egg</button>
+            <button id="tester-reveal-deck" class="button" type="button">Reveal Deck</button>
+            <button id="tester-trash-deck" class="button danger" type="button">Trash Deck</button>
+            <button id="tester-open-trash" class="button" type="button">Open Trash</button>
           </div>
-          <div class="tester-zone-body">
-            <div class="tester-security-layout">
-              <div>
-                <h4 class="tester-subzone-title">Stack</h4>
-                <div id="tester-security-grid" class="tester-card-grid compact"></div>
+        </aside>
+
+        <main class="tester-panel tester-playmat">
+          <div class="tester-top-row">
+            <section class="tester-panel tester-security-strip">
+              <div class="tester-zone-header">
+                <h3 class="tester-zone-title">Security</h3>
+                <div id="tester-security-meta" class="tester-zone-meta"></div>
               </div>
-              <div>
-                <h4 class="tester-subzone-title">Revealed</h4>
-                <div id="tester-revealed-security-grid" class="tester-card-grid compact"></div>
+              <div id="tester-security-grid" class="tester-security-cards"></div>
+            </section>
+            <section class="tester-panel">
+              <div class="tester-zone-header">
+                <h3 class="tester-zone-title">Reveal Area</h3>
+                <div id="tester-reveal-meta" class="tester-zone-meta"></div>
               </div>
+              <div id="tester-revealed-security-grid" class="tester-security-cards"></div>
+            </section>
+          </div>
+
+          <div class="tester-field-row">
+            <section id="tester-breeding-zone" class="tester-breeding-slot empty">
+              <div class="tester-field-label">
+                <span>Breeding</span>
+                <span id="tester-breeding-meta">0</span>
+              </div>
+              <div id="tester-breeding-stack" class="tester-stack"></div>
+            </section>
+            <section class="tester-panel">
+              <div class="tester-zone-header">
+                <h3 class="tester-zone-title">Battle Area</h3>
+                <div id="tester-board-meta" class="tester-zone-meta"></div>
+              </div>
+              <div id="tester-board-grid" class="tester-fields"></div>
+            </section>
+          </div>
+
+          <div class="tester-hand-row">
+            <div class="tester-zone-header">
+              <h3 class="tester-zone-title">Hand</h3>
+              <div id="tester-hand-meta" class="tester-zone-meta"></div>
             </div>
+            <div id="tester-hand-grid" class="tester-hand-fan"></div>
           </div>
-        </section>
+        </main>
 
-        <section class="tester-zone hand">
+        <aside class="tester-panel tester-drawer">
           <div class="tester-zone-header">
-            <h3 class="tester-zone-title">Hand</h3>
-            <div id="tester-hand-meta" class="tester-zone-meta"></div>
+            <h3 id="tester-drawer-title" class="tester-zone-title">Trash</h3>
+            <div id="tester-drawer-meta" class="tester-zone-meta"></div>
           </div>
-          <div class="tester-zone-body">
-            <div id="tester-hand-grid" class="tester-card-grid"></div>
-          </div>
-        </section>
-
-        <section class="tester-zone board">
-          <div class="tester-zone-header">
-            <h3 class="tester-zone-title">Board</h3>
-            <div id="tester-board-meta" class="tester-zone-meta"></div>
-          </div>
-          <div class="tester-zone-body">
-            <div id="tester-board-grid" class="tester-card-grid"></div>
-          </div>
-        </section>
+          <div id="tester-drawer-grid" class="tester-card-grid"></div>
+        </aside>
       </div>
     </section>
   </div>
@@ -2214,13 +2478,21 @@ HTML_TEMPLATE = Template(
     const testerSubtitleEl = document.getElementById("tester-subtitle");
     const testerSessionMetaEl = document.getElementById("tester-session-meta");
     const testerStatsGridEl = document.getElementById("tester-stats-grid");
+    const testerPileListEl = document.getElementById("tester-pile-list");
     const testerHandGridEl = document.getElementById("tester-hand-grid");
     const testerHandMetaEl = document.getElementById("tester-hand-meta");
     const testerSecurityGridEl = document.getElementById("tester-security-grid");
     const testerRevealedSecurityGridEl = document.getElementById("tester-revealed-security-grid");
     const testerSecurityMetaEl = document.getElementById("tester-security-meta");
+    const testerRevealMetaEl = document.getElementById("tester-reveal-meta");
+    const testerBreedingZoneEl = document.getElementById("tester-breeding-zone");
+    const testerBreedingStackEl = document.getElementById("tester-breeding-stack");
+    const testerBreedingMetaEl = document.getElementById("tester-breeding-meta");
     const testerBoardGridEl = document.getElementById("tester-board-grid");
     const testerBoardMetaEl = document.getElementById("tester-board-meta");
+    const testerDrawerTitleEl = document.getElementById("tester-drawer-title");
+    const testerDrawerMetaEl = document.getElementById("tester-drawer-meta");
+    const testerDrawerGridEl = document.getElementById("tester-drawer-grid");
     const testerBackLibraryBtn = document.getElementById("tester-back-library");
     const testerEditDeckBtn = document.getElementById("tester-edit-deck");
     const testerNewShuffleBtn = document.getElementById("tester-new-shuffle");
@@ -2229,6 +2501,10 @@ HTML_TEMPLATE = Template(
     const testerRevealSecurityBtn = document.getElementById("tester-reveal-security");
     const testerRevealAllSecurityBtn = document.getElementById("tester-reveal-all-security");
     const testerToggleSecurityBtn = document.getElementById("tester-toggle-security");
+    const testerHatchEggBtn = document.getElementById("tester-hatch-egg");
+    const testerRevealDeckBtn = document.getElementById("tester-reveal-deck");
+    const testerTrashDeckBtn = document.getElementById("tester-trash-deck");
+    const testerOpenTrashBtn = document.getElementById("tester-open-trash");
     const imageViewerEl = document.getElementById("image-viewer");
     const imageViewerImgEl = document.getElementById("image-viewer-img");
     const imageViewerCaptionEl = document.getElementById("image-viewer-caption");
@@ -2271,13 +2547,18 @@ HTML_TEMPLATE = Template(
       testHand: {
         visible: false,
         deckId: null,
+        nextId: 1,
         stack: [],
+        eggDeck: [],
         hand: [],
         security: [],
         revealedSecurity: [],
-        board: [],
+        reveal: [],
+        breeding: [],
+        fields: [],
         trash: [],
-        showSecurity: false
+        showSecurity: false,
+        openDrawer: "trash"
       }
     };
 
@@ -3021,32 +3302,52 @@ HTML_TEMPLATE = Template(
       validationPanelEl.appendChild(list);
     }
 
+    const TESTER_FIELD_COUNT = 8;
+
+    function createEmptyTesterFields() {
+      return Array.from({ length: TESTER_FIELD_COUNT }, function() { return []; });
+    }
+
     function resetTestHand() {
       state.testHand.visible = false;
       state.testHand.deckId = null;
+      state.testHand.nextId = 1;
       state.testHand.stack = [];
+      state.testHand.eggDeck = [];
       state.testHand.hand = [];
       state.testHand.security = [];
       state.testHand.revealedSecurity = [];
-      state.testHand.board = [];
+      state.testHand.reveal = [];
+      state.testHand.breeding = [];
+      state.testHand.fields = createEmptyTesterFields();
       state.testHand.trash = [];
       state.testHand.showSecurity = false;
+      state.testHand.openDrawer = "trash";
     }
 
     function resetTestHandForDeck(deck) {
       if (state.testHand.deckId === deck.id) resetTestHand();
     }
 
-    function expandedMainDeckCards(deck) {
+    function expandedDeckCards(deck, includeEggs) {
       const pool = [];
       deck.cards.forEach(function(card) {
-        if (card.type === "Digi-Egg") return;
+        const isEgg = card.type === "Digi-Egg";
+        if (includeEggs !== isEgg) return;
         const count = Math.max(0, Number(card.count) || 0);
         for (let index = 0; index < count; index += 1) {
           pool.push(card);
         }
       });
       return pool;
+    }
+
+    function expandedMainDeckCards(deck) {
+      return expandedDeckCards(deck, false);
+    }
+
+    function expandedEggDeckCards(deck) {
+      return expandedDeckCards(deck, true);
     }
 
     function shuffledCards(cards) {
@@ -3060,23 +3361,54 @@ HTML_TEMPLATE = Template(
       return shuffled;
     }
 
+    function createTesterInstance(card, faceUp) {
+      return {
+        uid: "test-card-" + state.testHand.nextId++,
+        card: card,
+        faceUp: faceUp !== false,
+        suspended: false
+      };
+    }
+
+    function getTesterCard(instance) {
+      return instance && instance.card ? instance.card : instance;
+    }
+
+    function setTesterFace(instance, faceUp) {
+      if (instance && instance.card) instance.faceUp = !!faceUp;
+      return instance;
+    }
+
     function setupTestHand(deck) {
-      const pool = expandedMainDeckCards(deck);
-      if (pool.length < 5) {
+      const mainPool = expandedMainDeckCards(deck);
+      if (mainPool.length < 5) {
         window.alert("This deck needs at least 5 non-egg cards to test a hand.");
         return false;
       }
 
-      const shuffled = shuffledCards(pool);
+      state.testHand.nextId = 1;
+      const shuffledMain = shuffledCards(mainPool).map(function(card) {
+        return createTesterInstance(card, false);
+      });
+      const shuffledEggs = shuffledCards(expandedEggDeckCards(deck)).map(function(card) {
+        return createTesterInstance(card, false);
+      });
+
       state.testHand.visible = true;
       state.testHand.deckId = deck.id;
-      state.testHand.security = shuffled.splice(0, Math.min(5, shuffled.length));
-      state.testHand.hand = shuffled.splice(0, Math.min(5, shuffled.length));
-      state.testHand.stack = shuffled;
+      state.testHand.security = shuffledMain.splice(0, Math.min(5, shuffledMain.length));
+      state.testHand.hand = shuffledMain.splice(0, Math.min(5, shuffledMain.length)).map(function(instance) {
+        return setTesterFace(instance, true);
+      });
+      state.testHand.stack = shuffledMain;
+      state.testHand.eggDeck = shuffledEggs;
       state.testHand.revealedSecurity = [];
-      state.testHand.board = [];
+      state.testHand.reveal = [];
+      state.testHand.breeding = [];
+      state.testHand.fields = createEmptyTesterFields();
       state.testHand.trash = [];
       state.testHand.showSecurity = false;
+      state.testHand.openDrawer = "trash";
       return true;
     }
 
@@ -3093,21 +3425,53 @@ HTML_TEMPLATE = Template(
       if (!state.testHand.visible || state.testHand.deckId !== deck.id) {
         return setupTestHand(deck);
       }
+      if (!Array.isArray(state.testHand.fields) || state.testHand.fields.length !== TESTER_FIELD_COUNT) {
+        state.testHand.fields = createEmptyTesterFields();
+      }
       return true;
     }
 
-    function drawTestCard(deck) {
-      if (!state.testHand.visible || state.testHand.deckId !== deck.id) {
-        startTestHand(deck);
-        return;
-      }
-      if (!state.testHand.stack.length) return;
-      state.testHand.hand.push(state.testHand.stack.shift());
+    function renderAfterTesterMove(deck) {
       if (state.view === "tester") {
         renderTester(deck);
       } else {
         renderTestHand(deck);
       }
+    }
+
+    function drawTestCard(deck) {
+      if (!ensureTestHand(deck)) return;
+      const instance = state.testHand.stack.shift();
+      if (!instance) return;
+      state.testHand.hand.push(setTesterFace(instance, true));
+      renderAfterTesterMove(deck);
+    }
+
+    function revealTopDeck(deck) {
+      if (!ensureTestHand(deck)) return;
+      const instance = state.testHand.stack.shift();
+      if (!instance) return;
+      state.testHand.reveal.push(setTesterFace(instance, true));
+      state.testHand.openDrawer = "reveal";
+      renderTester(deck);
+    }
+
+    function trashTopDeck(deck) {
+      if (!ensureTestHand(deck)) return;
+      const instance = state.testHand.stack.shift();
+      if (!instance) return;
+      state.testHand.trash.push(setTesterFace(instance, true));
+      state.testHand.openDrawer = "trash";
+      renderTester(deck);
+    }
+
+    function hatchEgg(deck) {
+      if (!ensureTestHand(deck)) return;
+      const instance = state.testHand.eggDeck.shift();
+      if (!instance) return;
+      state.testHand.breeding.push(setTesterFace(instance, true));
+      state.testHand.openDrawer = "breeding";
+      renderTester(deck);
     }
 
     function renderTestHand(deck) {
@@ -3129,71 +3493,246 @@ HTML_TEMPLATE = Template(
 
     function revealSecurityCard(deck) {
       if (!ensureTestHand(deck) || !state.testHand.security.length) return;
-      state.testHand.revealedSecurity.push(state.testHand.security.shift());
+      const instance = state.testHand.security.shift();
+      state.testHand.revealedSecurity.push(setTesterFace(instance, true));
+      state.testHand.openDrawer = "revealedSecurity";
       renderTester(deck);
     }
 
     function revealAllSecurity(deck) {
       if (!ensureTestHand(deck) || !state.testHand.security.length) return;
       while (state.testHand.security.length) {
-        state.testHand.revealedSecurity.push(state.testHand.security.shift());
+        state.testHand.revealedSecurity.push(setTesterFace(state.testHand.security.shift(), true));
       }
+      state.testHand.openDrawer = "revealedSecurity";
       renderTester(deck);
     }
 
-    function moveHandCardToBoard(deck, index) {
+    function firstEmptyTesterField() {
+      for (let index = 0; index < state.testHand.fields.length; index += 1) {
+        if (!state.testHand.fields[index].length) return index;
+      }
+      return 0;
+    }
+
+    function getTesterSourceArray(ref) {
+      if (!ref) return null;
+      if (ref.zone === "hand") return state.testHand.hand;
+      if (ref.zone === "stack") return state.testHand.stack;
+      if (ref.zone === "eggDeck") return state.testHand.eggDeck;
+      if (ref.zone === "security") return state.testHand.security;
+      if (ref.zone === "revealedSecurity") return state.testHand.revealedSecurity;
+      if (ref.zone === "reveal") return state.testHand.reveal;
+      if (ref.zone === "trash") return state.testHand.trash;
+      if (ref.zone === "breeding") return state.testHand.breeding;
+      if (ref.zone === "field") return state.testHand.fields[ref.fieldIndex] || null;
+      return null;
+    }
+
+    function removeTesterInstance(ref) {
+      const source = getTesterSourceArray(ref);
+      if (!source || ref.index < 0 || ref.index >= source.length) return null;
+      return source.splice(ref.index, 1)[0] || null;
+    }
+
+    function putTesterInstance(instance, target) {
+      if (!instance || !target) return;
+      if (target.zone === "hand") {
+        state.testHand.hand.push(setTesterFace(instance, true));
+      } else if (target.zone === "trash") {
+        state.testHand.trash.push(setTesterFace(instance, true));
+        state.testHand.openDrawer = "trash";
+      } else if (target.zone === "reveal") {
+        state.testHand.reveal.push(setTesterFace(instance, true));
+        state.testHand.openDrawer = "reveal";
+      } else if (target.zone === "security") {
+        setTesterFace(instance, !!target.faceUp);
+        if (target.position === "bottom") {
+          state.testHand.security.push(instance);
+        } else {
+          state.testHand.security.unshift(instance);
+        }
+      } else if (target.zone === "stack") {
+        setTesterFace(instance, false);
+        if (target.position === "bottom") {
+          state.testHand.stack.push(instance);
+        } else {
+          state.testHand.stack.unshift(instance);
+        }
+      } else if (target.zone === "eggDeck") {
+        setTesterFace(instance, false);
+        if (target.position === "bottom") {
+          state.testHand.eggDeck.push(instance);
+        } else {
+          state.testHand.eggDeck.unshift(instance);
+        }
+      } else if (target.zone === "breeding") {
+        state.testHand.breeding.push(setTesterFace(instance, true));
+        state.testHand.openDrawer = "breeding";
+      } else if (target.zone === "field") {
+        const targetStack = state.testHand.fields[target.fieldIndex] || state.testHand.fields[0];
+        setTesterFace(instance, true);
+        if (target.mode === "source" && targetStack.length) {
+          targetStack.splice(Math.max(0, targetStack.length - 1), 0, instance);
+        } else {
+          targetStack.push(instance);
+        }
+        state.testHand.openDrawer = "field:" + target.fieldIndex;
+      }
+    }
+
+    function isSameTesterSpot(ref, target) {
+      if (!ref || !target) return false;
+      if (ref.zone !== target.zone) return false;
+      if (ref.zone === "field") return ref.fieldIndex === target.fieldIndex;
+      return true;
+    }
+
+    function moveTesterCard(deck, ref, target) {
+      if (!ensureTestHand(deck) || isSameTesterSpot(ref, target)) return;
+      const instance = removeTesterInstance(ref);
+      if (!instance) return;
+      putTesterInstance(instance, target);
+      const card = getTesterCard(instance);
+      if (card) state.selectedCardCode = card.code;
+      renderTester(deck);
+    }
+
+    function moveTesterStack(deck, sourceRef, target) {
       if (!ensureTestHand(deck)) return;
-      const card = state.testHand.hand.splice(index, 1)[0];
-      if (!card) return;
-      state.testHand.board.push(card);
+      const source = getTesterSourceArray(sourceRef);
+      if (!source || !source.length) return;
+      const moving = source.splice(0, source.length);
+      moving.forEach(function(instance) {
+        putTesterInstance(instance, target);
+      });
       renderTester(deck);
     }
 
-    function moveBoardCardToHand(deck, index) {
+    function moveBreedingToBattle(deck) {
+      if (!ensureTestHand(deck) || !state.testHand.breeding.length) return;
+      const targetIndex = firstEmptyTesterField();
+      moveTesterStack(deck, { zone: "breeding", index: 0 }, { zone: "field", fieldIndex: targetIndex, mode: "top" });
+    }
+
+    function toggleTesterSuspend(deck, fieldIndex) {
       if (!ensureTestHand(deck)) return;
-      const card = state.testHand.board.splice(index, 1)[0];
-      if (!card) return;
-      state.testHand.hand.push(card);
+      const stack = state.testHand.fields[fieldIndex];
+      if (!stack || !stack.length) return;
+      stack[stack.length - 1].suspended = !stack[stack.length - 1].suspended;
       renderTester(deck);
     }
 
-    function moveBoardCardToTrash(deck, index) {
+    function unsuspendAllTesterCards(deck) {
       if (!ensureTestHand(deck)) return;
-      const card = state.testHand.board.splice(index, 1)[0];
-      if (!card) return;
-      state.testHand.trash.push(card);
+      state.testHand.fields.forEach(function(stack) {
+        stack.forEach(function(instance) { instance.suspended = false; });
+      });
+      state.testHand.breeding.forEach(function(instance) { instance.suspended = false; });
       renderTester(deck);
     }
 
-    function createTesterCard(card, options) {
+    function openTesterDrawer(deck, drawerName) {
+      if (!ensureTestHand(deck)) return;
+      state.testHand.openDrawer = drawerName || "trash";
+      renderTester(deck);
+    }
+
+    function testerDragPayload(ref) {
+      return JSON.stringify(ref);
+    }
+
+    function readTesterDragPayload(event) {
+      try {
+        return JSON.parse(event.dataTransfer.getData("application/x-dcgo-card") || "");
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function attachTesterDrag(element, ref) {
+      if (!element || !ref) return;
+      element.draggable = true;
+      element.addEventListener("dragstart", function(event) {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("application/x-dcgo-card", testerDragPayload(ref));
+      });
+    }
+
+    function attachTesterDropZone(element, target) {
+      if (!element) return;
+      element.ondragover = function(event) {
+        if (!event.dataTransfer.types || Array.prototype.indexOf.call(event.dataTransfer.types, "application/x-dcgo-card") < 0) {
+          return;
+        }
+        event.preventDefault();
+        element.classList.add("tester-drop-over");
+      };
+      element.ondragleave = function() {
+        element.classList.remove("tester-drop-over");
+      };
+      element.ondrop = function(event) {
+        const deck = getSelectedDeck();
+        const ref = readTesterDragPayload(event);
+        element.classList.remove("tester-drop-over");
+        if (!deck || !ref) return;
+        event.preventDefault();
+        moveTesterCard(deck, ref, target);
+      };
+    }
+
+    function createTesterButton(label, onClick, extraClass) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "button" + (extraClass ? " " + extraClass : "");
+      button.textContent = label;
+      button.addEventListener("click", function(event) {
+        event.stopPropagation();
+        onClick();
+      });
+      return button;
+    }
+
+    function createTesterCard(instance, options) {
       const opts = options || {};
+      const card = getTesterCard(instance);
+      const faceUp = !instance || !instance.card || instance.faceUp !== false || opts.forceFaceUp;
       const item = document.createElement("div");
       item.className = "tester-card";
       item.title = card.name + " " + card.code;
+      if (opts.ref) attachTesterDrag(item, opts.ref);
 
       const thumb = document.createElement("div");
-      thumb.className = "tester-card-thumb";
-      if (card.imageUrl) {
-        const img = document.createElement("img");
-        img.src = card.imageUrl;
-        img.alt = card.name;
-        img.loading = "lazy";
-        img.addEventListener("error", function() {
-          img.remove();
+      thumb.className = faceUp ? "tester-card-thumb" : "tester-card-back";
+      if (faceUp) {
+        if (card.imageUrl) {
+          const img = document.createElement("img");
+          img.src = card.imageUrl;
+          img.alt = card.name;
+          img.loading = "lazy";
+          img.addEventListener("error", function() {
+            img.remove();
+            thumb.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
+          });
+          thumb.appendChild(img);
+        } else {
           thumb.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
-        });
-        thumb.appendChild(img);
+        }
+        attachCardImageViewerTrigger(thumb, card);
       } else {
-        thumb.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
+        thumb.textContent = opts.backLabel || "Deck";
       }
-      attachCardImageViewerTrigger(thumb, card);
+      thumb.addEventListener("click", function(event) {
+        event.stopPropagation();
+        state.selectedCardCode = card.code;
+      });
 
       const name = document.createElement("div");
       name.className = "tester-card-name";
-      name.textContent = card.name;
+      name.textContent = faceUp ? card.name : (opts.hiddenName || "Face-down card");
       const code = document.createElement("div");
       code.className = "tester-card-code";
-      code.textContent = card.code;
+      code.textContent = faceUp ? card.code : (opts.hiddenCode || "");
 
       item.appendChild(thumb);
       item.appendChild(name);
@@ -3203,15 +3742,7 @@ HTML_TEMPLATE = Template(
         const actions = document.createElement("div");
         actions.className = "tester-card-actions";
         opts.actions.forEach(function(action) {
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = "button" + (action.primary ? " primary" : "");
-          button.textContent = action.label;
-          button.addEventListener("click", function(event) {
-            event.stopPropagation();
-            action.onClick();
-          });
-          actions.appendChild(button);
+          actions.appendChild(createTesterButton(action.label, action.onClick, action.primary ? "primary" : ""));
         });
         item.appendChild(actions);
       }
@@ -3237,19 +3768,52 @@ HTML_TEMPLATE = Template(
       return item;
     }
 
-    function renderTesterGrid(gridEl, cards, emptyText, actionsForCard) {
+    function renderTesterGrid(gridEl, instances, emptyText, actionsForCard, refForCard) {
       gridEl.innerHTML = "";
-      if (!cards.length) {
+      if (!instances.length) {
         const empty = document.createElement("div");
         empty.className = "tester-empty";
         empty.textContent = emptyText;
         gridEl.appendChild(empty);
         return;
       }
-      cards.forEach(function(card, index) {
-        gridEl.appendChild(createTesterCard(card, {
-          actions: actionsForCard ? actionsForCard(card, index) : []
+      instances.forEach(function(instance, index) {
+        gridEl.appendChild(createTesterCard(instance, {
+          ref: refForCard ? refForCard(instance, index) : null,
+          actions: actionsForCard ? actionsForCard(instance, index) : []
         }));
+      });
+    }
+
+    function createTesterPile(deck, label, count, drawerName, dropTarget) {
+      const pile = document.createElement("button");
+      pile.type = "button";
+      pile.className = "tester-pile";
+      pile.addEventListener("click", function() {
+        openTesterDrawer(deck, drawerName);
+      });
+      const countEl = document.createElement("div");
+      countEl.className = "tester-pile-count";
+      countEl.textContent = count;
+      const labelEl = document.createElement("div");
+      labelEl.className = "tester-pile-label";
+      labelEl.textContent = label;
+      pile.appendChild(countEl);
+      pile.appendChild(labelEl);
+      if (dropTarget) attachTesterDropZone(pile, dropTarget);
+      return pile;
+    }
+
+    function renderTesterPiles(deck) {
+      testerPileListEl.innerHTML = "";
+      [
+        ["Deck", state.testHand.stack.length, "stack", { zone: "stack", position: "top" }],
+        ["Egg", state.testHand.eggDeck.length, "eggDeck", { zone: "eggDeck", position: "top" }],
+        ["Security", state.testHand.security.length, "security", { zone: "security", position: "top", faceUp: false }],
+        ["Reveal", state.testHand.reveal.length + state.testHand.revealedSecurity.length, "reveal", { zone: "reveal" }],
+        ["Trash", state.testHand.trash.length, "trash", { zone: "trash" }]
+      ].forEach(function(item) {
+        testerPileListEl.appendChild(createTesterPile(deck, item[0], item[1], item[2], item[3]));
       });
     }
 
@@ -3258,47 +3822,259 @@ HTML_TEMPLATE = Template(
       if (!state.testHand.security.length) {
         const empty = document.createElement("div");
         empty.className = "tester-empty";
-        empty.textContent = "No face-down security cards remain.";
+        empty.textContent = "No security cards remain.";
         testerSecurityGridEl.appendChild(empty);
       } else if (state.testHand.showSecurity) {
-        state.testHand.security.forEach(function(card) {
-          testerSecurityGridEl.appendChild(createTesterCard(card));
+        state.testHand.security.forEach(function(instance, index) {
+          testerSecurityGridEl.appendChild(createTesterCard(instance, {
+            ref: { zone: "security", index: index },
+            forceFaceUp: true,
+            actions: [
+              { label: "Reveal", primary: true, onClick: function() { moveTesterCard(deck, { zone: "security", index: index }, { zone: "reveal" }); } },
+              { label: "Trash", onClick: function() { moveTesterCard(deck, { zone: "security", index: index }, { zone: "trash" }); } }
+            ]
+          }));
         });
       } else {
-        state.testHand.security.forEach(function(card, index) {
+        state.testHand.security.forEach(function(instance, index) {
           testerSecurityGridEl.appendChild(createSecurityBack(index));
         });
       }
 
+      const revealed = state.testHand.revealedSecurity.concat(state.testHand.reveal);
       renderTesterGrid(
         testerRevealedSecurityGridEl,
-        state.testHand.revealedSecurity,
-        "No security cards revealed yet.",
-        null
+        revealed,
+        "No revealed cards yet.",
+        function(instance, index) {
+          const fromRevealedSecurity = index < state.testHand.revealedSecurity.length;
+          const sourceIndex = fromRevealedSecurity ? index : index - state.testHand.revealedSecurity.length;
+          const sourceZone = fromRevealedSecurity ? "revealedSecurity" : "reveal";
+          return [
+            { label: "Field", primary: true, onClick: function() { moveTesterCard(deck, { zone: sourceZone, index: sourceIndex }, { zone: "field", fieldIndex: firstEmptyTesterField(), mode: "top" }); } },
+            { label: "Hand", onClick: function() { moveTesterCard(deck, { zone: sourceZone, index: sourceIndex }, { zone: "hand" }); } },
+            { label: "Trash", onClick: function() { moveTesterCard(deck, { zone: sourceZone, index: sourceIndex }, { zone: "trash" }); } }
+          ];
+        },
+        function(instance, index) {
+          if (index < state.testHand.revealedSecurity.length) return { zone: "revealedSecurity", index: index };
+          return { zone: "reveal", index: index - state.testHand.revealedSecurity.length };
+        }
       );
 
       testerRevealSecurityBtn.disabled = !state.testHand.security.length;
       testerRevealAllSecurityBtn.disabled = !state.testHand.security.length;
       testerToggleSecurityBtn.textContent = state.testHand.showSecurity ? "Hide Security" : "Show Security";
-      testerSecurityMetaEl.textContent =
-        state.testHand.security.length + " hidden • " +
-        state.testHand.revealedSecurity.length + " revealed";
+      testerSecurityMetaEl.textContent = state.testHand.security.length + " hidden";
+      testerRevealMetaEl.textContent = revealed.length + " shown";
+    }
+
+    function createTesterStackElement(deck, stack, sourceZone, fieldIndex) {
+      const wrap = document.createElement("div");
+      wrap.className = "tester-stack";
+      if (!stack.length) {
+        const empty = document.createElement("div");
+        empty.className = "tester-empty";
+        empty.textContent = sourceZone === "breeding" ? "Drop or hatch an egg here." : "Drop a card here.";
+        wrap.appendChild(empty);
+        return wrap;
+      }
+
+      stack.forEach(function(instance, index) {
+        const card = getTesterCard(instance);
+        const cardEl = document.createElement("div");
+        cardEl.className = "tester-stack-card" + (instance.suspended ? " suspended" : "");
+        cardEl.style.zIndex = String(10 + index);
+        cardEl.style.bottom = (8 + Math.min(index, 9) * 7) + "px";
+        cardEl.style.opacity = index === stack.length - 1 ? "1" : "0.72";
+        if (card.imageUrl) {
+          const img = document.createElement("img");
+          img.src = card.imageUrl;
+          img.alt = card.name;
+          img.loading = "lazy";
+          cardEl.appendChild(img);
+        } else {
+          cardEl.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
+        }
+        attachTesterDrag(cardEl, sourceZone === "field"
+          ? { zone: "field", fieldIndex: fieldIndex, index: index }
+          : { zone: "breeding", index: index });
+        attachCardImageViewerTrigger(cardEl, card);
+        cardEl.addEventListener("click", function(event) {
+          event.stopPropagation();
+          state.selectedCardCode = card.code;
+          state.testHand.openDrawer = sourceZone === "field" ? "field:" + fieldIndex : "breeding";
+          renderTester(deck);
+        });
+        wrap.appendChild(cardEl);
+      });
+
+      const badge = document.createElement("div");
+      badge.className = "tester-stack-badge";
+      badge.textContent = "x" + stack.length;
+      wrap.appendChild(badge);
+      return wrap;
+    }
+
+    function renderTesterFields(deck) {
+      testerBoardGridEl.innerHTML = "";
+      state.testHand.fields.forEach(function(stack, index) {
+        const slot = document.createElement("section");
+        slot.className = "tester-field-slot" + (stack.length ? "" : " empty");
+        attachTesterDropZone(slot, { zone: "field", fieldIndex: index, mode: "top" });
+        slot.addEventListener("click", function() {
+          if (!stack.length) return;
+          openTesterDrawer(deck, "field:" + index);
+        });
+
+        const label = document.createElement("div");
+        label.className = "tester-field-label";
+        const title = document.createElement("span");
+        title.textContent = "Battle " + (index + 1);
+        const count = document.createElement("span");
+        count.textContent = stack.length ? stack.length + " stack" : "empty";
+        label.appendChild(title);
+        label.appendChild(count);
+        slot.appendChild(label);
+        slot.appendChild(createTesterStackElement(deck, stack, "field", index));
+
+        if (stack.length) {
+          const sourceDrop = document.createElement("div");
+          sourceDrop.className = "tester-source-drop";
+          sourceDrop.textContent = "Drop here to stack under top";
+          attachTesterDropZone(sourceDrop, { zone: "field", fieldIndex: index, mode: "source" });
+          slot.appendChild(sourceDrop);
+        }
+        testerBoardGridEl.appendChild(slot);
+      });
+    }
+
+    function renderTesterBreeding(deck) {
+      testerBreedingZoneEl.className = "tester-breeding-slot" + (state.testHand.breeding.length ? "" : " empty");
+      testerBreedingStackEl.innerHTML = "";
+      testerBreedingStackEl.appendChild(createTesterStackElement(deck, state.testHand.breeding, "breeding", -1));
+      testerBreedingMetaEl.textContent = state.testHand.breeding.length + " stack";
+      attachTesterDropZone(testerBreedingZoneEl, { zone: "breeding" });
+    }
+
+    function renderTesterHand(deck) {
+      attachTesterDropZone(testerHandGridEl, { zone: "hand" });
+      renderTesterGrid(
+        testerHandGridEl,
+        state.testHand.hand,
+        "No cards in hand. Draw or start a new shuffle.",
+        function(instance, index) {
+          return [
+            { label: "Play", primary: true, onClick: function() { moveTesterCard(deck, { zone: "hand", index: index }, { zone: "field", fieldIndex: firstEmptyTesterField(), mode: "top" }); } },
+            { label: "Trash", onClick: function() { moveTesterCard(deck, { zone: "hand", index: index }, { zone: "trash" }); } },
+            { label: "Reveal", onClick: function() { moveTesterCard(deck, { zone: "hand", index: index }, { zone: "reveal" }); } }
+          ];
+        },
+        function(instance, index) { return { zone: "hand", index: index }; }
+      );
+    }
+
+    function drawerTitle(drawerName) {
+      if (drawerName === "stack") return "Deck";
+      if (drawerName === "eggDeck") return "Egg Deck";
+      if (drawerName === "security") return "Security";
+      if (drawerName === "revealedSecurity") return "Security Revealed";
+      if (drawerName === "reveal") return "Reveal Area";
+      if (drawerName === "trash") return "Trash";
+      if (drawerName === "breeding") return "Breeding Stack";
+      if (String(drawerName).indexOf("field:") === 0) return "Battle " + (Number(String(drawerName).split(":")[1]) + 1) + " Stack";
+      return "Zone";
+    }
+
+    function drawerSource(drawerName) {
+      if (String(drawerName).indexOf("field:") === 0) {
+        const fieldIndex = Number(String(drawerName).split(":")[1]);
+        return {
+          cards: state.testHand.fields[fieldIndex] || [],
+          ref: function(index) { return { zone: "field", fieldIndex: fieldIndex, index: index }; },
+          stackZone: "field",
+          fieldIndex: fieldIndex
+        };
+      }
+      return {
+        cards: getTesterSourceArray({ zone: drawerName, index: 0 }) || [],
+        ref: function(index) { return { zone: drawerName, index: index }; },
+        stackZone: drawerName,
+        fieldIndex: -1
+      };
+    }
+
+    function drawerCardActions(deck, drawerName, index) {
+      const source = drawerSource(drawerName);
+      const ref = source.ref(index);
+      if (drawerName === "stack" || drawerName === "eggDeck") {
+        return [];
+      }
+      const actions = [
+        { label: "Hand", onClick: function() { moveTesterCard(deck, ref, { zone: "hand" }); } },
+        { label: "Trash", onClick: function() { moveTesterCard(deck, ref, { zone: "trash" }); } },
+        { label: "Field", primary: true, onClick: function() { moveTesterCard(deck, ref, { zone: "field", fieldIndex: firstEmptyTesterField(), mode: "top" }); } },
+        { label: "Deck", onClick: function() { moveTesterCard(deck, ref, { zone: "stack", position: "top" }); } }
+      ];
+      if (drawerName !== "security") {
+        actions.push({ label: "Security", onClick: function() { moveTesterCard(deck, ref, { zone: "security", position: "top", faceUp: false }); } });
+      }
+      if (drawerName !== "reveal" && drawerName !== "revealedSecurity") {
+        actions.push({ label: "Reveal", onClick: function() { moveTesterCard(deck, ref, { zone: "reveal" }); } });
+      }
+      return actions;
+    }
+
+    function renderTesterDrawer(deck) {
+      const drawerName = state.testHand.openDrawer || "trash";
+      const source = drawerSource(drawerName);
+      testerDrawerTitleEl.textContent = drawerTitle(drawerName);
+      testerDrawerMetaEl.textContent = source.cards.length + " cards";
+      testerDrawerGridEl.innerHTML = "";
+
+      let stackActions = null;
+      if ((source.stackZone === "field" || source.stackZone === "breeding") && source.cards.length) {
+        stackActions = document.createElement("div");
+        stackActions.className = "tester-stack-actions";
+        if (source.stackZone === "field") {
+          stackActions.appendChild(createTesterButton("Suspend Top", function() { toggleTesterSuspend(deck, source.fieldIndex); }));
+          stackActions.appendChild(createTesterButton("Trash Stack", function() { moveTesterStack(deck, { zone: "field", fieldIndex: source.fieldIndex, index: 0 }, { zone: "trash" }); }, "danger"));
+        } else {
+          stackActions.appendChild(createTesterButton("Move Out", function() { moveBreedingToBattle(deck); }, "primary"));
+          stackActions.appendChild(createTesterButton("Trash Stack", function() { moveTesterStack(deck, { zone: "breeding", index: 0 }, { zone: "trash" }); }, "danger"));
+        }
+      }
+
+      renderTesterGrid(
+        testerDrawerGridEl,
+        source.cards,
+        "No cards in this zone.",
+        function(instance, index) { return drawerCardActions(deck, drawerName, index); },
+        function(instance, index) { return source.ref(index); }
+      );
+      if (stackActions) testerDrawerGridEl.insertBefore(stackActions, testerDrawerGridEl.firstChild);
     }
 
     function renderTester(deck) {
       if (!ensureTestHand(deck)) return;
 
       const stats = getDeckStats(deck);
+      const occupiedFields = state.testHand.fields.filter(function(stack) { return stack.length > 0; }).length;
+      const revealedCount = state.testHand.revealedSecurity.length + state.testHand.reveal.length;
       testerTitleEl.textContent = deck.name;
-      testerSubtitleEl.textContent = deck.fileName;
+      testerSubtitleEl.textContent = deck.fileName + " · drag cards between zones, or use the card buttons";
       testerSessionMetaEl.textContent = stats.mainCount + " main / " + stats.eggCount + " egg";
 
       testerStatsGridEl.innerHTML = "";
       [
         ["Deck", state.testHand.stack.length],
+        ["Egg", state.testHand.eggDeck.length],
         ["Hand", state.testHand.hand.length],
         ["Security", state.testHand.security.length],
-        ["Trash", state.testHand.trash.length]
+        ["Reveal", revealedCount],
+        ["Trash", state.testHand.trash.length],
+        ["Fields", occupiedFields],
+        ["Breeding", state.testHand.breeding.length]
       ].forEach(function(stat) {
         const item = document.createElement("div");
         item.className = "tester-stat";
@@ -3313,35 +4089,20 @@ HTML_TEMPLATE = Template(
         testerStatsGridEl.appendChild(item);
       });
 
-      renderTesterGrid(
-        testerHandGridEl,
-        state.testHand.hand,
-        "No cards in hand. Draw or start a new shuffle.",
-        function(card, index) {
-          return [
-            { label: "Play", primary: true, onClick: function() { moveHandCardToBoard(deck, index); } }
-          ];
-        }
-      );
-
-      renderTesterGrid(
-        testerBoardGridEl,
-        state.testHand.board,
-        "Play cards from hand here to sketch a test board.",
-        function(card, index) {
-          return [
-            { label: "Hand", onClick: function() { moveBoardCardToHand(deck, index); } },
-            { label: "Trash", onClick: function() { moveBoardCardToTrash(deck, index); } }
-          ];
-        }
-      );
-
+      renderTesterPiles(deck);
       renderTesterSecurity(deck);
+      renderTesterBreeding(deck);
+      renderTesterFields(deck);
+      renderTesterHand(deck);
+      renderTesterDrawer(deck);
+
+      attachTesterDropZone(testerRevealedSecurityGridEl, { zone: "reveal" });
       testerDrawBtn.disabled = !state.testHand.stack.length;
+      testerHatchEggBtn.disabled = !state.testHand.eggDeck.length;
+      testerRevealDeckBtn.disabled = !state.testHand.stack.length;
+      testerTrashDeckBtn.disabled = !state.testHand.stack.length;
       testerHandMetaEl.textContent = state.testHand.hand.length + " cards";
-      testerBoardMetaEl.textContent =
-        state.testHand.board.length + " in play • " +
-        state.testHand.trash.length + " trash";
+      testerBoardMetaEl.textContent = occupiedFields + " occupied / " + TESTER_FIELD_COUNT + " slots";
     }
 
     function pickSelectedCard(deck) {
@@ -4617,6 +5378,30 @@ HTML_TEMPLATE = Template(
       if (!deck || !ensureTestHand(deck)) return;
       state.testHand.showSecurity = !state.testHand.showSecurity;
       renderTester(deck);
+    });
+
+    testerHatchEggBtn.addEventListener("click", function() {
+      const deck = getSelectedDeck();
+      if (!deck) return;
+      hatchEgg(deck);
+    });
+
+    testerRevealDeckBtn.addEventListener("click", function() {
+      const deck = getSelectedDeck();
+      if (!deck) return;
+      revealTopDeck(deck);
+    });
+
+    testerTrashDeckBtn.addEventListener("click", function() {
+      const deck = getSelectedDeck();
+      if (!deck) return;
+      trashTopDeck(deck);
+    });
+
+    testerOpenTrashBtn.addEventListener("click", function() {
+      const deck = getSelectedDeck();
+      if (!deck) return;
+      openTesterDrawer(deck, "trash");
     });
 
     newTestHandBtn.addEventListener("click", function() {
