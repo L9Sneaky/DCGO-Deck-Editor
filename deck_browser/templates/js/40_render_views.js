@@ -510,7 +510,7 @@
       const wrap = document.createElement("div");
       wrap.className = className;
       const words = String(text || "Card").trim().split(/\s+/).slice(0, 2);
-      wrap.textContent = words.join("\\n");
+      wrap.textContent = words.join("\n");
       return wrap;
     }
 

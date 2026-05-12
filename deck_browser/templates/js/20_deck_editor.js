@@ -333,7 +333,7 @@
     function buildDeckExportText(deck) {
       const body = deck.cards.map(function(card) {
         return card.count + " " + (card.printedName || card.name) + " " + card.code;
-      }).join("\\n");
+      }).join("\n");
       return [
         "Name: " + deck.name,
         "Key Card: " + (deck.keyCard || "-1"),
@@ -342,7 +342,7 @@
         "// DeckList",
         "",
         body
-      ].join("\\n");
+      ].join("\n");
     }
 
     function isDeckDirty(deck) {
@@ -485,4 +485,3 @@
 
       validationPanelEl.appendChild(list);
     }
-

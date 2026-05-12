@@ -108,7 +108,7 @@
     }
 
     function appendPlainTextWithBreaks(parent, text) {
-      String(text || "").split("\\n").forEach(function(line, index, lines) {
+      String(text || "").split("\n").forEach(function(line, index, lines) {
         if (line) parent.appendChild(document.createTextNode(line));
         if (index !== lines.length - 1) parent.appendChild(document.createElement("br"));
       });

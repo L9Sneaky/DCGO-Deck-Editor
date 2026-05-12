@@ -359,7 +359,7 @@
       }
 
       lines.push("", "Replace the current deck list with this import?");
-      return lines.join("\\n");
+      return lines.join("\n");
     }
 
     function importParsedDeck(deck, parsed, importedCards) {
@@ -397,11 +397,11 @@
 
       const validation = validateDeck(deck);
       if (validation.errors.length) {
-        window.alert("Fix validation errors before saving:\\n\\n" + validation.errors.slice(0, 8).join("\\n"));
+        window.alert("Fix validation errors before saving:\n\n" + validation.errors.slice(0, 8).join("\n"));
         return;
       }
 
-      if (validation.warnings.length && !window.confirm("Save with warnings?\\n\\n" + validation.warnings.slice(0, 8).join("\\n"))) {
+      if (validation.warnings.length && !window.confirm("Save with warnings?\n\n" + validation.warnings.slice(0, 8).join("\n"))) {
         return;
       }
 

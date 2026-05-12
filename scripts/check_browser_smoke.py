@@ -58,7 +58,23 @@ async function main() {
     process.exit(1);
   }
 
-  await page.click(".library-deck-card .library-deck-actions .button.primary");
+  await page.click(".library-deck-card");
+  await page.waitForSelector("#editor-view:not(.hidden)", { timeout: 10000 });
+
+  const editorResult = await page.evaluate(() => ({
+    visible: !document.querySelector("#editor-view")?.classList.contains("hidden"),
+    dirtyText: document.querySelector("#dirty-status")?.textContent || "",
+    dirtyClass: document.querySelector("#dirty-status")?.className || "",
+    saveDisabled: Boolean(document.querySelector("#save-changes")?.disabled),
+  }));
+
+  if (!editorResult.visible || editorResult.dirtyText || !editorResult.saveDisabled) {
+    console.log(JSON.stringify({ libraryResult, editorResult, errors }, null, 2));
+    await browser.close();
+    process.exit(1);
+  }
+
+  await page.click("#test-hand");
   await page.waitForSelector("#test-view:not(.hidden)", { timeout: 10000 });
 
   const testerResult = await page.evaluate(() => ({
@@ -69,12 +85,12 @@ async function main() {
   }));
 
   if (!testerResult.visible || testerResult.handCards < 1 || testerResult.memoryCells < 21) {
-    console.log(JSON.stringify({ libraryResult, testerResult, errors }, null, 2));
+    console.log(JSON.stringify({ libraryResult, editorResult, testerResult, errors }, null, 2));
     await browser.close();
     process.exit(1);
   }
 
-  console.log(JSON.stringify({ libraryResult, testerResult }, null, 2));
+  console.log(JSON.stringify({ libraryResult, editorResult, testerResult }, null, 2));
   await browser.close();
 }
 
