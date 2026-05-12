@@ -1369,7 +1369,8 @@ HTML_TEMPLATE = Template(
 
     .tester-reveal-panel.hidden,
     .tester-security-panel.hidden,
-    .tester-context-menu.hidden {
+    .tester-context-menu.hidden,
+    .tester-stack-viewer.hidden {
       display: none !important;
     }
 
@@ -1461,6 +1462,7 @@ HTML_TEMPLATE = Template(
     }
 
     .tester-card {
+      position: relative;
       display: grid;
       gap: 3px;
       min-width: 0;
@@ -1500,6 +1502,35 @@ HTML_TEMPLATE = Template(
         radial-gradient(circle at center, rgba(95, 212, 255, 0.20), transparent 48%),
         repeating-linear-gradient(135deg, rgba(95,212,255,0.10) 0 8px, rgba(255,255,255,0.025) 8px 16px),
         rgba(4, 12, 20, 0.96);
+    }
+
+    .tester-card-modifiers {
+      position: absolute;
+      left: 5px;
+      top: 5px;
+      z-index: 5;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      pointer-events: none;
+    }
+
+    .tester-card-modifier {
+      min-width: 18px;
+      padding: 1px 4px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.72);
+      border: 1px solid rgba(95, 212, 255, 0.28);
+      color: rgba(237,247,255,0.94);
+      font-size: 8px;
+      line-height: 1.35;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.32);
+    }
+
+    .tester-card-modifier.mark {
+      background: rgba(255, 191, 95, 0.86);
+      color: #130a02;
     }
 
     .tester-card-name {
@@ -1557,7 +1588,7 @@ HTML_TEMPLATE = Template(
       border: 1px solid rgba(185, 221, 255, 0.24);
       background: rgba(0, 0, 0, 0.14);
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-rows: auto minmax(0, 1fr) auto;
       overflow: hidden;
       box-shadow: inset 0 0 18px rgba(255,255,255,0.045);
     }
@@ -1608,6 +1639,97 @@ HTML_TEMPLATE = Template(
 
     .tester-context-menu button:hover {
       background: rgba(95, 212, 255, 0.14);
+    }
+
+    .tester-log {
+      max-height: 92px;
+      padding: 8px;
+      overflow: auto;
+      border-top: 1px solid rgba(95, 212, 255, 0.14);
+      color: rgba(237,247,255,0.68);
+      font-size: 10px;
+      line-height: 1.35;
+      scrollbar-width: none;
+    }
+
+    .tester-log::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+
+    .tester-log-entry {
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .tester-stack-viewer {
+      position: fixed;
+      inset: 0;
+      z-index: 140;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.52);
+      backdrop-filter: blur(6px);
+    }
+
+    .tester-stack-viewer-panel {
+      width: min(980px, calc(100vw - 48px));
+      max-height: min(720px, calc(100vh - 48px));
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      border-radius: 14px;
+      border: 1px solid rgba(95, 212, 255, 0.28);
+      background: rgba(6, 18, 30, 0.96);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.58), inset 0 0 28px rgba(95,212,255,0.06);
+      overflow: hidden;
+    }
+
+    .tester-stack-viewer-header {
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(95, 212, 255, 0.16);
+    }
+
+    .tester-stack-viewer-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .tester-stack-viewer-grid {
+      min-height: 0;
+      overflow: auto;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+      gap: 12px;
+      align-content: start;
+      scrollbar-width: none;
+    }
+
+    .tester-stack-viewer-grid::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+
+    .tester-stack-bottom-drop {
+      position: absolute;
+      inset: auto 6px 6px 6px;
+      z-index: 22;
+      min-height: 20px;
+      border-radius: 3px;
+      border: 1px dashed rgba(95, 212, 255, 0.26);
+      background: rgba(3, 13, 22, 0.62);
+      color: rgba(237,247,255,0.66);
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      pointer-events: auto;
     }
 
     .tester-context-separator {
@@ -2824,6 +2946,7 @@ HTML_TEMPLATE = Template(
           <div id="tester-drawer-meta" class="tester-zone-meta"></div>
         </div>
         <div id="tester-drawer-grid" class="tester-card-grid"></div>
+        <div id="tester-log" class="tester-log"></div>
       </aside>
     </section>
   </div>
@@ -2835,6 +2958,15 @@ HTML_TEMPLATE = Template(
     </div>
   </div>
   <div id="tester-context-menu" class="tester-context-menu hidden" role="menu"></div>
+  <div id="tester-stack-viewer" class="tester-stack-viewer hidden" role="dialog" aria-modal="true" aria-label="Stack viewer">
+    <section class="tester-stack-viewer-panel">
+      <div class="tester-stack-viewer-header">
+        <h2 id="tester-stack-viewer-title" class="tester-stack-viewer-title">Stack</h2>
+        <button id="tester-stack-viewer-close" class="button" type="button" aria-label="Close stack viewer">Close</button>
+      </div>
+      <div id="tester-stack-viewer-grid" class="tester-stack-viewer-grid"></div>
+    </section>
+  </div>
 
   <script>
     const APP_DATA = $app_data;
@@ -2931,6 +3063,7 @@ HTML_TEMPLATE = Template(
     const testerDrawerTitleEl = document.getElementById("tester-drawer-title");
     const testerDrawerMetaEl = document.getElementById("tester-drawer-meta");
     const testerDrawerGridEl = document.getElementById("tester-drawer-grid");
+    const testerLogEl = document.getElementById("tester-log");
     const testerBackLibraryBtn = document.getElementById("tester-back-library");
     const testerEditDeckBtn = document.getElementById("tester-edit-deck");
     const testerNewShuffleBtn = document.getElementById("tester-new-shuffle");
@@ -2950,6 +3083,10 @@ HTML_TEMPLATE = Template(
     const imageViewerCaptionEl = document.getElementById("image-viewer-caption");
     const imageViewerCloseBtn = document.getElementById("image-viewer-close");
     const testerContextMenuEl = document.getElementById("tester-context-menu");
+    const testerStackViewerEl = document.getElementById("tester-stack-viewer");
+    const testerStackViewerTitleEl = document.getElementById("tester-stack-viewer-title");
+    const testerStackViewerGridEl = document.getElementById("tester-stack-viewer-grid");
+    const testerStackViewerCloseBtn = document.getElementById("tester-stack-viewer-close");
 
     const COLOR_MAP = {
       "Red": "#f25757",
@@ -3003,7 +3140,9 @@ HTML_TEMPLATE = Template(
         showSecurityPanel: false,
         showRevealPanel: false,
         handSort: "",
-        openDrawer: "trash"
+        openDrawer: "trash",
+        stackViewer: null,
+        log: []
       }
     };
 
@@ -3770,6 +3909,9 @@ HTML_TEMPLATE = Template(
       state.testHand.showSecurity = false;
       state.testHand.showSecurityPanel = false;
       state.testHand.showRevealPanel = false;
+      state.testHand.handSort = "";
+      state.testHand.stackViewer = null;
+      state.testHand.log = [];
       state.testHand.openDrawer = "trash";
     }
 
@@ -3823,7 +3965,8 @@ HTML_TEMPLATE = Template(
         uid: "test-card-" + state.testHand.nextId++,
         card: card,
         faceUp: faceUp !== false,
-        suspended: false
+        suspended: false,
+        modifiers: { plusDp: 0, plusSecurity: 0, marked: false }
       };
     }
 
@@ -3882,6 +4025,13 @@ HTML_TEMPLATE = Template(
       const opts = options || {};
       const actions = [];
       const sourceZone = ref ? ref.zone : "";
+      const source = drawerSource(sourceZone === "field" ? "field:" + ref.fieldIndex : sourceZone);
+      const sourceCards = source.cards || [];
+      actions.push({ label: opts.faceUp === false ? "Show card" : "Hide / flip card", onClick: function() { flipTesterCard(deck, ref); } });
+      if (sourceCards.length > 1 || sourceZone === "stack" || sourceZone === "eggDeck" || sourceZone === "security" || sourceZone === "trash") {
+        actions.push({ label: "Show stack", onClick: function() { openTesterStackViewer(deck, sourceZone === "field" ? "field:" + ref.fieldIndex : sourceZone); } });
+      }
+      actions.push({ separator: true });
       if (sourceZone !== "hand") {
         actions.push({ label: "Move to hand", onClick: function() { moveTesterCard(deck, ref, { zone: "hand" }); } });
       }
@@ -3909,6 +4059,31 @@ HTML_TEMPLATE = Template(
         actions.push({ separator: true });
         actions.push({ label: opts.suspended ? "Unsuspend stack top" : "Suspend stack top", onClick: function() { toggleTesterSuspend(deck, ref.fieldIndex); } });
       }
+      actions.push({ separator: true });
+      actions.push({ label: "Mark / unmark", onClick: function() {
+        const sourceArray = getTesterSourceArray(ref);
+        const instance = sourceArray && sourceArray[ref.index];
+        modifyTesterCard(deck, ref, { marked: !(instance && instance.modifiers && instance.modifiers.marked) });
+      } });
+      actions.push({ label: "+1000 DP", onClick: function() {
+        const sourceArray = getTesterSourceArray(ref);
+        const instance = sourceArray && sourceArray[ref.index];
+        const current = instance && instance.modifiers ? Number(instance.modifiers.plusDp) || 0 : 0;
+        modifyTesterCard(deck, ref, { plusDp: current + 1000 });
+      } });
+      actions.push({ label: "-1000 DP", onClick: function() {
+        const sourceArray = getTesterSourceArray(ref);
+        const instance = sourceArray && sourceArray[ref.index];
+        const current = instance && instance.modifiers ? Number(instance.modifiers.plusDp) || 0 : 0;
+        modifyTesterCard(deck, ref, { plusDp: current - 1000 });
+      } });
+      actions.push({ label: "+1 security attack", onClick: function() {
+        const sourceArray = getTesterSourceArray(ref);
+        const instance = sourceArray && sourceArray[ref.index];
+        const current = instance && instance.modifiers ? Number(instance.modifiers.plusSecurity) || 0 : 0;
+        modifyTesterCard(deck, ref, { plusSecurity: current + 1 });
+      } });
+      actions.push({ label: "Clear markers", onClick: function() { modifyTesterCard(deck, ref, { plusDp: 0, plusSecurity: 0, marked: false }); } });
       return actions;
     }
 
@@ -3946,6 +4121,8 @@ HTML_TEMPLATE = Template(
       state.testHand.showRevealPanel = false;
       state.testHand.handSort = "";
       state.testHand.openDrawer = "trash";
+      state.testHand.stackViewer = null;
+      state.testHand.log = ["Started a new test hand."];
       return true;
     }
 
@@ -3976,11 +4153,49 @@ HTML_TEMPLATE = Template(
       }
     }
 
+    function testerZoneLabel(zone) {
+      if (!zone) return "Zone";
+      if (zone === "stack") return "Deck";
+      if (zone === "eggDeck") return "Egg Deck";
+      if (zone === "security") return "Security";
+      if (zone === "revealedSecurity") return "Security Revealed";
+      if (zone === "reveal") return "Reveal";
+      if (zone === "trash") return "Trash";
+      if (zone === "hand") return "Hand";
+      if (zone === "breeding") return "Breeding";
+      if (zone === "field") return "Battle Area";
+      return String(zone);
+    }
+
+    function testerTargetLabel(target) {
+      if (!target) return "Zone";
+      if (target.zone === "field") return "Battle " + (Number(target.fieldIndex || 0) + 1);
+      if (target.zone === "stack") return target.position === "bottom" ? "Bottom Deck" : "Top Deck";
+      if (target.zone === "security") return (target.position === "bottom" ? "Bottom Security" : "Top Security") + (target.faceUp ? " face up" : " face down");
+      return testerZoneLabel(target.zone);
+    }
+
+    function logTesterAction(message) {
+      if (!message) return;
+      state.testHand.log.unshift(message);
+      state.testHand.log = state.testHand.log.slice(0, 80);
+    }
+
+    function selectTesterCard(card) {
+      if (!card) return;
+      state.selectedCardCode = card.code;
+      if (state.view === "tester") {
+        const currentDeck = getSelectedDeck();
+        if (currentDeck) renderTesterCardDetails(currentDeck);
+      }
+    }
+
     function drawTestCard(deck) {
       if (!ensureTestHand(deck)) return;
       const instance = state.testHand.stack.shift();
       if (!instance) return;
       state.testHand.hand.push(setTesterFace(instance, true));
+      logTesterAction("Drew " + getTesterCard(instance).name + ".");
       renderAfterTesterMove(deck);
     }
 
@@ -3991,6 +4206,7 @@ HTML_TEMPLATE = Template(
       state.testHand.reveal.push(setTesterFace(instance, true));
       state.testHand.openDrawer = "reveal";
       state.testHand.showRevealPanel = true;
+      logTesterAction("Revealed " + getTesterCard(instance).name + " from deck.");
       renderTester(deck);
     }
 
@@ -4000,6 +4216,7 @@ HTML_TEMPLATE = Template(
       if (!instance) return;
       state.testHand.trash.push(setTesterFace(instance, true));
       state.testHand.openDrawer = "trash";
+      logTesterAction("Milled " + getTesterCard(instance).name + ".");
       renderTester(deck);
     }
 
@@ -4009,6 +4226,7 @@ HTML_TEMPLATE = Template(
       if (!instance) return;
       state.testHand.breeding.push(setTesterFace(instance, true));
       state.testHand.openDrawer = "breeding";
+      logTesterAction("Hatched " + getTesterCard(instance).name + ".");
       renderTester(deck);
     }
 
@@ -4035,6 +4253,7 @@ HTML_TEMPLATE = Template(
       state.testHand.revealedSecurity.push(setTesterFace(instance, true));
       state.testHand.openDrawer = "revealedSecurity";
       state.testHand.showRevealPanel = true;
+      logTesterAction("Revealed " + getTesterCard(instance).name + " from security.");
       renderTester(deck);
     }
 
@@ -4045,6 +4264,20 @@ HTML_TEMPLATE = Template(
       }
       state.testHand.openDrawer = "revealedSecurity";
       state.testHand.showRevealPanel = true;
+      logTesterAction("Revealed all security.");
+      renderTester(deck);
+    }
+
+    function moveSecurityEdge(deck, targetZone, bottomCard) {
+      if (!ensureTestHand(deck) || !state.testHand.security.length) return;
+      const index = bottomCard ? state.testHand.security.length - 1 : 0;
+      moveTesterCard(deck, { zone: "security", index: index }, { zone: targetZone });
+    }
+
+    function shuffleTesterSecurity(deck) {
+      if (!ensureTestHand(deck) || state.testHand.security.length < 2) return;
+      state.testHand.security = shuffledCards(state.testHand.security);
+      logTesterAction("Shuffled security.");
       renderTester(deck);
     }
 
@@ -4109,7 +4342,12 @@ HTML_TEMPLATE = Template(
           state.testHand.eggDeck.unshift(instance);
         }
       } else if (target.zone === "breeding") {
-        state.testHand.breeding.push(setTesterFace(instance, true));
+        setTesterFace(instance, true);
+        if (target.mode === "source" && state.testHand.breeding.length) {
+          state.testHand.breeding.splice(Math.max(0, state.testHand.breeding.length - 1), 0, instance);
+        } else {
+          state.testHand.breeding.push(instance);
+        }
         state.testHand.openDrawer = "breeding";
       } else if (target.zone === "field") {
         const targetStack = state.testHand.fields[target.fieldIndex] || state.testHand.fields[0];
@@ -4126,6 +4364,7 @@ HTML_TEMPLATE = Template(
     function isSameTesterSpot(ref, target) {
       if (!ref || !target) return false;
       if (ref.zone !== target.zone) return false;
+      if (target.position || target.mode || target.faceUp !== undefined) return false;
       if (ref.zone === "field") return ref.fieldIndex === target.fieldIndex;
       return true;
     }
@@ -4137,6 +4376,7 @@ HTML_TEMPLATE = Template(
       putTesterInstance(instance, target);
       const card = getTesterCard(instance);
       if (card) state.selectedCardCode = card.code;
+      if (card) logTesterAction(card.name + ": " + testerZoneLabel(ref.zone) + " → " + testerTargetLabel(target) + ".");
       hideTesterContextMenu();
       renderTester(deck);
     }
@@ -4149,6 +4389,7 @@ HTML_TEMPLATE = Template(
       moving.forEach(function(instance) {
         putTesterInstance(instance, target);
       });
+      logTesterAction("Moved stack from " + testerZoneLabel(sourceRef.zone) + " to " + testerTargetLabel(target) + ".");
       renderTester(deck);
     }
 
@@ -4163,6 +4404,7 @@ HTML_TEMPLATE = Template(
       const stack = state.testHand.fields[fieldIndex];
       if (!stack || !stack.length) return;
       stack[stack.length - 1].suspended = !stack[stack.length - 1].suspended;
+      logTesterAction((stack[stack.length - 1].suspended ? "Suspended " : "Unsuspended ") + getTesterCard(stack[stack.length - 1]).name + ".");
       renderTester(deck);
     }
 
@@ -4172,6 +4414,32 @@ HTML_TEMPLATE = Template(
         stack.forEach(function(instance) { instance.suspended = false; });
       });
       state.testHand.breeding.forEach(function(instance) { instance.suspended = false; });
+      logTesterAction("Unsuspended all cards.");
+      renderTester(deck);
+    }
+
+    function flipTesterCard(deck, ref) {
+      if (!ensureTestHand(deck)) return;
+      const source = getTesterSourceArray(ref);
+      if (!source || ref.index < 0 || ref.index >= source.length) return;
+      const instance = source[ref.index];
+      instance.faceUp = instance.faceUp === false;
+      const card = getTesterCard(instance);
+      state.selectedCardCode = card.code;
+      logTesterAction((instance.faceUp ? "Showed " : "Hid ") + card.name + ".");
+      hideTesterContextMenu();
+      renderTester(deck);
+    }
+
+    function modifyTesterCard(deck, ref, patch) {
+      if (!ensureTestHand(deck)) return;
+      const source = getTesterSourceArray(ref);
+      if (!source || ref.index < 0 || ref.index >= source.length) return;
+      const instance = source[ref.index];
+      instance.modifiers = Object.assign({ plusDp: 0, plusSecurity: 0, marked: false }, instance.modifiers || {}, patch || {});
+      const card = getTesterCard(instance);
+      logTesterAction("Updated markers on " + card.name + ".");
+      hideTesterContextMenu();
       renderTester(deck);
     }
 
@@ -4238,6 +4506,23 @@ HTML_TEMPLATE = Template(
       return button;
     }
 
+    function createTesterModifierBadges(instance) {
+      const modifiers = Object.assign({ plusDp: 0, plusSecurity: 0, marked: false }, (instance && instance.modifiers) || {});
+      const badges = document.createElement("div");
+      badges.className = "tester-card-modifiers";
+      const values = [];
+      if (modifiers.marked) values.push({ text: "★", extra: " mark" });
+      if (modifiers.plusDp) values.push({ text: (modifiers.plusDp > 0 ? "+" : "") + modifiers.plusDp, extra: "" });
+      if (modifiers.plusSecurity) values.push({ text: "SA" + (modifiers.plusSecurity > 0 ? "+" : "") + modifiers.plusSecurity, extra: "" });
+      values.forEach(function(value) {
+        const badge = document.createElement("span");
+        badge.className = "tester-card-modifier" + value.extra;
+        badge.textContent = value.text;
+        badges.appendChild(badge);
+      });
+      return badges.childNodes.length ? badges : null;
+    }
+
     function createTesterCard(instance, options) {
       const opts = options || {};
       const card = getTesterCard(instance);
@@ -4248,9 +4533,12 @@ HTML_TEMPLATE = Template(
       if (opts.ref) attachTesterDrag(item, opts.ref);
       if (opts.ref) {
         item.addEventListener("contextmenu", function(event) {
-          showTesterContextMenu(event, card.name + " · " + card.code, testerCardActions(getSelectedDeck(), opts.ref));
+          showTesterContextMenu(event, card.name + " · " + card.code, testerCardActions(getSelectedDeck(), opts.ref, { faceUp: faceUp }));
         });
       }
+      item.addEventListener("mouseenter", function() {
+        if (faceUp || opts.forceFaceUp) selectTesterCard(card);
+      });
 
       const thumb = document.createElement("div");
       thumb.className = faceUp ? "tester-card-thumb" : "tester-card-back";
@@ -4274,11 +4562,7 @@ HTML_TEMPLATE = Template(
       }
       thumb.addEventListener("click", function(event) {
         event.stopPropagation();
-        state.selectedCardCode = card.code;
-        if (state.view === "tester") {
-          const currentDeck = getSelectedDeck();
-          if (currentDeck) renderTesterCardDetails(currentDeck);
-        }
+        selectTesterCard(card);
       });
 
       const name = document.createElement("div");
@@ -4289,6 +4573,8 @@ HTML_TEMPLATE = Template(
       code.textContent = faceUp ? card.code : (opts.hiddenCode || "");
 
       item.appendChild(thumb);
+      const modifierBadges = createTesterModifierBadges(instance);
+      if (modifierBadges) item.appendChild(modifierBadges);
       item.appendChild(name);
       item.appendChild(code);
 
@@ -4299,7 +4585,7 @@ HTML_TEMPLATE = Template(
       const item = document.createElement("div");
       item.className = "tester-card security-back-card";
       item.addEventListener("contextmenu", function(event) {
-        showTesterContextMenu(event, "Security #" + (index + 1), testerCardActions(deck, { zone: "security", index: index }));
+        showTesterContextMenu(event, "Security #" + (index + 1), testerCardActions(deck, { zone: "security", index: index }, { faceUp: false }));
       });
       const back = document.createElement("div");
       back.className = "tester-card-back";
@@ -4525,24 +4811,29 @@ HTML_TEMPLATE = Template(
         } else {
           cardEl.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
         }
+        const modifierBadges = createTesterModifierBadges(instance);
+        if (modifierBadges) cardEl.appendChild(modifierBadges);
         attachTesterDrag(cardEl, sourceZone === "field"
           ? { zone: "field", fieldIndex: fieldIndex, index: index }
           : { zone: "breeding", index: index });
         attachCardImageViewerTrigger(cardEl, card);
+        cardEl.addEventListener("mouseenter", function() {
+          if (instance.faceUp !== false) selectTesterCard(card);
+        });
         cardEl.addEventListener("contextmenu", function(event) {
           const ref = sourceZone === "field"
             ? { zone: "field", fieldIndex: fieldIndex, index: index }
             : { zone: "breeding", index: index };
           showTesterContextMenu(event, card.name + " · " + card.code, testerCardActions(deck, ref, {
             stackTop: index === stack.length - 1,
-            suspended: !!instance.suspended
+            suspended: !!instance.suspended,
+            faceUp: instance.faceUp !== false
           }));
         });
         cardEl.addEventListener("click", function(event) {
           event.stopPropagation();
-          state.selectedCardCode = card.code;
-          state.testHand.openDrawer = sourceZone === "field" ? "field:" + fieldIndex : "breeding";
-          renderTester(deck);
+          selectTesterCard(card);
+          openTesterStackViewer(deck, sourceZone === "field" ? "field:" + fieldIndex : "breeding");
         });
         wrap.appendChild(cardEl);
       });
@@ -4578,8 +4869,8 @@ HTML_TEMPLATE = Template(
 
         if (stack.length) {
           const sourceDrop = document.createElement("div");
-          sourceDrop.className = "tester-source-drop";
-          sourceDrop.textContent = "Drop here to stack under top";
+          sourceDrop.className = "tester-source-drop tester-stack-bottom-drop";
+          sourceDrop.textContent = "▽";
           attachTesterDropZone(sourceDrop, { zone: "field", fieldIndex: index, mode: "source" });
           slot.appendChild(sourceDrop);
         }
@@ -4589,8 +4880,16 @@ HTML_TEMPLATE = Template(
 
     function renderTesterBreeding(deck) {
       testerBreedingZoneEl.className = "tester-breeding-slot" + (state.testHand.breeding.length ? "" : " empty");
+      testerBreedingZoneEl.querySelectorAll(".tester-stack-bottom-drop").forEach(function(element) { element.remove(); });
       testerBreedingStackEl.innerHTML = "";
       testerBreedingStackEl.appendChild(createTesterStackElement(deck, state.testHand.breeding, "breeding", -1));
+      if (state.testHand.breeding.length) {
+        const sourceDrop = document.createElement("div");
+        sourceDrop.className = "tester-source-drop tester-stack-bottom-drop";
+        sourceDrop.textContent = "▽";
+        attachTesterDropZone(sourceDrop, { zone: "breeding", mode: "source" });
+        testerBreedingZoneEl.appendChild(sourceDrop);
+      }
       testerBreedingMetaEl.textContent = state.testHand.breeding.length + " stack";
       attachTesterDropZone(testerBreedingZoneEl, { zone: "breeding" });
     }
@@ -4644,6 +4943,38 @@ HTML_TEMPLATE = Template(
       };
     }
 
+    function openTesterStackViewer(deck, drawerName) {
+      if (!ensureTestHand(deck)) return;
+      state.testHand.stackViewer = drawerName || state.testHand.openDrawer || "trash";
+      renderTester(deck);
+    }
+
+    function closeTesterStackViewer() {
+      state.testHand.stackViewer = null;
+      testerStackViewerEl.classList.add("hidden");
+      testerStackViewerGridEl.innerHTML = "";
+    }
+
+    function renderTesterStackViewer(deck) {
+      const drawerName = state.testHand.stackViewer;
+      if (!drawerName) {
+        testerStackViewerEl.classList.add("hidden");
+        testerStackViewerGridEl.innerHTML = "";
+        return;
+      }
+
+      const source = drawerSource(drawerName);
+      testerStackViewerTitleEl.textContent = drawerTitle(drawerName) + " · " + source.cards.length;
+      renderTesterGrid(
+        testerStackViewerGridEl,
+        source.cards,
+        "No cards in this stack.",
+        null,
+        function(instance, index) { return source.ref(index); }
+      );
+      testerStackViewerEl.classList.remove("hidden");
+    }
+
     function drawerCardActions(deck, drawerName, index) {
       const source = drawerSource(drawerName);
       const ref = source.ref(index);
@@ -4695,6 +5026,23 @@ HTML_TEMPLATE = Template(
       if (stackActions) testerDrawerGridEl.insertBefore(stackActions, testerDrawerGridEl.firstChild);
     }
 
+    function renderTesterLog() {
+      testerLogEl.innerHTML = "";
+      if (!state.testHand.log.length) {
+        const empty = document.createElement("div");
+        empty.className = "tester-log-entry";
+        empty.textContent = "No actions yet.";
+        testerLogEl.appendChild(empty);
+        return;
+      }
+      state.testHand.log.slice(0, 8).forEach(function(entry) {
+        const item = document.createElement("div");
+        item.className = "tester-log-entry";
+        item.textContent = entry;
+        testerLogEl.appendChild(item);
+      });
+    }
+
     function renderTester(deck) {
       if (!ensureTestHand(deck)) return;
 
@@ -4737,6 +5085,8 @@ HTML_TEMPLATE = Template(
       renderTesterFields(deck);
       renderTesterHand(deck);
       renderTesterDrawer(deck);
+      renderTesterStackViewer(deck);
+      renderTesterLog();
 
       attachTesterDropZone(testerRevealedSecurityGridEl, { zone: "reveal" });
       testerDrawBtn.disabled = !state.testHand.stack.length;
@@ -6026,8 +6376,18 @@ HTML_TEMPLATE = Template(
       showTesterContextMenu(event, "Deck", [
         { label: "Draw one", onClick: function() { drawTestCard(deck); } },
         { label: "Reveal top", onClick: function() { revealTopDeck(deck); } },
+        { label: "Reveal bottom", onClick: function() {
+          if (!state.testHand.stack.length) return;
+          const instance = state.testHand.stack.pop();
+          state.testHand.reveal.push(setTesterFace(instance, true));
+          state.testHand.openDrawer = "reveal";
+          state.testHand.showRevealPanel = true;
+          logTesterAction("Revealed " + getTesterCard(instance).name + " from bottom deck.");
+          renderTester(deck);
+        } },
         { label: "Mill top", onClick: function() { trashTopDeck(deck); } },
-        { label: "Open deck", onClick: function() { openTesterDrawer(deck, "stack"); } }
+        { label: "Show deck stack", onClick: function() { openTesterStackViewer(deck, "stack"); } },
+        { label: "Open deck drawer", onClick: function() { openTesterDrawer(deck, "stack"); } }
       ]);
     });
 
@@ -6072,6 +6432,14 @@ HTML_TEMPLATE = Template(
       showTesterContextMenu(event, "Security", [
         { label: "Reveal top security", onClick: function() { revealSecurityCard(deck); } },
         { label: "Reveal all security", onClick: function() { revealAllSecurity(deck); } },
+        { label: "Open security stack", onClick: function() { openTesterStackViewer(deck, "security"); } },
+        { separator: true },
+        { label: "Take top security", onClick: function() { moveSecurityEdge(deck, "hand", false); } },
+        { label: "Take bottom security", onClick: function() { moveSecurityEdge(deck, "hand", true); } },
+        { label: "Trash top security", onClick: function() { moveSecurityEdge(deck, "trash", false); } },
+        { label: "Trash bottom security", onClick: function() { moveSecurityEdge(deck, "trash", true); } },
+        { label: "Shuffle security", onClick: function() { shuffleTesterSecurity(deck); } },
+        { separator: true },
         { label: state.testHand.showSecurity ? "Hide security faces" : "Show security faces", onClick: function() { state.testHand.showSecurity = !state.testHand.showSecurity; state.testHand.showSecurityPanel = true; renderTester(deck); } }
       ]);
     });
@@ -6113,7 +6481,15 @@ HTML_TEMPLATE = Template(
     });
 
     document.addEventListener("keydown", function(event) {
-      if (event.key === "Escape") hideTesterContextMenu();
+      if (event.key === "Escape") {
+        hideTesterContextMenu();
+        closeTesterStackViewer();
+      }
+    });
+
+    testerStackViewerCloseBtn.addEventListener("click", closeTesterStackViewer);
+    testerStackViewerEl.addEventListener("click", function(event) {
+      if (event.target === testerStackViewerEl) closeTesterStackViewer();
     });
 
     newTestHandBtn.addEventListener("click", function() {
