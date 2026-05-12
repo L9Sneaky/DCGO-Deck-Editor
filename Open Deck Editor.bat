@@ -91,6 +91,8 @@ if not exist "%SCRIPT_DIR%deck_browser\output" mkdir "%SCRIPT_DIR%deck_browser\o
 if not exist "%APP_SUPPORT_DIR%" mkdir "%APP_SUPPORT_DIR%"
 
 if defined DECK_ROOT (
+  echo Deck folder: %DECK_ROOT%
+  echo Editor data: %APP_SUPPORT_DIR%
   %PYTHON_CMD% "%SERVER_SCRIPT%" --app-support-dir "%APP_SUPPORT_DIR%" --deck-root "%DECK_ROOT%" --output "%OUTPUT_HTML%" --open
 ) else (
   echo Could not find Assets\Decks automatically.

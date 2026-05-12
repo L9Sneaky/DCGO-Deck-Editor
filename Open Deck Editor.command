@@ -11,6 +11,7 @@ HTML_TEMPLATE="$SCRIPT_DIR/deck_browser/templates/deck_browser.html"
 CSS_TEMPLATE_DIR="$SCRIPT_DIR/deck_browser/templates/css"
 JS_TEMPLATE_DIR="$SCRIPT_DIR/deck_browser/templates/js"
 DEFAULT_TEST_SUPPORT_DIR="$HOME/Library/Application Support/DCGO-AutoUpdate-Test"
+DEFAULT_TEST_DECK_ROOT="$DEFAULT_TEST_SUPPORT_DIR/userdata/Decks"
 
 find_deck_root() {
   if [ -n "${DCGO_DECK_ROOT:-}" ] && [ -d "$DCGO_DECK_ROOT" ]; then
@@ -23,7 +24,13 @@ find_deck_root() {
     "$SCRIPT_DIR/../Assets/Decks" \
     "$SCRIPT_DIR/DCGO_Application/Assets/Decks" \
     "$SCRIPT_DIR/DCGO.app/Contents/drive_c/Program Files/DCGO_Standalone/Assets/Decks" \
-    "$SCRIPT_DIR/DCGO.app/Contents/drive_c/Program Files/DCGO_Application-3/Assets/Decks"
+    "$SCRIPT_DIR/DCGO.app/Contents/drive_c/Program Files/DCGO_Application-3/Assets/Decks" \
+    "$DEFAULT_TEST_DECK_ROOT" \
+    "$DEFAULT_TEST_SUPPORT_DIR/prefixes/live/drive_c/Program Files/DCGO_Standalone/Assets/Decks" \
+    "$DEFAULT_TEST_SUPPORT_DIR/prefixes/beta/drive_c/Program Files/DCGO_Standalone/Assets/Decks" \
+    "$SCRIPT_DIR/DCGO.app/Contents/SharedSupport/prefix_seed/drive_c/Program Files/DCGO_Standalone/Assets/Decks" \
+    "$SCRIPT_DIR/DCGO.app/Contents/SharedSupport/launcher_seed/Assets/Decks" \
+    "$SCRIPT_DIR/DCGO.app/Contents/SharedSupport/launcher_seed_beta/Assets/Decks"
   do
     if [ -d "$CANDIDATE" ]; then
       (CDPATH= cd -- "$CANDIDATE" && pwd)
@@ -34,15 +41,16 @@ find_deck_root() {
   find "$SCRIPT_DIR" -maxdepth 6 -type d -path "*/Assets/Decks" -print -quit 2>/dev/null || true
 }
 
-if [ -z "${DCGO_DECK_ROOT:-}" ] && [ -z "${DCGO_APP_SUPPORT_DIR:-}" ] && [ -d "$SCRIPT_DIR/DCGO.app" ] && [ -d "$DEFAULT_TEST_SUPPORT_DIR/userdata/Decks" ]; then
-  DECK_ROOT=""
-else
-  DECK_ROOT=$(find_deck_root | sed -n '1p')
-fi
+DECK_ROOT=$(find_deck_root | sed -n '1p')
 
 if [ -n "${DCGO_APP_SUPPORT_DIR:-}" ]; then
   APP_SUPPORT_DIR="$DCGO_APP_SUPPORT_DIR"
-elif [ -z "$DECK_ROOT" ] && [ -d "$DEFAULT_TEST_SUPPORT_DIR/userdata/Decks" ]; then
+elif [ -n "$DECK_ROOT" ]; then
+  case "$DECK_ROOT" in
+    "$DEFAULT_TEST_SUPPORT_DIR"/*) APP_SUPPORT_DIR="$DEFAULT_TEST_SUPPORT_DIR" ;;
+    *) APP_SUPPORT_DIR="$SCRIPT_DIR/deck_browser_data" ;;
+  esac
+elif [ -d "$DEFAULT_TEST_DECK_ROOT" ]; then
   APP_SUPPORT_DIR="$DEFAULT_TEST_SUPPORT_DIR"
 else
   APP_SUPPORT_DIR="$SCRIPT_DIR/deck_browser_data"
@@ -71,15 +79,17 @@ done
 mkdir -p "$(dirname "$OUTPUT_HTML")"
 mkdir -p "$APP_SUPPORT_DIR"
 
-if [ -n "$DECK_ROOT" ]; then
-  "$PYTHON_BIN" "$SERVER_SCRIPT" \
-    --app-support-dir "$APP_SUPPORT_DIR" \
-    --deck-root "$DECK_ROOT" \
-    --output "$OUTPUT_HTML" \
-    --open
-else
-  "$PYTHON_BIN" "$SERVER_SCRIPT" \
-    --app-support-dir "$APP_SUPPORT_DIR" \
-    --output "$OUTPUT_HTML" \
-    --open
+if [ -z "$DECK_ROOT" ]; then
+  printf 'Could not find an Assets/Decks folder.\n' >&2
+  printf 'Move this editor folder into the DCGO client folder, or set DCGO_DECK_ROOT.\n' >&2
+  exit 1
 fi
+
+printf 'Deck folder: %s\n' "$DECK_ROOT"
+printf 'Editor data: %s\n' "$APP_SUPPORT_DIR"
+
+"$PYTHON_BIN" "$SERVER_SCRIPT" \
+  --app-support-dir "$APP_SUPPORT_DIR" \
+  --deck-root "$DECK_ROOT" \
+  --output "$OUTPUT_HTML" \
+  --open
