@@ -1138,7 +1138,7 @@ HTML_TEMPLATE = Template(
       grid-area: bottom;
       min-height: 0;
       display: grid;
-      grid-template-columns: 82px 82px minmax(0, 1fr);
+      grid-template-columns: 82px minmax(0, 1fr);
       gap: 10px;
       align-items: stretch;
     }
@@ -1160,7 +1160,7 @@ HTML_TEMPLATE = Template(
     .tester-deck-dock {
       align-content: end;
       justify-items: center;
-      gap: 4px;
+      gap: 0;
       grid-template-rows: minmax(0, 1fr) auto auto;
     }
 
@@ -1186,6 +1186,7 @@ HTML_TEMPLATE = Template(
     .tester-deck-stack-button {
       width: 58px;
       height: 78px;
+      margin-bottom: 4px;
       position: relative;
       border: 1px solid rgba(95, 212, 255, 0.24);
       border-radius: 5px;
@@ -1240,16 +1241,15 @@ HTML_TEMPLATE = Template(
 
     .tester-deck-bottom-drop {
       width: 58px;
-      min-height: 18px;
+      min-height: 17px;
       border: 1px dashed rgba(95, 212, 255, 0.24);
-      border-radius: 4px;
+      border-radius: 0 0 4px 4px;
       display: grid;
       place-items: center;
       color: rgba(237,247,255,0.56);
       background: rgba(0,0,0,0.22);
-      font-size: 7px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.04em;
     }
 
     .tester-hand-tools {
@@ -2783,6 +2783,11 @@ HTML_TEMPLATE = Template(
           <section class="tester-trash-drop" title="Open trash">
             <button id="tester-trash-pile-button" class="tester-trash-button" type="button" aria-label="Open trash">🗑</button>
             <span id="tester-trash-count">0</span>
+            <div class="tester-deck-dock">
+              <button id="tester-deck-stack" class="tester-deck-stack-button" type="button" title="Draw one card. Drop here to put a card on top of the deck." aria-label="Deck: draw one card"></button>
+              <div id="tester-deck-count" class="tester-deck-count">0</div>
+              <div id="tester-deck-bottom-drop" class="tester-deck-bottom-drop" title="Drop here to put a card on the bottom of the deck">▽</div>
+            </div>
           </section>
         </section>
 
@@ -2790,11 +2795,6 @@ HTML_TEMPLATE = Template(
           <div class="tester-security-dock">
             <button id="tester-security-button" class="tester-zone-icon-button" type="button" title="Open security" aria-label="Open security">SEC</button>
             <div id="tester-security-count" class="tester-zone-meta"></div>
-          </div>
-          <div class="tester-deck-dock">
-            <button id="tester-deck-stack" class="tester-deck-stack-button" type="button" title="Draw one card. Drop here to put a card on top of the deck." aria-label="Deck: draw one card"></button>
-            <div id="tester-deck-count" class="tester-deck-count">0</div>
-            <div id="tester-deck-bottom-drop" class="tester-deck-bottom-drop" title="Drop here to put a card on the bottom of the deck">Bottom</div>
           </div>
           <div class="tester-hand-row">
             <div class="tester-zone-header compact">
