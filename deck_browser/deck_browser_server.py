@@ -21,6 +21,8 @@ import build_deck_browser
 
 SUFFIX_ALPHABET = string.ascii_letters + string.digits
 MAX_REQUEST_BYTES = 64 * 1024 * 1024
+DECKLIST_LINE_RE = re.compile(r"^\s*//\s*Deck\s*List\s*$", flags=re.IGNORECASE)
+DECK_CARD_LINE_RE = re.compile(r"^\s*(\d+)\s+(.+?)\s+([A-Za-z0-9-]+(?:_[A-Za-z0-9-]+)?)\s*$")
 
 
 def parse_args() -> argparse.Namespace:
@@ -195,12 +197,40 @@ def deck_path_from_file_name(deck_root: Path, file_name: Any) -> Path:
 
 
 def normalize_deck_text(value: Any) -> str:
-    text = str(value or "").replace("\r\n", "\n").replace("\r", "\n").strip()
-    if not text.startswith("Name:"):
+    text = str(value or "").replace("\r\n", "\n").replace("\r", "\n")
+    text = text.lstrip("\ufeff")
+    if not text.strip():
+        raise ValueError("Deck text must not be empty.")
+
+    lines = text.split("\n")
+    first_content = next((line for line in lines if line.strip()), "")
+    if not first_content.lstrip().startswith("Name:"):
         raise ValueError("Deck text must start with Name:.")
-    if "\n// DeckList" not in text:
-        raise ValueError("Deck text must include // DeckList.")
-    return text + "\n"
+
+    decklist_index = next((index for index, line in enumerate(lines) if DECKLIST_LINE_RE.match(line)), None)
+    if decklist_index is None:
+        first_card_index = next((index for index, line in enumerate(lines) if DECK_CARD_LINE_RE.match(line)), None)
+        if first_card_index is None:
+            raise ValueError("Deck text must include // DeckList.")
+        insert_at = first_card_index
+        if insert_at > 0 and lines[insert_at - 1].strip():
+            lines.insert(insert_at, "")
+            insert_at += 1
+        lines.insert(insert_at, "// DeckList")
+        insert_at += 1
+        if insert_at < len(lines) and lines[insert_at].strip():
+            lines.insert(insert_at, "")
+    else:
+        if lines[decklist_index].strip() != "// DeckList":
+            lines[decklist_index] = "// DeckList"
+        if decklist_index > 0 and lines[decklist_index - 1].strip():
+            lines.insert(decklist_index, "")
+            decklist_index += 1
+        if decklist_index + 1 < len(lines) and lines[decklist_index + 1].strip():
+            lines.insert(decklist_index + 1, "")
+
+    normalized = "\n".join(lines).strip()
+    return normalized + "\n"
 
 
 def save_deck_file(deck_root: Path, file_name: Any, text: Any) -> Path:
