@@ -61,7 +61,7 @@
       return Math.random();
     }
 
-    function shuffledCards(cards) {
+    function fisherYatesShuffle(cards) {
       const shuffled = cards.slice();
       for (let index = shuffled.length - 1; index > 0; index -= 1) {
         const swapIndex = Math.floor(randomUnit() * (index + 1));
@@ -70,6 +70,105 @@
         shuffled[swapIndex] = current;
       }
       return shuffled;
+    }
+
+    function riffleShuffle(cards) {
+      const mid = Math.floor(cards.length / 2);
+      const left = cards.slice(0, mid);
+      const right = cards.slice(mid);
+      const result = [];
+      let leftIndex = 0;
+      let rightIndex = 0;
+      while (leftIndex < left.length && rightIndex < right.length) {
+        result.push(randomUnit() < 0.5 ? left[leftIndex++] : right[rightIndex++]);
+      }
+      return result.concat(left.slice(leftIndex), right.slice(rightIndex));
+    }
+
+    function insideOutShuffle(cards) {
+      const result = [];
+      cards.forEach(function(card, index) {
+        const targetIndex = Math.floor(randomUnit() * (index + 1));
+        if (targetIndex === index) {
+          result.push(card);
+        } else {
+          result.push(result[targetIndex]);
+          result[targetIndex] = card;
+        }
+      });
+      return result;
+    }
+
+    function blockShuffle(cards) {
+      const blockSize = Math.max(3, Math.floor(Math.sqrt(cards.length || 1)));
+      const blocks = [];
+      for (let index = 0; index < cards.length; index += blockSize) {
+        blocks.push(cards.slice(index, index + blockSize));
+      }
+      return fisherYatesShuffle(blocks).flatMap(function(block) {
+        return fisherYatesShuffle(block);
+      });
+    }
+
+    function reverseBlockShuffle(cards) {
+      const blockSize = Math.max(3, Math.floor(Math.sqrt(cards.length || 1)));
+      const blocks = [];
+      for (let index = 0; index < cards.length; index += blockSize) {
+        blocks.push(cards.slice(index, index + blockSize).reverse());
+      }
+      return fisherYatesShuffle(blocks).flat();
+    }
+
+    function sattoloShuffle(cards) {
+      const shuffled = cards.slice();
+      for (let index = shuffled.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(randomUnit() * index);
+        const current = shuffled[index];
+        shuffled[index] = shuffled[swapIndex];
+        shuffled[swapIndex] = current;
+      }
+      return shuffled;
+    }
+
+    function testerClusterKey(card) {
+      return card && (card.cardNumber || card.code || card.name);
+    }
+
+    function correctCardClustering(cards) {
+      const result = cards.slice();
+      for (let attempt = 0; attempt < 500; attempt += 1) {
+        let changed = false;
+        for (let index = 0; index < result.length - 1; index += 1) {
+          const key = testerClusterKey(result[index]);
+          if (!key || key !== testerClusterKey(result[index + 1])) continue;
+          for (let retry = 0; retry < 35; retry += 1) {
+            const candidate = Math.floor(randomUnit() * result.length);
+            if (Math.abs(candidate - index) <= 1) continue;
+            const before = candidate > 0 ? testerClusterKey(result[candidate - 1]) : "";
+            const after = candidate < result.length - 1 ? testerClusterKey(result[candidate + 1]) : "";
+            if (before === key || after === key) continue;
+            const current = result[index + 1];
+            result[index + 1] = result[candidate];
+            result[candidate] = current;
+            changed = true;
+            break;
+          }
+        }
+        if (!changed) break;
+      }
+      return result;
+    }
+
+    function shuffledCards(cards) {
+      let shuffled = cards.slice();
+      for (let round = 0; round < 3; round += 1) shuffled = fisherYatesShuffle(shuffled);
+      shuffled = riffleShuffle(riffleShuffle(shuffled));
+      shuffled = insideOutShuffle(shuffled);
+      shuffled = blockShuffle(shuffled);
+      shuffled = correctCardClustering(shuffled);
+      shuffled = sattoloShuffle(shuffled);
+      for (let round = 0; round < 3; round += 1) shuffled = fisherYatesShuffle(shuffled);
+      return reverseBlockShuffle(shuffled);
     }
 
     function createTesterInstance(card, faceUp) {
@@ -766,6 +865,42 @@
       });
     }
 
+    function renderTesterDeckPreview(deck) {
+      testerDeckPreviewEl.innerHTML = "";
+      const imageWrap = document.createElement("div");
+      imageWrap.className = "tester-deck-preview-art";
+      const coverCard = pickSelectedCard(deck);
+      if (coverCard && coverCard.imageUrl) {
+        const img = document.createElement("img");
+        img.src = coverCard.imageUrl;
+        img.alt = coverCard.name;
+        img.loading = "lazy";
+        imageWrap.appendChild(img);
+      } else {
+        imageWrap.appendChild(createFallbackLabel(deck.name, "thumb-fallback"));
+      }
+      testerDeckPreviewEl.appendChild(imageWrap);
+
+      const stacks = document.createElement("div");
+      stacks.className = "tester-deck-preview-stacks";
+      [
+        ["MAIN", state.testHand.stack.length],
+        ["EGG", state.testHand.eggDeck.length],
+        ["SEC", state.testHand.security.length],
+        ["HAND", state.testHand.hand.length]
+      ].forEach(function(item) {
+        const stack = document.createElement("div");
+        stack.className = "tester-preview-stack";
+        stack.innerHTML = "<strong>" + item[1] + "</strong><span>" + item[0] + "</span>";
+        stacks.appendChild(stack);
+      });
+      testerDeckPreviewEl.appendChild(stacks);
+
+      const colorBar = createColorRatioBar(getColorProfile(deck.cards));
+      colorBar.classList.add("tester-preview-color-bar");
+      testerDeckPreviewEl.appendChild(colorBar);
+    }
+
     function renderTesterMemory(deck) {
       testerMemoryTrackEl.innerHTML = "";
       for (let value = -10; value <= 10; value += 1) {
@@ -1189,6 +1324,7 @@
         testerStatsGridEl.appendChild(item);
       });
 
+      renderTesterDeckPreview(deck);
       renderTesterPiles(deck);
       renderTesterDeckDock(deck);
       renderTesterMemory(deck);

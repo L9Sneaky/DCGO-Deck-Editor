@@ -260,6 +260,12 @@
       startTestHand(deck);
     });
 
+    testerUnsuspendBtn.addEventListener("click", function() {
+      const deck = getSelectedDeck();
+      if (!deck) return;
+      unsuspendAllTesterCards(deck);
+    });
+
     testerDrawBtn.addEventListener("click", function() {
       const deck = getSelectedDeck();
       if (!deck) return;

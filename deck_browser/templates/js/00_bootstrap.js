@@ -70,6 +70,7 @@
     const testerSubtitleEl = document.getElementById("tester-subtitle");
     const testerSessionMetaEl = document.getElementById("tester-session-meta");
     const testerStatsGridEl = document.getElementById("tester-stats-grid");
+    const testerDeckPreviewEl = document.getElementById("tester-deck-preview");
     const testerPileListEl = document.getElementById("tester-pile-list");
     const testerHandGridEl = document.getElementById("tester-hand-grid");
     const testerHandMetaEl = document.getElementById("tester-hand-meta");
@@ -99,6 +100,7 @@
     const testerEditDeckBtn = document.getElementById("tester-edit-deck");
     const testerNewShuffleBtn = document.getElementById("tester-new-shuffle");
     const testerMulliganBtn = document.getElementById("tester-mulligan");
+    const testerUnsuspendBtn = document.getElementById("tester-unsuspend");
     const testerDrawBtn = document.getElementById("tester-draw");
     const testerRevealSecurityBtn = document.getElementById("tester-reveal-security");
     const testerRevealAllSecurityBtn = document.getElementById("tester-reveal-all-security");
