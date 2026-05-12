@@ -158,7 +158,7 @@
 
     function isTraitToken(word) {
       if (TRAIT_WORDS[word]) return true;
-      return /^(Lv\\.\\d+|\\d{3,6}|[A-Z][A-Z0-9 ./'-]{2,})$$/.test(word);
+      return /^(Lv\.\d+|\d{3,6}|[A-Z][A-Z0-9 ./'-]{2,})$$/.test(word);
     }
 
     function keywordTokenClass(word, isAngle) {
@@ -174,7 +174,7 @@
 
     function appendHighlightedText(parent, text) {
       const rawText = String(text || "");
-      const regex = /(\\[([^\\]]+)\\]|＜([^＞]+)＞)/g;
+      const regex = /(\[([^\]]+)\]|＜([^＞]+)＞)/g;
       let match;
       let lastIndex = 0;
 
@@ -250,4 +250,3 @@
       if (bottom.children.length) wrap.appendChild(bottom);
       return wrap;
     }
-

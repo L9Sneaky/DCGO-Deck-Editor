@@ -257,25 +257,25 @@
     function parseTextImport(rawText) {
       const refs = [];
       let importedName = "";
-      const lines = rawText.split(/\\r?\\n/);
+      const lines = rawText.split(/\r?\n/);
 
       lines.forEach(function(line) {
         const trimmed = line.trim();
         if (!trimmed) return;
         if (trimmed.startsWith("//")) {
-          const name = trimmed.replace(/^\\/\\/\\s*/, "").trim();
+          const name = trimmed.replace(/^\/\/\s*/, "").trim();
           if (name && name.toLowerCase() !== "decklist") importedName = name;
           return;
         }
 
-        const nameMatch = trimmed.match(/^Name:\\s*(.+)$$/i);
+        const nameMatch = trimmed.match(/^Name:\s*(.+)$$/i);
         if (nameMatch) {
           importedName = nameMatch[1].trim();
           return;
         }
         if (/^(Key Card|Sort Index):/i.test(trimmed)) return;
 
-        const lineMatch = trimmed.match(/^\\s*(\\d+)\\s+.+?\\s+([A-Za-z0-9-]+(?:_[A-Za-z0-9-]+)?)\\s*$$/);
+        const lineMatch = trimmed.match(/^\s*(\d+)\s+.+?\s+([A-Za-z0-9-]+(?:_[A-Za-z0-9-]+)?)\s*$$/);
         if (!lineMatch) return;
 
         const count = Number(lineMatch[1]);
