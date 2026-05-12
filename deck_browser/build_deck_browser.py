@@ -1138,12 +1138,13 @@ HTML_TEMPLATE = Template(
       grid-area: bottom;
       min-height: 0;
       display: grid;
-      grid-template-columns: 82px minmax(0, 1fr);
+      grid-template-columns: 82px 82px minmax(0, 1fr);
       gap: 10px;
       align-items: stretch;
     }
 
     .tester-security-dock,
+    .tester-deck-dock,
     .tester-hand-row {
       min-height: 0;
       display: grid;
@@ -1154,6 +1155,13 @@ HTML_TEMPLATE = Template(
       align-content: end;
       justify-items: center;
       gap: 5px;
+    }
+
+    .tester-deck-dock {
+      align-content: end;
+      justify-items: center;
+      gap: 4px;
+      grid-template-rows: minmax(0, 1fr) auto auto;
     }
 
     .tester-zone-icon-button {
@@ -1173,6 +1181,94 @@ HTML_TEMPLATE = Template(
       line-height: 1.05;
       text-align: center;
       box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+    }
+
+    .tester-deck-stack-button {
+      width: 58px;
+      height: 78px;
+      position: relative;
+      border: 1px solid rgba(95, 212, 255, 0.24);
+      border-radius: 5px;
+      background:
+        linear-gradient(145deg, rgba(75, 40, 158, 0.92), rgba(14, 44, 80, 0.95)),
+        rgba(2, 8, 14, 0.72);
+      color: rgba(237,247,255,0.9);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.25), inset 0 0 18px rgba(95,212,255,0.18);
+    }
+
+    .tester-deck-stack-button::before {
+      content: "";
+      width: 34px;
+      height: 44px;
+      border: 1px solid rgba(233, 247, 255, 0.42);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(95,212,255,0.38), transparent 62%);
+      box-shadow: 0 0 14px rgba(95,212,255,0.38);
+    }
+
+    .tester-deck-stack-button:disabled {
+      cursor: default;
+      opacity: 0.58;
+    }
+
+    .tester-deck-count {
+      min-width: 46px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: rgba(0,0,0,0.34);
+      color: rgba(237,247,255,0.88);
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-style: italic;
+      line-height: 1.25;
+      text-align: center;
+    }
+
+    .tester-deck-count::before,
+    .tester-deck-count::after {
+      content: "△";
+      color: rgba(237,247,255,0.38);
+      margin: 0 3px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      vertical-align: 1px;
+    }
+
+    .tester-deck-bottom-drop {
+      width: 58px;
+      min-height: 18px;
+      border: 1px dashed rgba(95, 212, 255, 0.24);
+      border-radius: 4px;
+      display: grid;
+      place-items: center;
+      color: rgba(237,247,255,0.56);
+      background: rgba(0,0,0,0.22);
+      font-size: 7px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .tester-hand-tools {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .tester-hand-sort {
+      width: 94px;
+      min-height: 22px;
+      border-radius: 6px;
+      border: 1px solid rgba(95, 212, 255, 0.18);
+      background: rgba(2, 8, 14, 0.62);
+      color: var(--text);
+      font-size: 10px;
+      padding: 1px 5px;
     }
 
     .tester-zone-icon-button:hover {
@@ -2695,10 +2791,27 @@ HTML_TEMPLATE = Template(
             <button id="tester-security-button" class="tester-zone-icon-button" type="button" title="Open security" aria-label="Open security">SEC</button>
             <div id="tester-security-count" class="tester-zone-meta"></div>
           </div>
+          <div class="tester-deck-dock">
+            <button id="tester-deck-stack" class="tester-deck-stack-button" type="button" title="Draw one card. Drop here to put a card on top of the deck." aria-label="Deck: draw one card"></button>
+            <div id="tester-deck-count" class="tester-deck-count">0</div>
+            <div id="tester-deck-bottom-drop" class="tester-deck-bottom-drop" title="Drop here to put a card on the bottom of the deck">Bottom</div>
+          </div>
           <div class="tester-hand-row">
             <div class="tester-zone-header compact">
               <h3 class="tester-zone-title">Hand</h3>
-              <div id="tester-hand-meta" class="tester-zone-meta"></div>
+              <div class="tester-hand-tools">
+                <select id="tester-hand-sort" class="tester-hand-sort" title="Sort hand" aria-label="Sort hand">
+                  <option value="">Manual</option>
+                  <option value="type">Type</option>
+                  <option value="level">Level</option>
+                  <option value="playCost">Play Cost</option>
+                  <option value="digivolveCost">Digi Cost</option>
+                  <option value="color">Color</option>
+                  <option value="number">Set #</option>
+                  <option value="name">Name</option>
+                </select>
+                <div id="tester-hand-meta" class="tester-zone-meta"></div>
+              </div>
             </div>
             <div id="tester-hand-grid" class="tester-hand-fan"></div>
           </div>
@@ -2797,6 +2910,10 @@ HTML_TEMPLATE = Template(
     const testerPileListEl = document.getElementById("tester-pile-list");
     const testerHandGridEl = document.getElementById("tester-hand-grid");
     const testerHandMetaEl = document.getElementById("tester-hand-meta");
+    const testerHandSortEl = document.getElementById("tester-hand-sort");
+    const testerDeckStackEl = document.getElementById("tester-deck-stack");
+    const testerDeckCountEl = document.getElementById("tester-deck-count");
+    const testerDeckBottomDropEl = document.getElementById("tester-deck-bottom-drop");
     const testerMemoryTrackEl = document.getElementById("tester-memory-track");
     const testerRevealPanelEl = document.querySelector(".tester-reveal-panel");
     const testerSecurityPanelEl = document.getElementById("tester-security-panel");
@@ -2885,6 +3002,7 @@ HTML_TEMPLATE = Template(
         showSecurity: false,
         showSecurityPanel: false,
         showRevealPanel: false,
+        handSort: "",
         openDrawer: "trash"
       }
     };
@@ -3826,6 +3944,7 @@ HTML_TEMPLATE = Template(
       state.testHand.showSecurity = false;
       state.testHand.showSecurityPanel = false;
       state.testHand.showRevealPanel = false;
+      state.testHand.handSort = "";
       state.testHand.openDrawer = "trash";
       return true;
     }
@@ -4226,6 +4345,16 @@ HTML_TEMPLATE = Template(
       return pile;
     }
 
+    function renderTesterDeckDock(deck) {
+      testerDeckCountEl.textContent = String(state.testHand.stack.length);
+      testerDeckStackEl.disabled = !state.testHand.stack.length;
+      testerDeckStackEl.title = state.testHand.stack.length
+        ? "Draw one card. Drop here to put a card on top of the deck."
+        : "Deck is empty. Drop here to put a card on top of the deck.";
+      attachTesterDropZone(testerDeckStackEl, { zone: "stack", position: "top" });
+      attachTesterDropZone(testerDeckBottomDropEl, { zone: "stack", position: "bottom" });
+    }
+
     function renderTesterPiles(deck) {
       testerPileListEl.innerHTML = "";
       [
@@ -4317,6 +4446,56 @@ HTML_TEMPLATE = Template(
       testerRevealMetaEl.textContent = revealed.length + " shown";
       testerRevealPanelEl.classList.toggle("hidden", !revealed.length && !state.testHand.showRevealPanel);
       testerSecurityPanelEl.classList.toggle("hidden", !state.testHand.showSecurityPanel);
+    }
+
+    function minDigivolveCost(card) {
+      const values = (card.digivolveCosts || []).filter(function(value) {
+        return value !== null && value !== undefined && value !== "";
+      }).map(Number).filter(function(value) {
+        return Number.isFinite(value);
+      });
+      if (!values.length) return null;
+      return Math.min.apply(Math, values);
+    }
+
+    function handSortValue(instance, mode) {
+      const card = getTesterCard(instance);
+      if (!card) return "";
+      if (mode === "type") {
+        const order = { "Digi-Egg": 0, "Digimon": 1, "Tamer": 2, "Option": 3 };
+        return order[card.type] !== undefined ? order[card.type] : 9;
+      }
+      if (mode === "level") return card.level === null || card.level === undefined ? 99 : Number(card.level);
+      if (mode === "playCost") return card.playCost === null || card.playCost === undefined ? 99 : Number(card.playCost);
+      if (mode === "digivolveCost") {
+        const cost = minDigivolveCost(card);
+        return cost === null ? 99 : cost;
+      }
+      if (mode === "color") {
+        const order = { "Red": 0, "Blue": 1, "Yellow": 2, "Green": 3, "Purple": 4, "Black": 5, "White": 6 };
+        const color = (card.colors || [])[0] || "";
+        return order[color] !== undefined ? order[color] : 9;
+      }
+      if (mode === "number") return String(card.cardNumber || card.code || "");
+      if (mode === "name") return String(card.name || "");
+      return "";
+    }
+
+    function sortTesterHand() {
+      const mode = state.testHand.handSort || "";
+      if (!mode) return;
+      state.testHand.hand.sort(function(left, right) {
+        const leftValue = handSortValue(left, mode);
+        const rightValue = handSortValue(right, mode);
+        if (typeof leftValue === "number" && typeof rightValue === "number" && leftValue !== rightValue) {
+          return leftValue - rightValue;
+        }
+        const primary = String(leftValue).localeCompare(String(rightValue), undefined, { numeric: true, sensitivity: "base" });
+        if (primary) return primary;
+        const leftCard = getTesterCard(left);
+        const rightCard = getTesterCard(right);
+        return String(leftCard.name + leftCard.code).localeCompare(String(rightCard.name + rightCard.code), undefined, { numeric: true, sensitivity: "base" });
+      });
     }
 
     function createTesterStackElement(deck, stack, sourceZone, fieldIndex) {
@@ -4417,6 +4596,8 @@ HTML_TEMPLATE = Template(
     }
 
     function renderTesterHand(deck) {
+      sortTesterHand();
+      testerHandSortEl.value = state.testHand.handSort || "";
       attachTesterDropZone(testerHandGridEl, { zone: "hand" });
       renderTesterGrid(
         testerHandGridEl,
@@ -4549,6 +4730,7 @@ HTML_TEMPLATE = Template(
       });
 
       renderTesterPiles(deck);
+      renderTesterDeckDock(deck);
       renderTesterMemory(deck);
       renderTesterSecurity(deck);
       renderTesterBreeding(deck);
@@ -5830,6 +6012,30 @@ HTML_TEMPLATE = Template(
       const deck = getSelectedDeck();
       if (!deck) return;
       drawTestCard(deck);
+    });
+
+    testerDeckStackEl.addEventListener("click", function() {
+      const deck = getSelectedDeck();
+      if (!deck) return;
+      drawTestCard(deck);
+    });
+
+    testerDeckStackEl.addEventListener("contextmenu", function(event) {
+      const deck = getSelectedDeck();
+      if (!deck || !ensureTestHand(deck)) return;
+      showTesterContextMenu(event, "Deck", [
+        { label: "Draw one", onClick: function() { drawTestCard(deck); } },
+        { label: "Reveal top", onClick: function() { revealTopDeck(deck); } },
+        { label: "Mill top", onClick: function() { trashTopDeck(deck); } },
+        { label: "Open deck", onClick: function() { openTesterDrawer(deck, "stack"); } }
+      ]);
+    });
+
+    testerHandSortEl.addEventListener("change", function() {
+      const deck = getSelectedDeck();
+      if (!deck || !ensureTestHand(deck)) return;
+      state.testHand.handSort = testerHandSortEl.value;
+      renderTester(deck);
     });
 
     testerRevealSecurityBtn.addEventListener("click", function() {
