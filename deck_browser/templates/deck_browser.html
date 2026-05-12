@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DCGO Deck Browser</title>
+  <style>
+$deck_browser_css
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section id="library-view" class="panel library-view">
+      <div class="library-header">
+        <div class="library-heading">
+          <p class="eyebrow">DCGO Utility</p>
+          <h1 class="title">Deck Library</h1>
+          <p class="subtitle">Browse the current shared deck folder. Open a deck to inspect and edit it on its own page.</p>
+        </div>
+        <div class="tiny" id="library-summary"></div>
+      </div>
+      <div class="library-toolbar">
+        <div class="library-toolbar-left">
+          <input id="library-search" class="input library-search" type="search" placeholder="Search decks or included cards">
+          <button id="new-deck-button" class="button primary" type="button" title="Create an empty deck file in the shared deck folder">New Deck</button>
+          <button id="update-card-database" class="button" type="button" title="Force-refresh card metadata from GitHub">Update Card DB</button>
+        </div>
+        <div class="library-toolbar-right tiny">Generated: <span id="library-generated-at-label"></span></div>
+      </div>
+      <div id="library-grid" class="library-grid"></div>
+      <div class="library-footer">
+        Built from <span id="library-deck-root-label"></span><br>
+        Metadata source: <span id="library-manifest-source-label"></span>
+      </div>
+    </section>
+
+    <section id="editor-view" class="app editor-view hidden">
+      <aside class="panel sidebar">
+        <div id="details-body" class="details-body"></div>
+      </aside>
+
+      <main class="panel main">
+        <section class="deck-hero">
+          <div class="hero-top">
+            <div>
+              <p class="eyebrow">Selected Deck</p>
+              <h2 class="hero-title" id="hero-title">No deck selected</h2>
+              <p class="hero-subtitle" id="hero-subtitle">Choose a deck from the list on the left.</p>
+              <div id="dirty-status" class="dirty-status hidden"></div>
+            </div>
+            <div class="hero-actions">
+              <button id="back-to-library" class="button" type="button">Back to Decks</button>
+              <button id="save-changes" class="button success" type="button">Save Changes</button>
+              <button id="export-deck-image" class="button" type="button">Export Image</button>
+              <button id="import-clipboard" class="button" type="button">Import Clipboard</button>
+              <button id="test-hand" class="button primary" type="button">Test Hand</button>
+              <button id="rename-deck" class="button" type="button">Rename</button>
+              <button id="duplicate-deck" class="button" type="button">Duplicate</button>
+              <button id="delete-deck" class="button danger" type="button">Delete</button>
+              <button id="copy-decklist" class="button primary" type="button">Copy Updated List</button>
+              <button id="copy-filename" class="button" type="button">Copy File Name</button>
+            </div>
+          </div>
+          <div id="stats-grid" class="stats-grid"></div>
+          <div id="hero-chips" class="meta-row"></div>
+          <div id="validation-panel" class="validation-panel"></div>
+          <div id="test-hand-panel" class="test-hand-panel hidden">
+            <div class="test-hand-header">
+              <div>
+                <h3>Test Hand</h3>
+                <div id="test-hand-status" class="tiny"></div>
+              </div>
+              <div class="test-hand-actions">
+                <button id="new-test-hand" class="button primary" type="button">New Hand</button>
+                <button id="mulligan-test-hand" class="button" type="button">Mulligan</button>
+                <button id="draw-test-card" class="button" type="button">Draw 1</button>
+                <button id="reset-test-hand" class="button" type="button">Hide</button>
+              </div>
+            </div>
+            <div id="test-hand-grid" class="test-hand-grid"></div>
+          </div>
+        </section>
+        <section class="toolbar">
+          <div class="toolbar-left">
+            <input id="card-search" class="input" type="search" placeholder="Filter cards in this deck" style="min-width: 240px; max-width: 320px;">
+          </div>
+          <div class="toolbar-right tiny" id="card-search-summary"></div>
+        </section>
+        <section class="cards-panel">
+          <div id="cards-grid" class="cards-grid"></div>
+        </section>
+      </main>
+
+      <aside class="panel catalog-panel">
+        <div class="details-header">
+          <p class="eyebrow">Card Search</p>
+          <div class="tiny" id="catalog-summary"></div>
+        </div>
+        <div class="catalog-controls">
+          <div class="filter-grid">
+            <div class="filter-row top">
+              <input id="filter-number" class="filter-input" type="search" placeholder="Set Number">
+              <input id="filter-name" class="filter-input" type="search" placeholder="Name">
+              <input id="filter-dp" class="filter-input" type="number" min="0" step="1000" placeholder="DP">
+            </div>
+
+            <div class="filter-row middle">
+              <select id="filter-type" class="filter-select">
+                <option value="">Type</option>
+                <option>Digimon</option>
+                <option>Digi-Egg</option>
+                <option>Option</option>
+                <option>Tamer</option>
+              </select>
+              <select id="filter-attribute" class="filter-select">
+                <option value="">Attr.</option>
+                <option>Data</option>
+                <option>Free</option>
+                <option>Unknown</option>
+                <option>Variable</option>
+                <option>Vaccine</option>
+                <option>Virus</option>
+                <option>Game</option>
+                <option>God</option>
+                <option>Life</option>
+                <option>Navi</option>
+                <option>Social</option>
+                <option>System</option>
+                <option>Tool</option>
+              </select>
+              <select id="filter-play-cost" class="filter-select">
+                <option value="">Cost</option>
+                <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option>
+                <option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+                <option>10</option><option>11</option><option>12</option><option>13</option><option>14</option>
+                <option>15</option><option>16</option><option>20</option>
+              </select>
+              <select id="filter-digivolution-cost" class="filter-select">
+                <option value="">Digiv. Cost</option>
+                <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option>
+                <option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+              </select>
+              <select id="filter-level" class="filter-select">
+                <option value="">Lvl</option>
+                <option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option>
+              </select>
+            </div>
+
+            <div class="filter-row lower">
+              <select id="filter-stage" class="filter-select">
+                <option value="">Stage</option>
+                <option>In-Training</option>
+                <option>Rookie</option>
+                <option>Champion</option>
+                <option>Ultimate</option>
+                <option>Mega</option>
+                <option>Armor Form</option>
+                <option>Hybrid</option>
+                <option>Appmon</option>
+                <option>Stnd./Appmon</option>
+                <option>Sup./Appmon</option>
+                <option>Ult./Appmon</option>
+                <option>God/Appmon</option>
+                <option>D-Reaper</option>
+                <option>Eater</option>
+              </select>
+              <input id="filter-trait" class="filter-input" type="search" placeholder="Trait">
+              <input id="filter-illustrator" class="filter-input" type="search" placeholder="Illustrator">
+            </div>
+
+            <input id="filter-effect" class="filter-input" type="search" placeholder="Effect Text">
+
+            <div class="filter-row bottom">
+              <select id="filter-color-1" class="filter-select filter-color-select" title="Color 1">
+                <option value="">🌈</option>
+                <option value="Red">🟥</option>
+                <option value="Blue">🟦</option>
+                <option value="Yellow">🟨</option>
+                <option value="Green">🟩</option>
+                <option value="Purple">🟪</option>
+                <option value="Black">⬛</option>
+                <option value="White">⬜</option>
+              </select>
+              <select id="filter-color-2" class="filter-select filter-color-select" title="Color 2">
+                <option value="">🌈</option>
+                <option value="Red">🟥</option>
+                <option value="Blue">🟦</option>
+                <option value="Yellow">🟨</option>
+                <option value="Green">🟩</option>
+                <option value="Purple">🟪</option>
+                <option value="Black">⬛</option>
+                <option value="White">⬜</option>
+              </select>
+              <select id="filter-color-3" class="filter-select filter-color-select" title="Color 3">
+                <option value="">🌈</option>
+                <option value="Red">🟥</option>
+                <option value="Blue">🟦</option>
+                <option value="Yellow">🟨</option>
+                <option value="Green">🟩</option>
+                <option value="Purple">🟪</option>
+                <option value="Black">⬛</option>
+                <option value="White">⬜</option>
+              </select>
+              <label class="filter-check"><input id="filter-ace" type="checkbox"> ACE</label>
+              <label class="filter-check"><input id="filter-alt-arts" type="checkbox" checked> Alt Arts</label>
+              <button id="filter-clear" class="button" type="button">Clear</button>
+            </div>
+          </div>
+        </div>
+        <div id="catalog-grid" class="catalog-results"></div>
+      </aside>
+    </section>
+
+    <section id="test-view" class="tester-view hidden">
+      <aside class="tester-details-rail">
+        <div class="tester-rail-actions">
+          <button id="tester-back-library" class="button" type="button" title="Back to deck library" aria-label="Back to deck library">←</button>
+          <button id="tester-edit-deck" class="button" type="button" title="Edit deck" aria-label="Edit deck">✎</button>
+        </div>
+        <div id="tester-details-body" class="details-body tester-details-body"></div>
+      </aside>
+
+      <main class="tester-board">
+        <div class="tester-board-tools">
+          <section class="tester-deck-widget tester-piles">
+            <div class="tester-deck-title-row">
+              <div>
+                <p class="eyebrow">Hand Test</p>
+                <h2 id="tester-title" class="tester-title">No deck selected</h2>
+                <p id="tester-subtitle" class="tester-subtitle"></p>
+              </div>
+              <div id="tester-session-meta" class="tester-zone-meta"></div>
+            </div>
+            <div id="tester-stats-grid" class="tester-stats-grid"></div>
+            <div id="tester-pile-list" class="tester-pile-list"></div>
+            <div class="tester-mini-actions">
+              <button id="tester-hatch-egg" class="button" type="button" title="Hatch top egg" aria-label="Hatch top egg">Egg</button>
+              <button id="tester-reveal-deck" class="button" type="button" title="Reveal top deck card" aria-label="Reveal top deck card">Top</button>
+              <button id="tester-trash-deck" class="button danger" type="button" title="Trash top deck card" aria-label="Trash top deck card">Mill</button>
+              <button id="tester-open-trash" class="button" type="button" title="Open trash" aria-label="Open trash">Trash</button>
+            </div>
+          </section>
+
+          <div class="tester-actions">
+            <button id="tester-new-shuffle" class="button primary" type="button" title="Reset with a new random shuffle" aria-label="Reset with a new random shuffle">RESET</button>
+            <button id="tester-mulligan" class="button" type="button" title="Mulligan / new hand" aria-label="Mulligan or new hand">MULL</button>
+            <button id="tester-draw" class="button" type="button" title="Draw one card" aria-label="Draw one card">+1</button>
+            <button id="tester-reveal-security" class="button success" type="button" title="Reveal one security" aria-label="Reveal one security">SEC</button>
+            <button id="tester-reveal-all-security" class="button" type="button" title="Reveal all security" aria-label="Reveal all security">ALL</button>
+            <button id="tester-toggle-security" class="button" type="button" title="Show or hide security" aria-label="Show or hide security">👁</button>
+          </div>
+        </div>
+
+        <section class="tester-reveal-panel">
+          <div class="tester-zone-header compact">
+            <h3 class="tester-zone-title">Reveal</h3>
+            <div id="tester-reveal-meta" class="tester-zone-meta"></div>
+          </div>
+          <div id="tester-revealed-security-grid" class="tester-security-cards"></div>
+        </section>
+
+        <section id="tester-security-panel" class="tester-security-panel hidden">
+          <div class="tester-zone-header compact">
+            <h3 class="tester-zone-title">Security</h3>
+            <div id="tester-security-meta" class="tester-zone-meta"></div>
+          </div>
+          <div id="tester-security-grid" class="tester-security-cards"></div>
+        </section>
+
+        <div id="tester-memory-track" class="tester-memory-track"></div>
+
+        <section class="tester-field-area">
+          <section id="tester-breeding-zone" class="tester-breeding-slot empty">
+            <div class="tester-field-label">
+              <span>Breeding</span>
+              <span id="tester-breeding-meta">0</span>
+            </div>
+            <div id="tester-breeding-stack" class="tester-stack"></div>
+          </section>
+          <section class="tester-battle-wrap">
+            <div class="tester-zone-header compact">
+              <h3 class="tester-zone-title">Battle Area</h3>
+              <div id="tester-board-meta" class="tester-zone-meta"></div>
+            </div>
+            <div id="tester-board-grid" class="tester-fields"></div>
+          </section>
+          <section class="tester-trash-drop" title="Open trash">
+            <button id="tester-trash-pile-button" class="tester-trash-button" type="button" aria-label="Open trash">🗑</button>
+            <span id="tester-trash-count">0</span>
+            <div class="tester-deck-dock">
+              <button id="tester-deck-stack" class="tester-deck-stack-button" type="button" title="Draw one card. Drop here to put a card on top of the deck." aria-label="Deck: draw one card"></button>
+              <div id="tester-deck-count" class="tester-deck-count">0</div>
+              <div id="tester-deck-bottom-drop" class="tester-deck-bottom-drop" title="Drop here to put a card on the bottom of the deck">▽</div>
+            </div>
+          </section>
+        </section>
+
+        <section class="tester-bottom-row">
+          <div class="tester-security-dock">
+            <button id="tester-security-button" class="tester-zone-icon-button" type="button" title="Open security" aria-label="Open security">SEC</button>
+            <div id="tester-security-count" class="tester-zone-meta"></div>
+          </div>
+          <div class="tester-hand-row">
+            <div class="tester-zone-header compact">
+              <h3 class="tester-zone-title">Hand</h3>
+              <div class="tester-hand-tools">
+                <select id="tester-hand-sort" class="tester-hand-sort" title="Sort hand" aria-label="Sort hand">
+                  <option value="">Manual</option>
+                  <option value="type">Type</option>
+                  <option value="level">Level</option>
+                  <option value="playCost">Play Cost</option>
+                  <option value="digivolveCost">Digi Cost</option>
+                  <option value="color">Color</option>
+                  <option value="number">Set #</option>
+                  <option value="name">Name</option>
+                </select>
+                <div id="tester-hand-meta" class="tester-zone-meta"></div>
+              </div>
+            </div>
+            <div id="tester-hand-grid" class="tester-hand-fan"></div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="tester-drawer">
+        <div class="tester-zone-header">
+          <h3 id="tester-drawer-title" class="tester-zone-title">Trash</h3>
+          <div id="tester-drawer-meta" class="tester-zone-meta"></div>
+        </div>
+        <div id="tester-drawer-grid" class="tester-card-grid"></div>
+        <div id="tester-log" class="tester-log"></div>
+      </aside>
+    </section>
+  </div>
+  <div id="image-viewer" class="image-viewer hidden" role="dialog" aria-modal="true" aria-label="Card image preview">
+    <button id="image-viewer-close" class="image-viewer-close" type="button" aria-label="Close image preview">×</button>
+    <div class="image-viewer-frame">
+      <img id="image-viewer-img" alt="">
+      <div id="image-viewer-caption" class="image-viewer-caption"></div>
+    </div>
+  </div>
+  <div id="tester-context-menu" class="tester-context-menu hidden" role="menu"></div>
+  <div id="tester-stack-viewer" class="tester-stack-viewer hidden" role="dialog" aria-modal="true" aria-label="Stack viewer">
+    <section class="tester-stack-viewer-panel">
+      <div class="tester-stack-viewer-header">
+        <h2 id="tester-stack-viewer-title" class="tester-stack-viewer-title">Stack</h2>
+        <button id="tester-stack-viewer-close" class="button" type="button" aria-label="Close stack viewer">Close</button>
+      </div>
+      <div id="tester-stack-viewer-grid" class="tester-stack-viewer-grid"></div>
+    </section>
+  </div>
+
+  <script>
+$deck_browser_js
+  </script>
+</body>
+</html>
