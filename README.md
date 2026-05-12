@@ -46,6 +46,7 @@ Keep the terminal/command window open while using the editor.
 - Browse decks visually.
 - Create, rename, duplicate, and delete decks.
 - Edit deck lists with card search and filters.
+- Saving normalizes deck text to the DCGO layout and inserts a missing `// DeckList` marker when possible.
 - Import deck lists from clipboard.
 - Export deck images.
 - Test opening hands.
