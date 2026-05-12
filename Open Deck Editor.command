@@ -5,7 +5,11 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 PYTHON_BIN=${PYTHON_BIN:-python3}
 OUTPUT_HTML="$SCRIPT_DIR/deck_browser/output/current_decks.html"
 BUILDER_SCRIPT="$SCRIPT_DIR/deck_browser/build_deck_browser.py"
+DATA_SCRIPT="$SCRIPT_DIR/deck_browser/deck_data.py"
 SERVER_SCRIPT="$SCRIPT_DIR/deck_browser/deck_browser_server.py"
+HTML_TEMPLATE="$SCRIPT_DIR/deck_browser/templates/deck_browser.html"
+CSS_TEMPLATE_DIR="$SCRIPT_DIR/deck_browser/templates/css"
+JS_TEMPLATE_DIR="$SCRIPT_DIR/deck_browser/templates/js"
 DEFAULT_TEST_SUPPORT_DIR="$HOME/Library/Application Support/DCGO-AutoUpdate-Test"
 
 find_deck_root() {
@@ -50,15 +54,19 @@ if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
   exit 1
 fi
 
-if [ ! -f "$BUILDER_SCRIPT" ]; then
-  printf 'Missing deck browser builder: %s\n' "$BUILDER_SCRIPT" >&2
-  exit 1
-fi
+for REQUIRED_FILE in "$BUILDER_SCRIPT" "$DATA_SCRIPT" "$SERVER_SCRIPT" "$HTML_TEMPLATE"; do
+  if [ ! -f "$REQUIRED_FILE" ]; then
+    printf 'Missing deck editor file: %s\n' "$REQUIRED_FILE" >&2
+    exit 1
+  fi
+done
 
-if [ ! -f "$SERVER_SCRIPT" ]; then
-  printf 'Missing deck browser server: %s\n' "$SERVER_SCRIPT" >&2
-  exit 1
-fi
+for REQUIRED_DIR in "$CSS_TEMPLATE_DIR" "$JS_TEMPLATE_DIR"; do
+  if [ ! -d "$REQUIRED_DIR" ]; then
+    printf 'Missing deck editor template folder: %s\n' "$REQUIRED_DIR" >&2
+    exit 1
+  fi
+done
 
 mkdir -p "$(dirname "$OUTPUT_HTML")"
 mkdir -p "$APP_SUPPORT_DIR"
