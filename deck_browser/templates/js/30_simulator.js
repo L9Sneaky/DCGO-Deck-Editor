@@ -1191,6 +1191,24 @@
       attachTesterDropZone(testerBreedingZoneEl, { zone: "breeding" });
     }
 
+    function updateTesterHandFanLayout() {
+      const cards = Array.from(testerHandGridEl.querySelectorAll(".tester-card"));
+      const count = cards.length;
+      if (count <= 1) {
+        testerHandGridEl.style.setProperty("--tester-hand-overlap", "0px");
+        return;
+      }
+      const cardWidth = cards[0].getBoundingClientRect().width || 74;
+      const availableWidth = testerHandGridEl.clientWidth || 0;
+      const normalGap = 6;
+      const naturalWidth = (cardWidth * count) + (normalGap * (count - 1));
+      const overflowOverlap = Math.max(0, (naturalWidth - availableWidth) / (count - 1));
+      const countPressure = count >= 8 ? (count - 7) * 2 : 0;
+      const maxOverlap = cardWidth * 0.62;
+      const overlap = Math.min(maxOverlap, Math.max(overflowOverlap, countPressure));
+      testerHandGridEl.style.setProperty("--tester-hand-overlap", overlap.toFixed(1) + "px");
+    }
+
     function renderTesterHand(deck) {
       sortTesterHand();
       testerHandSortEl.value = state.testHand.handSort || "";
@@ -1208,6 +1226,7 @@
         },
         function(instance, index) { return { zone: "hand", index: index }; }
       );
+      window.requestAnimationFrame(updateTesterHandFanLayout);
     }
 
     function drawerTitle(drawerName) {

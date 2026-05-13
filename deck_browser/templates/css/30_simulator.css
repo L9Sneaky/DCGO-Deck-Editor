@@ -752,7 +752,7 @@
     }
 
     .tester-hand-fan .tester-card + .tester-card {
-      margin-left: clamp(-32px, -2.2vw, -18px);
+      margin-left: calc(-1 * var(--tester-hand-overlap, 0px));
     }
 
     .tester-hand-fan .tester-card:hover {
