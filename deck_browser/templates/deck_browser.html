@@ -235,17 +235,14 @@ $deck_browser_css
             <div id="tester-stats-grid" class="tester-stats-grid"></div>
             <div id="tester-deck-preview" class="tester-deck-preview"></div>
             <div id="tester-pile-list" class="tester-pile-list"></div>
-            <div class="tester-mini-actions">
+            <div class="tester-mini-actions hidden-actions">
               <button id="tester-hatch-egg" class="button" type="button" title="Hatch top egg" aria-label="Hatch top egg">Egg</button>
-              <button id="tester-reveal-deck" class="button" type="button" title="Reveal top deck card" aria-label="Reveal top deck card">Top</button>
-              <button id="tester-trash-deck" class="button danger" type="button" title="Trash top deck card" aria-label="Trash top deck card">Mill</button>
-              <button id="tester-open-trash" class="button" type="button" title="Open trash" aria-label="Open trash">Trash</button>
             </div>
           </section>
 
           <div class="tester-actions">
             <button id="tester-new-shuffle" class="button primary" type="button" title="Reset with a new random shuffle" aria-label="Reset with a new random shuffle">RESET</button>
-            <button id="tester-mulligan" class="button" type="button" title="Mulligan / new hand" aria-label="Mulligan or new hand">MULL</button>
+            <button id="tester-mulligan" class="button hidden-actions" type="button" title="Mulligan / new hand" aria-label="Mulligan or new hand">MULL</button>
             <button id="tester-unsuspend" class="button" type="button" title="Unsuspend all cards" aria-label="Unsuspend all cards">↻</button>
             <button id="tester-draw" class="button" type="button" title="Draw one card" aria-label="Draw one card">+1</button>
             <button id="tester-reveal-security" class="button success" type="button" title="Reveal one security" aria-label="Reveal one security">SEC</button>
@@ -297,10 +294,18 @@ $deck_browser_css
           <section class="tester-trash-drop" title="Open trash">
             <button id="tester-trash-pile-button" class="tester-trash-button" type="button" aria-label="Open trash">🗑</button>
             <span id="tester-trash-count">0</span>
-            <div class="tester-deck-dock">
-              <button id="tester-deck-stack" class="tester-deck-stack-button" type="button" title="Draw one card. Drop here to put a card on top of the deck." aria-label="Deck: draw one card"></button>
-              <div id="tester-deck-count" class="tester-deck-count">0</div>
-              <div id="tester-deck-bottom-drop" class="tester-deck-bottom-drop" title="Drop here to put a card on the bottom of the deck">▽</div>
+            <div class="tester-deck-side">
+              <div class="tester-deck-dock">
+                <button id="tester-deck-stack" class="tester-deck-stack-button" type="button" title="Draw one card. Drop here to put a card on top of the deck." aria-label="Deck: draw one card"></button>
+                <div id="tester-deck-count" class="tester-deck-count">0</div>
+                <div id="tester-deck-bottom-drop" class="tester-deck-bottom-drop" title="Drop here to put a card on the bottom of the deck">▽</div>
+              </div>
+              <div class="tester-deck-quick-actions">
+                <button id="tester-reveal-deck" class="button" type="button" title="Reveal top deck card" aria-label="Reveal top deck card">Reveal</button>
+                <button id="tester-trash-deck" class="button danger" type="button" title="Trash top deck card" aria-label="Trash top deck card">Mill</button>
+                <button id="tester-secure-deck" class="button success" type="button" title="Put top deck card into security face-down" aria-label="Put top deck card into security face-down">+SEC</button>
+                <button id="tester-open-trash" class="button" type="button" title="Open trash" aria-label="Open trash">Trash</button>
+              </div>
             </div>
           </section>
         </section>

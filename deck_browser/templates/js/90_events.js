@@ -376,6 +376,12 @@
       trashTopDeck(deck);
     });
 
+    testerSecureDeckBtn.addEventListener("click", function() {
+      const deck = getSelectedDeck();
+      if (!deck) return;
+      secureTopDeck(deck);
+    });
+
     testerOpenTrashBtn.addEventListener("click", function() {
       const deck = getSelectedDeck();
       if (!deck) return;

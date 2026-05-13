@@ -111,6 +111,7 @@
     const testerHatchEggBtn = document.getElementById("tester-hatch-egg");
     const testerRevealDeckBtn = document.getElementById("tester-reveal-deck");
     const testerTrashDeckBtn = document.getElementById("tester-trash-deck");
+    const testerSecureDeckBtn = document.getElementById("tester-secure-deck");
     const testerOpenTrashBtn = document.getElementById("tester-open-trash");
     const testerTrashPileBtn = document.getElementById("tester-trash-pile-button");
     const testerTrashCountEl = document.getElementById("tester-trash-count");

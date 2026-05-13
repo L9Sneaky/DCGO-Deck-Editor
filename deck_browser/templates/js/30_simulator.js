@@ -431,6 +431,15 @@
       renderTester(deck);
     }
 
+    function secureTopDeck(deck) {
+      if (!ensureTestHand(deck)) return;
+      const instance = state.testHand.stack.shift();
+      if (!instance) return;
+      state.testHand.security.unshift(setTesterFace(instance, false));
+      logTesterAction("Added a deck card to security.");
+      renderTester(deck);
+    }
+
     function hatchEgg(deck) {
       if (!ensureTestHand(deck)) return;
       const instance = state.testHand.eggDeck.shift();
@@ -1382,6 +1391,7 @@
       testerHatchEggBtn.disabled = !state.testHand.eggDeck.length;
       testerRevealDeckBtn.disabled = !state.testHand.stack.length;
       testerTrashDeckBtn.disabled = !state.testHand.stack.length;
+      testerSecureDeckBtn.disabled = !state.testHand.stack.length;
       testerTrashCountEl.textContent = state.testHand.trash.length;
       attachTesterDropZone(testerTrashPileBtn, { zone: "trash" });
       testerHandMetaEl.textContent = state.testHand.hand.length + " cards";
