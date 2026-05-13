@@ -56,13 +56,20 @@
       line-height: 1.32;
     }
 
+    .tester-details-body .details-source-label {
+      margin: 6px 0 2px;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+
     .tester-board {
       position: relative;
       min-width: 0;
       min-height: 0;
       overflow: hidden;
       display: grid;
-      grid-template-rows: clamp(76px, 11vh, 112px) 36px minmax(270px, 1fr) clamp(116px, 18vh, 156px);
+      grid-template-rows: clamp(76px, 11vh, 112px) 36px minmax(210px, 0.78fr) clamp(116px, 18vh, 156px);
       grid-template-areas:
         "tools"
         "memory"
@@ -411,7 +418,7 @@
     .tester-fields {
       display: grid;
       grid-template-columns: repeat(8, minmax(0, 1fr));
-      grid-template-rows: minmax(110px, 1fr) minmax(58px, 0.48fr);
+      grid-template-rows: minmax(82px, 0.72fr) minmax(48px, 0.36fr);
       gap: 6px;
       min-height: 0;
       overflow: hidden;

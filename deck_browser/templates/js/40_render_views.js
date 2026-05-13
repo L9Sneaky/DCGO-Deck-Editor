@@ -475,6 +475,58 @@
 
     function renderTesterCardDetails(deck) {
       renderDetailsInto(testerDetailsBodyEl, deck);
+      appendTesterStackInheritedDetails();
+    }
+
+    function appendTesterStackInheritedDetails() {
+      const context = state.selectedTesterStack;
+      if (!context || (context.sourceZone !== "field" && context.sourceZone !== "breeding")) return;
+      if (typeof getTesterSourceArray !== "function") return;
+      const source = getTesterSourceArray(context.sourceZone === "field"
+        ? { zone: "field", fieldIndex: context.fieldIndex, index: 0 }
+        : { zone: "breeding", index: 0 });
+      if (!source || context.index <= 0) return;
+
+      const sourceCards = source.slice(0, context.index).map(function(instance) {
+        return getTesterCard(instance);
+      }).filter(Boolean);
+      const inheritedSections = [];
+      sourceCards.forEach(function(card) {
+        (card.effectSections || []).forEach(function(section) {
+          if (!section || !section.text) return;
+          if (section.label !== "Inherited" && section.label !== "Security") return;
+          inheritedSections.push({
+            card: card,
+            text: section.text
+          });
+        });
+      });
+      if (!inheritedSections.length) return;
+
+      const block = document.createElement("section");
+      block.className = "details-effect-card tester-stack-inherited-card";
+      const header = document.createElement("div");
+      header.className = "details-effect-header";
+      header.textContent = "DIGIVOLUTION CARDS ↙";
+      block.appendChild(header);
+
+      inheritedSections.forEach(function(item) {
+        const sourceLabel = document.createElement("div");
+        sourceLabel.className = "details-source-label";
+        sourceLabel.textContent = item.card.name + " · " + item.card.code;
+        block.appendChild(sourceLabel);
+        const text = document.createElement("div");
+        text.className = "details-effect-text";
+        appendHighlightedText(text, item.text);
+        block.appendChild(text);
+      });
+
+      const footer = testerDetailsBodyEl.querySelector(".details-footer");
+      if (footer) {
+        testerDetailsBodyEl.insertBefore(block, footer);
+      } else {
+        testerDetailsBodyEl.appendChild(block);
+      }
     }
 
     function createChip(text, extraClass) {

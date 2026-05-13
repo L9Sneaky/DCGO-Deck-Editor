@@ -25,6 +25,7 @@
       state.testHand.stackViewer = null;
       state.testHand.log = [];
       state.testHand.openDrawer = "trash";
+      state.selectedTesterStack = null;
     }
 
     function resetTestHandForDeck(deck) {
@@ -392,9 +393,10 @@
       state.testHand.log = state.testHand.log.slice(0, 80);
     }
 
-    function selectTesterCard(card) {
+    function selectTesterCard(card, stackContext) {
       if (!card) return;
       state.selectedCardCode = card.code;
+      state.selectedTesterStack = stackContext || null;
       if (state.view === "tester") {
         const currentDeck = getSelectedDeck();
         if (currentDeck) renderTesterCardDetails(currentDeck);
@@ -631,6 +633,14 @@
       renderTester(deck);
     }
 
+    function toggleTesterBreedingSuspend(deck) {
+      if (!ensureTestHand(deck) || !state.testHand.breeding.length) return;
+      const top = state.testHand.breeding[state.testHand.breeding.length - 1];
+      top.suspended = !top.suspended;
+      logTesterAction((top.suspended ? "Suspended " : "Unsuspended ") + getTesterCard(top).name + ".");
+      renderTester(deck);
+    }
+
     function unsuspendAllTesterCards(deck) {
       if (!ensureTestHand(deck)) return;
       state.testHand.fields.forEach(function(stack) {
@@ -791,7 +801,6 @@
         } else {
           thumb.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
         }
-        attachCardImageViewerTrigger(thumb, card);
       } else {
         thumb.textContent = opts.backLabel || "Deck";
       }
@@ -1100,9 +1109,14 @@
         attachTesterDrag(cardEl, sourceZone === "field"
           ? { zone: "field", fieldIndex: fieldIndex, index: index }
           : { zone: "breeding", index: index });
-        attachCardImageViewerTrigger(cardEl, card);
         cardEl.addEventListener("mouseenter", function() {
-          if (instance.faceUp !== false) selectTesterCard(card);
+          if (instance.faceUp !== false) {
+            selectTesterCard(card, {
+              sourceZone: sourceZone,
+              fieldIndex: fieldIndex,
+              index: index
+            });
+          }
         });
         cardEl.addEventListener("contextmenu", function(event) {
           const ref = sourceZone === "field"
@@ -1116,8 +1130,21 @@
         });
         cardEl.addEventListener("click", function(event) {
           event.stopPropagation();
-          selectTesterCard(card);
-          openTesterStackViewer(deck, sourceZone === "field" ? "field:" + fieldIndex : "breeding");
+          selectTesterCard(card, {
+            sourceZone: sourceZone,
+            fieldIndex: fieldIndex,
+            index: index
+          });
+        });
+        cardEl.addEventListener("dblclick", function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (index !== stack.length - 1) return;
+          if (sourceZone === "field") {
+            toggleTesterSuspend(deck, fieldIndex);
+          } else {
+            toggleTesterBreedingSuspend(deck);
+          }
         });
         if (index === stack.length - 1) {
           const stackHandle = document.createElement("div");
