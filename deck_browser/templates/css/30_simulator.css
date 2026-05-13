@@ -383,6 +383,15 @@
       align-items: stretch;
     }
 
+    .tester-breeding-column {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 6px;
+      align-items: stretch;
+    }
+
     .tester-battle-wrap {
       min-width: 0;
       min-height: 0;
@@ -442,8 +451,15 @@
     }
 
     .tester-breeding-slot {
-      align-self: end;
-      height: min(230px, 72%);
+      align-self: stretch;
+      height: auto;
+    }
+
+    .tester-egg-dock {
+      display: grid;
+      justify-items: center;
+      align-content: end;
+      gap: 0;
     }
 
     .tester-trash-drop {
@@ -538,6 +554,21 @@
       place-items: center;
       overflow: hidden;
       box-shadow: 0 10px 24px rgba(0,0,0,0.25), inset 0 0 18px rgba(95,212,255,0.18);
+    }
+
+    .tester-egg-stack-button {
+      margin-bottom: 0;
+      background:
+        radial-gradient(circle at center, rgba(95, 212, 255, 0.22), transparent 52%),
+        linear-gradient(145deg, rgba(246, 252, 255, 0.94), rgba(188, 221, 246, 0.96));
+      border-color: rgba(237,247,255,0.75);
+    }
+
+    .tester-egg-stack-button::before {
+      width: 34px;
+      height: 44px;
+      border-color: rgba(95, 212, 255, 0.42);
+      background: radial-gradient(circle, rgba(95,212,255,0.32), transparent 62%);
     }
 
     .tester-deck-stack-button::before {

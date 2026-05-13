@@ -358,6 +358,12 @@
       hatchEgg(deck);
     });
 
+    testerEggStackEl.addEventListener("click", function() {
+      const deck = getSelectedDeck();
+      if (!deck) return;
+      hatchEgg(deck);
+    });
+
     testerRevealDeckBtn.addEventListener("click", function() {
       const deck = getSelectedDeck();
       if (!deck) return;

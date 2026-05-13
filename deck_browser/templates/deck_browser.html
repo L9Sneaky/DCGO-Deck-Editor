@@ -273,12 +273,19 @@ $deck_browser_css
         <div id="tester-memory-track" class="tester-memory-track"></div>
 
         <section class="tester-field-area">
-          <section id="tester-breeding-zone" class="tester-breeding-slot empty">
-            <div class="tester-field-label">
-              <span>Breeding</span>
-              <span id="tester-breeding-meta">0</span>
-            </div>
-            <div id="tester-breeding-stack" class="tester-stack"></div>
+          <section class="tester-breeding-column">
+            <section id="tester-breeding-zone" class="tester-breeding-slot empty">
+              <div class="tester-field-label">
+                <span>Breeding</span>
+                <span id="tester-breeding-meta">0</span>
+              </div>
+              <div id="tester-breeding-stack" class="tester-stack"></div>
+            </section>
+            <section class="tester-egg-dock" title="Egg deck">
+              <button id="tester-egg-stack" class="tester-deck-stack-button tester-egg-stack-button" type="button" title="Hatch top egg. Drop here to put a card on top of the egg deck." aria-label="Egg deck: hatch top egg"></button>
+              <div id="tester-egg-count" class="tester-deck-count">0</div>
+              <div id="tester-egg-bottom-drop" class="tester-deck-bottom-drop" title="Drop here to put a card on the bottom of the egg deck">▽</div>
+            </section>
           </section>
           <section class="tester-battle-wrap">
             <div class="tester-zone-header compact">

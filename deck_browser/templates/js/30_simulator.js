@@ -870,6 +870,14 @@
         : "Deck is empty. Drop here to put a card on top of the deck.";
       attachTesterDropZone(testerDeckStackEl, { zone: "stack", position: "top" });
       attachTesterDropZone(testerDeckBottomDropEl, { zone: "stack", position: "bottom" });
+
+      testerEggCountEl.textContent = String(state.testHand.eggDeck.length);
+      testerEggStackEl.disabled = !state.testHand.eggDeck.length;
+      testerEggStackEl.title = state.testHand.eggDeck.length
+        ? "Hatch top egg. Drop here to put a card on top of the egg deck."
+        : "Egg deck is empty. Drop here to put a card on top of the egg deck.";
+      attachTesterDropZone(testerEggStackEl, { zone: "eggDeck", position: "top" });
+      attachTesterDropZone(testerEggBottomDropEl, { zone: "eggDeck", position: "bottom" });
     }
 
     function renderTesterPiles(deck) {

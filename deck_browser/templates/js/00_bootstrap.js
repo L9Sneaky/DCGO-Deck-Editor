@@ -78,6 +78,9 @@
     const testerDeckStackEl = document.getElementById("tester-deck-stack");
     const testerDeckCountEl = document.getElementById("tester-deck-count");
     const testerDeckBottomDropEl = document.getElementById("tester-deck-bottom-drop");
+    const testerEggStackEl = document.getElementById("tester-egg-stack");
+    const testerEggCountEl = document.getElementById("tester-egg-count");
+    const testerEggBottomDropEl = document.getElementById("tester-egg-bottom-drop");
     const testerMemoryTrackEl = document.getElementById("tester-memory-track");
     const testerRevealPanelEl = document.querySelector(".tester-reveal-panel");
     const testerSecurityPanelEl = document.getElementById("tester-security-panel");
