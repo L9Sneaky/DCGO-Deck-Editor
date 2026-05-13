@@ -91,28 +91,6 @@
 
         body.appendChild(createColorRatioBar(getColorProfile(deck.cards)));
 
-        const actions = document.createElement("div");
-        actions.className = "library-deck-actions";
-        const editButton = document.createElement("button");
-        editButton.type = "button";
-        editButton.className = "button";
-        editButton.textContent = "Edit";
-        editButton.addEventListener("click", function(event) {
-          event.stopPropagation();
-          openDeckEditor(deck);
-        });
-        const testButton = document.createElement("button");
-        testButton.type = "button";
-        testButton.className = "button primary";
-        testButton.textContent = "Hand Test";
-        testButton.addEventListener("click", function(event) {
-          event.stopPropagation();
-          openDeckTester(deck);
-        });
-        actions.appendChild(editButton);
-        actions.appendChild(testButton);
-        body.appendChild(actions);
-
         item.appendChild(cover);
         item.appendChild(body);
         libraryGridEl.appendChild(item);
