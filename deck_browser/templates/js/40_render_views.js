@@ -487,7 +487,7 @@
         : { zone: "breeding", index: 0 });
       if (!source || context.index <= 0) return;
 
-      const sourceCards = source.slice(0, context.index).map(function(instance) {
+      const sourceCards = source.slice(0, context.index).reverse().map(function(instance) {
         return getTesterCard(instance);
       }).filter(Boolean);
       const inheritedSections = [];

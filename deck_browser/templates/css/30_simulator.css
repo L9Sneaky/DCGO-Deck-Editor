@@ -69,13 +69,13 @@
       min-height: 0;
       overflow: hidden;
       display: grid;
-      grid-template-rows: clamp(76px, 11vh, 112px) 36px minmax(180px, 0.64fr) clamp(116px, 18vh, 156px);
+      grid-template-rows: clamp(72px, 10vh, 104px) 32px minmax(170px, 0.58fr) clamp(116px, 18vh, 156px);
       grid-template-areas:
         "tools"
         "memory"
         "field"
         "bottom";
-      gap: 8px;
+      gap: 6px;
       padding: 12px 8px 10px;
     }
 
@@ -358,13 +358,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       min-height: 0;
     }
 
     .tester-memory-track span {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       display: inline-grid;
       place-items: center;
       border-radius: 999px;
@@ -372,7 +372,7 @@
       background: rgba(4, 16, 25, 0.72);
       border: 1px solid rgba(95, 212, 255, 0.22);
       font-family: var(--font-display);
-      font-size: 17px;
+      font-size: 14px;
       box-shadow: 0 0 12px rgba(95,212,255,0.20);
       cursor: pointer;
       transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
@@ -394,8 +394,8 @@
       grid-area: field;
       min-height: 0;
       display: grid;
-      grid-template-columns: 78px minmax(0, 1fr) 70px;
-      gap: 8px;
+      grid-template-columns: 66px minmax(0, 1fr) 56px;
+      gap: 5px;
       align-items: stretch;
     }
 
@@ -403,8 +403,8 @@
       min-width: 0;
       min-height: 0;
       display: grid;
-      grid-template-rows: minmax(0, 0.58fr) auto;
-      gap: 6px;
+      grid-template-rows: minmax(0, 0.5fr) auto;
+      gap: 4px;
       align-items: stretch;
     }
 
@@ -418,8 +418,8 @@
     .tester-fields {
       display: grid;
       grid-template-columns: repeat(8, minmax(0, 1fr));
-      grid-template-rows: minmax(64px, 0.46fr) minmax(74px, 0.56fr);
-      gap: 6px;
+      grid-template-rows: minmax(58px, 0.4fr) minmax(74px, 0.56fr);
+      gap: 4px;
       min-height: 0;
       overflow: hidden;
       padding: 0;
@@ -435,7 +435,7 @@
       background: rgba(7, 25, 45, 0.34);
       overflow: hidden;
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr);
       box-shadow: inset 0 0 18px rgba(255,255,255,0.045);
     }
 
@@ -455,20 +455,12 @@
     }
 
     .tester-field-label {
-      padding: 3px 5px;
-      color: rgba(237,247,255,0.52);
-      font-size: 7px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      display: flex;
-      justify-content: space-between;
-      gap: 6px;
-      background: rgba(0,0,0,0.14);
+      display: none;
     }
 
     .tester-breeding-slot {
       align-self: stretch;
-      height: min(150px, 100%);
+      height: min(122px, 100%);
     }
 
     .tester-egg-dock {
@@ -481,7 +473,7 @@
     .tester-trash-drop {
       align-self: center;
       justify-self: stretch;
-      min-height: 96px;
+      min-height: 76px;
       display: grid;
       place-items: center;
       gap: 4px;
@@ -513,13 +505,13 @@
     }
 
     .tester-trash-button {
-      width: 58px;
-      height: 74px;
+      width: 46px;
+      height: 56px;
       border: 0;
       border-radius: 3px;
       background: rgba(0,0,0,0.32);
       color: rgba(237,247,255,0.72);
-      font-size: 28px;
+      font-size: 22px;
       cursor: pointer;
     }
 
@@ -533,8 +525,8 @@
       grid-area: bottom;
       min-height: 0;
       display: grid;
-      grid-template-columns: 82px minmax(0, 1fr) auto;
-      gap: 10px;
+      grid-template-columns: 66px minmax(0, 1fr) auto;
+      gap: 8px;
       align-items: stretch;
     }
 
@@ -560,8 +552,8 @@
     }
 
     .tester-zone-icon-button {
-      width: 58px;
-      height: 78px;
+      width: 50px;
+      height: 66px;
       border: 1px solid rgba(95, 212, 255, 0.22);
       border-radius: 10px;
       background:
@@ -579,8 +571,8 @@
     }
 
     .tester-deck-stack-button {
-      width: 58px;
-      height: 78px;
+      width: 54px;
+      height: 72px;
       margin-bottom: 4px;
       position: relative;
       border: 1px solid rgba(95, 212, 255, 0.24);
@@ -650,7 +642,7 @@
     }
 
     .tester-deck-bottom-drop {
-      width: 58px;
+      width: 54px;
       min-height: 17px;
       border: 1px dashed rgba(95, 212, 255, 0.24);
       border-radius: 0 0 4px 4px;
