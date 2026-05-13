@@ -62,7 +62,7 @@
       min-height: 0;
       overflow: hidden;
       display: grid;
-      grid-template-rows: clamp(104px, 16vh, 150px) 40px minmax(270px, 1fr) clamp(112px, 17vh, 150px);
+      grid-template-rows: clamp(76px, 11vh, 112px) 36px minmax(270px, 1fr) clamp(116px, 18vh, 156px);
       grid-template-areas:
         "tools"
         "memory"
@@ -96,13 +96,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: clamp(12px, 3vw, 36px);
+      gap: clamp(10px, 2.4vw, 30px);
       min-height: 0;
     }
 
     .tester-deck-widget {
-      width: min(360px, 38vw);
-      padding: 8px;
+      width: min(300px, 32vw);
+      padding: 6px;
       border-radius: 3px;
       border: 1px solid rgba(255,255,255,0.16);
       background: rgba(0, 0, 0, 0.24);
@@ -110,29 +110,28 @@
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       grid-template-areas:
-        "title title"
-        "preview actions"
-        "piles actions";
-      gap: 6px;
+        "title actions"
+        "preview actions";
+      gap: 5px;
     }
 
     .tester-deck-title-row {
       grid-area: title;
       display: flex;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
       align-items: start;
     }
 
     .tester-deck-title-row .eyebrow {
-      margin-bottom: 2px;
-      font-size: 9px;
+      margin-bottom: 1px;
+      font-size: 8px;
     }
 
     .tester-title {
       margin: 0;
       font-family: var(--font-display);
-      font-size: 19px;
+      font-size: 17px;
       line-height: 0.98;
       letter-spacing: 0.02em;
     }
@@ -142,7 +141,7 @@
       color: var(--muted);
       font-size: 10px;
       line-height: 1.2;
-      max-width: 210px;
+      max-width: 180px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -157,12 +156,12 @@
     }
 
     .tester-actions .button {
-      min-width: 70px;
-      min-height: 54px;
-      padding: 0 14px;
+      min-width: 64px;
+      min-height: 46px;
+      padding: 0 12px;
       border-radius: 6px;
       font-family: var(--font-display);
-      font-size: 18px;
+      font-size: 16px;
       letter-spacing: 0.12em;
       box-shadow: inset 0 0 18px rgba(255,255,255,0.07), 0 10px 24px rgba(0,0,0,0.22);
     }
@@ -190,9 +189,9 @@
       grid-area: preview;
       min-width: 0;
       display: grid;
-      grid-template-columns: 64px minmax(0, 1fr);
-      grid-template-rows: minmax(0, 76px) 8px;
-      gap: 5px;
+      grid-template-columns: 54px minmax(0, 1fr);
+      grid-template-rows: minmax(0, 62px) 7px;
+      gap: 4px;
       align-items: stretch;
     }
 
@@ -251,7 +250,7 @@
       grid-template-columns: 1fr;
       gap: 4px;
       align-content: center;
-      width: 52px;
+      width: 44px;
     }
 
     .tester-card-actions,
@@ -299,7 +298,7 @@
 
     .tester-pile-list {
       grid-area: piles;
-      display: grid;
+      display: none;
       grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 4px;
     }
@@ -394,7 +393,7 @@
     .tester-fields {
       display: grid;
       grid-template-columns: repeat(8, minmax(0, 1fr));
-      grid-template-rows: minmax(132px, 1fr) minmax(74px, 0.56fr);
+      grid-template-rows: minmax(110px, 1fr) minmax(58px, 0.48fr);
       gap: 6px;
       min-height: 0;
       overflow: hidden;
@@ -677,6 +676,18 @@
       align-items: center;
     }
 
+    .tester-hand-fan .tester-card {
+      width: clamp(58px, 5.2vw, 74px);
+      padding: 2px;
+      gap: 0;
+      align-self: stretch;
+    }
+
+    .tester-hand-fan .tester-card-name,
+    .tester-hand-fan .tester-card-code {
+      display: none;
+    }
+
     .tester-reveal-panel {
       position: absolute;
       z-index: 8;
@@ -788,6 +799,29 @@
       font-family: var(--font-display);
       font-size: 11px;
       line-height: 1;
+    }
+
+    .tester-stack-move-handle {
+      position: absolute;
+      left: 4px;
+      bottom: 4px;
+      z-index: 36;
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 4px;
+      border: 1px solid rgba(95, 212, 255, 0.46);
+      background: rgba(2, 8, 14, 0.78);
+      color: rgba(237,247,255,0.92);
+      font-size: 11px;
+      line-height: 1;
+      cursor: grab;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.34);
+    }
+
+    .tester-stack-move-handle:active {
+      cursor: grabbing;
     }
 
     .tester-card-grid {
@@ -915,9 +949,8 @@
     .tester-reveal-panel .tester-empty,
     .tester-drawer .tester-empty {
       color: transparent;
-      border-style: solid;
-      border-color: rgba(255,255,255,0.07);
-      background: rgba(255,255,255,0.025);
+      border-color: transparent;
+      background: transparent;
     }
 
     .tester-drawer {

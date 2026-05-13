@@ -555,7 +555,7 @@
       } else if (target.zone === "breeding") {
         setTesterFace(instance, true);
         if (target.mode === "source" && state.testHand.breeding.length) {
-          state.testHand.breeding.splice(Math.max(0, state.testHand.breeding.length - 1), 0, instance);
+          state.testHand.breeding.unshift(instance);
         } else {
           state.testHand.breeding.push(instance);
         }
@@ -564,7 +564,7 @@
         const targetStack = state.testHand.fields[target.fieldIndex] || state.testHand.fields[0];
         setTesterFace(instance, true);
         if (target.mode === "source" && targetStack.length) {
-          targetStack.splice(Math.max(0, targetStack.length - 1), 0, instance);
+          targetStack.unshift(instance);
         } else {
           targetStack.push(instance);
         }
@@ -597,7 +597,10 @@
       const source = getTesterSourceArray(sourceRef);
       if (!source || !source.length) return;
       const moving = source.splice(0, source.length);
-      moving.forEach(function(instance) {
+      const queue = (target.mode === "source" && (target.zone === "field" || target.zone === "breeding"))
+        ? moving.slice().reverse()
+        : moving;
+      queue.forEach(function(instance) {
         putTesterInstance(instance, target);
       });
       logTesterAction("Moved stack from " + testerZoneLabel(sourceRef.zone) + " to " + testerTargetLabel(target) + ".");
@@ -676,6 +679,7 @@
       if (!element || !ref) return;
       element.draggable = true;
       element.addEventListener("dragstart", function(event) {
+        event.stopPropagation();
         event.dataTransfer.effectAllowed = "move";
         event.dataTransfer.setData("application/x-dcgo-card", testerDragPayload(ref));
       });
@@ -699,7 +703,11 @@
         element.classList.remove("tester-drop-over");
         if (!deck || !ref) return;
         event.preventDefault();
-        moveTesterCard(deck, ref, target);
+        if (ref.stack) {
+          moveTesterStack(deck, ref, target);
+        } else {
+          moveTesterCard(deck, ref, target);
+        }
       };
     }
 
@@ -746,6 +754,13 @@
         item.addEventListener("contextmenu", function(event) {
           showTesterContextMenu(event, card.name + " · " + card.code, testerCardActions(getSelectedDeck(), opts.ref, { faceUp: faceUp }));
         });
+        if (opts.ref.zone === "eggDeck") {
+          item.addEventListener("click", function(event) {
+            event.stopPropagation();
+            const deck = getSelectedDeck();
+            if (deck) moveTesterCard(deck, opts.ref, { zone: "breeding" });
+          });
+        }
       }
       item.addEventListener("mouseenter", function() {
         if (faceUp || opts.forceFaceUp) selectTesterCard(card);
@@ -773,6 +788,11 @@
       }
       thumb.addEventListener("click", function(event) {
         event.stopPropagation();
+        if (opts.ref && opts.ref.zone === "eggDeck") {
+          const deck = getSelectedDeck();
+          if (deck) moveTesterCard(deck, opts.ref, { zone: "breeding" });
+          return;
+        }
         selectTesterCard(card);
       });
 
@@ -1082,6 +1102,19 @@
           selectTesterCard(card);
           openTesterStackViewer(deck, sourceZone === "field" ? "field:" + fieldIndex : "breeding");
         });
+        if (index === stack.length - 1) {
+          const stackHandle = document.createElement("div");
+          stackHandle.className = "tester-stack-move-handle";
+          stackHandle.title = "Drag to move the whole stack.";
+          stackHandle.textContent = "↕";
+          stackHandle.addEventListener("click", function(event) {
+            event.stopPropagation();
+          });
+          attachTesterDrag(stackHandle, sourceZone === "field"
+            ? { zone: "field", fieldIndex: fieldIndex, index: 0, stack: true }
+            : { zone: "breeding", index: 0, stack: true });
+          cardEl.appendChild(stackHandle);
+        }
         wrap.appendChild(cardEl);
       });
 
