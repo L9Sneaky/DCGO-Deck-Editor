@@ -761,6 +761,98 @@
       return badges.childNodes.length ? badges : null;
     }
 
+    function getTesterEffectSection(card, label) {
+      return ((card && card.effectSections) || []).find(function(section) {
+        return section && section.label === label && section.text;
+      }) || null;
+    }
+
+    function isTesterLinkCard(instanceOrCard) {
+      const card = getTesterCard(instanceOrCard);
+      if (!card) return false;
+      return Boolean(
+        card.linkEffect ||
+        card.linkRequirement ||
+        getTesterEffectSection(card, "Link Effect") ||
+        getTesterEffectSection(card, "Link Requirement")
+      );
+    }
+
+    function getTesterLinkEffect(card) {
+      return (card && card.linkEffect) ||
+        (getTesterEffectSection(card, "Link Effect") || {}).text ||
+        "";
+    }
+
+    function parseTesterLinkDpBonus(card) {
+      if (!card) return 0;
+      if (typeof card.linkDP === "number" && Number.isFinite(card.linkDP)) return card.linkDP;
+      const texts = [
+        card.linkDP,
+        card.linkEffect,
+        card.linkRequirement,
+        getTesterLinkEffect(card),
+        card.effectText
+      ].filter(Boolean).join("\n");
+      const patterns = [
+        /\+\s*DP\s*([0-9]{3,5})/i,
+        /\+\s*([0-9]{3,5})\s*DP/i,
+        /gets\s+\+\s*([0-9]{3,5})\s*DP/i
+      ];
+      for (let index = 0; index < patterns.length; index += 1) {
+        const match = texts.match(patterns[index]);
+        if (match) return Number(match[1]) || 0;
+      }
+      return 0;
+    }
+
+    function getTesterStackParts(stack) {
+      const cards = Array.isArray(stack) ? stack : [];
+      const topIndex = cards.length - 1;
+      const top = topIndex >= 0 ? cards[topIndex] : null;
+      const sources = [];
+      const linked = [];
+      cards.forEach(function(instance, index) {
+        if (index === topIndex) return;
+        const item = { instance: instance, index: index };
+        if (isTesterLinkCard(instance)) {
+          linked.push(item);
+        } else {
+          sources.push(item);
+        }
+      });
+      return { top: top, topIndex: topIndex, sources: sources, linked: linked };
+    }
+
+    function getTesterLinkedCards(stack) {
+      return getTesterStackParts(stack).linked;
+    }
+
+    function getTesterDigivolutionCards(stack) {
+      return getTesterStackParts(stack).sources;
+    }
+
+    function getTotalLinkedDpBonus(stack) {
+      return getTesterLinkedCards(stack).reduce(function(total, item) {
+        return total + parseTesterLinkDpBonus(getTesterCard(item.instance));
+      }, 0);
+    }
+
+    function getDisplayedDpForStack(stack) {
+      const parts = getTesterStackParts(stack);
+      const card = getTesterCard(parts.top);
+      const printedDp = Number(card && card.dp);
+      if (!Number.isFinite(printedDp) || printedDp <= 0) return null;
+      const modifiers = Object.assign({ plusDp: 0 }, (parts.top && parts.top.modifiers) || {});
+      return Math.max(0, printedDp + getTotalLinkedDpBonus(stack) + (Number(modifiers.plusDp) || 0));
+    }
+
+    window.getTesterLinkedCards = getTesterLinkedCards;
+    window.getTesterDigivolutionCards = getTesterDigivolutionCards;
+    window.getTesterLinkEffect = getTesterLinkEffect;
+    window.getTotalLinkedDpBonus = getTotalLinkedDpBonus;
+    window.getDisplayedDpForStack = getDisplayedDpForStack;
+
     function createTesterCard(instance, options) {
       const opts = options || {};
       const card = getTesterCard(instance);
@@ -1079,7 +1171,8 @@
 
     function createTesterStackElement(deck, stack, sourceZone, fieldIndex) {
       const wrap = document.createElement("div");
-      wrap.className = "tester-stack";
+      const parts = getTesterStackParts(stack);
+      wrap.className = "tester-stack sim-stack" + (parts.linked.length ? " has-linked-cards" : "");
       if (!stack.length) {
         const empty = document.createElement("div");
         empty.className = "tester-empty";
@@ -1088,13 +1181,15 @@
         return wrap;
       }
 
-      stack.forEach(function(instance, index) {
+      parts.sources.forEach(function(item, sourceOrder) {
+        const instance = item.instance;
+        const index = item.index;
         const card = getTesterCard(instance);
         const cardEl = document.createElement("div");
-        cardEl.className = "tester-stack-card" + (instance.suspended ? " suspended" : "");
+        cardEl.className = "tester-stack-card sim-stack-source-card" + (instance.suspended ? " suspended" : "");
         cardEl.style.zIndex = String(10 + index);
-        cardEl.style.bottom = (8 + Math.min(index, 9) * 7) + "px";
-        cardEl.style.opacity = index === stack.length - 1 ? "1" : "0.72";
+        cardEl.style.bottom = (8 + Math.min(sourceOrder, 9) * 7) + "px";
+        cardEl.style.opacity = "0.72";
         if (card.imageUrl) {
           const img = document.createElement("img");
           img.src = card.imageUrl;
@@ -1139,28 +1234,146 @@
         cardEl.addEventListener("dblclick", function(event) {
           event.preventDefault();
           event.stopPropagation();
-          if (index !== stack.length - 1) return;
+          if (index !== parts.topIndex) return;
           if (sourceZone === "field") {
             toggleTesterSuspend(deck, fieldIndex);
           } else {
             toggleTesterBreedingSuspend(deck);
           }
         });
-        if (index === stack.length - 1) {
-          const stackHandle = document.createElement("div");
-          stackHandle.className = "tester-stack-move-handle";
-          stackHandle.title = "Drag to move the whole stack.";
-          stackHandle.textContent = "↕";
-          stackHandle.addEventListener("click", function(event) {
-            event.stopPropagation();
-          });
-          attachTesterDrag(stackHandle, sourceZone === "field"
-            ? { zone: "field", fieldIndex: fieldIndex, index: 0, stack: true }
-            : { zone: "breeding", index: 0, stack: true });
-          cardEl.appendChild(stackHandle);
-        }
         wrap.appendChild(cardEl);
       });
+
+      parts.linked.forEach(function(item, linkOrder) {
+        const instance = item.instance;
+        const index = item.index;
+        const card = getTesterCard(instance);
+        const linkEl = document.createElement("div");
+        linkEl.className = "tester-stack-card tester-link-card sim-stack-link-card";
+        linkEl.style.zIndex = String(36 + linkOrder);
+        linkEl.style.setProperty("--link-index", String(linkOrder));
+        if (card.imageUrl) {
+          const img = document.createElement("img");
+          img.src = card.imageUrl;
+          img.alt = card.name;
+          img.loading = "lazy";
+          linkEl.appendChild(img);
+        } else {
+          linkEl.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
+        }
+        attachTesterDrag(linkEl, sourceZone === "field"
+          ? { zone: "field", fieldIndex: fieldIndex, index: index }
+          : { zone: "breeding", index: index });
+        linkEl.addEventListener("mouseenter", function() {
+          if (instance.faceUp !== false) {
+            selectTesterCard(card, {
+              sourceZone: sourceZone,
+              fieldIndex: fieldIndex,
+              index: index
+            });
+          }
+        });
+        linkEl.addEventListener("click", function(event) {
+          event.stopPropagation();
+          selectTesterCard(card, {
+            sourceZone: sourceZone,
+            fieldIndex: fieldIndex,
+            index: index
+          });
+        });
+        linkEl.addEventListener("contextmenu", function(event) {
+          const ref = sourceZone === "field"
+            ? { zone: "field", fieldIndex: fieldIndex, index: index }
+            : { zone: "breeding", index: index };
+          showTesterContextMenu(event, card.name + " · " + card.code, testerCardActions(deck, ref, {
+            faceUp: instance.faceUp !== false
+          }));
+        });
+        wrap.appendChild(linkEl);
+      });
+
+      const topInstance = parts.top;
+      const topCard = getTesterCard(topInstance);
+      const topEl = document.createElement("div");
+      topEl.className = "tester-stack-card sim-stack-main-card" + (topInstance.suspended ? " suspended" : "");
+      topEl.style.zIndex = "60";
+      topEl.style.bottom = (8 + Math.min(parts.sources.length, 9) * 7) + "px";
+      if (topCard.imageUrl) {
+        const img = document.createElement("img");
+        img.src = topCard.imageUrl;
+        img.alt = topCard.name;
+        img.loading = "lazy";
+        topEl.appendChild(img);
+      } else {
+        topEl.appendChild(createFallbackLabel(topCard.name, "thumb-fallback"));
+      }
+      const modifierBadges = createTesterModifierBadges(topInstance);
+      if (modifierBadges) topEl.appendChild(modifierBadges);
+      const displayedDp = getDisplayedDpForStack(stack);
+      if (displayedDp !== null && (displayedDp !== Number(topCard.dp) || getTotalLinkedDpBonus(stack))) {
+        const dpBadge = document.createElement("div");
+        dpBadge.className = "tester-modified-dp sim-card-modified-dp";
+        dpBadge.textContent = String(displayedDp);
+        topEl.appendChild(dpBadge);
+      }
+      if (parts.linked.length) {
+        const linkIndicator = document.createElement("div");
+        linkIndicator.className = "tester-link-indicator sim-link-indicator";
+        linkIndicator.textContent = "🔗 " + parts.linked.length;
+        topEl.appendChild(linkIndicator);
+      }
+      attachTesterDrag(topEl, sourceZone === "field"
+        ? { zone: "field", fieldIndex: fieldIndex, index: parts.topIndex }
+        : { zone: "breeding", index: parts.topIndex });
+      topEl.addEventListener("mouseenter", function() {
+        if (topInstance.faceUp !== false) {
+          selectTesterCard(topCard, {
+            sourceZone: sourceZone,
+            fieldIndex: fieldIndex,
+            index: parts.topIndex
+          });
+        }
+      });
+      topEl.addEventListener("contextmenu", function(event) {
+        const ref = sourceZone === "field"
+          ? { zone: "field", fieldIndex: fieldIndex, index: parts.topIndex }
+          : { zone: "breeding", index: parts.topIndex };
+        showTesterContextMenu(event, topCard.name + " · " + topCard.code, testerCardActions(deck, ref, {
+          stackTop: true,
+          suspended: !!topInstance.suspended,
+          faceUp: topInstance.faceUp !== false
+        }));
+      });
+      topEl.addEventListener("click", function(event) {
+        event.stopPropagation();
+        selectTesterCard(topCard, {
+          sourceZone: sourceZone,
+          fieldIndex: fieldIndex,
+          index: parts.topIndex
+        });
+      });
+      topEl.addEventListener("dblclick", function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (sourceZone === "field") {
+          toggleTesterSuspend(deck, fieldIndex);
+        } else {
+          toggleTesterBreedingSuspend(deck);
+        }
+      });
+
+      const stackHandle = document.createElement("div");
+      stackHandle.className = "tester-stack-move-handle";
+      stackHandle.title = "Drag to move the whole stack.";
+      stackHandle.textContent = "↕";
+      stackHandle.addEventListener("click", function(event) {
+        event.stopPropagation();
+      });
+      attachTesterDrag(stackHandle, sourceZone === "field"
+        ? { zone: "field", fieldIndex: fieldIndex, index: 0, stack: true }
+        : { zone: "breeding", index: 0, stack: true });
+      topEl.appendChild(stackHandle);
+      wrap.appendChild(topEl);
 
       const badge = document.createElement("div");
       badge.className = "tester-stack-badge";

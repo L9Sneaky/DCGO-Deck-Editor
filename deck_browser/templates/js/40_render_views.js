@@ -475,20 +475,77 @@
 
     function renderTesterCardDetails(deck) {
       renderDetailsInto(testerDetailsBodyEl, deck);
+      appendTesterStackLinkedDetails();
       appendTesterStackInheritedDetails();
+    }
+
+    function appendTesterStackLinkedDetails() {
+      const context = state.selectedTesterStack;
+      if (!context || (context.sourceZone !== "field" && context.sourceZone !== "breeding")) return;
+      if (typeof getTesterSourceArray !== "function" || typeof getTesterLinkedCards !== "function") return;
+      const source = getTesterSourceArray(context.sourceZone === "field"
+        ? { zone: "field", fieldIndex: context.fieldIndex, index: 0 }
+        : { zone: "breeding", index: 0 });
+      if (!source || !source.length || context.index !== source.length - 1) return;
+
+      const linkedCards = getTesterLinkedCards(source);
+      if (!linkedCards.length) return;
+      const totalDp = typeof getTotalLinkedDpBonus === "function" ? getTotalLinkedDpBonus(source) : 0;
+
+      const block = document.createElement("section");
+      block.className = "details-effect-card tester-linked-section sim-linked-section";
+      const header = document.createElement("div");
+      header.className = "details-effect-header tester-linked-section-header sim-linked-section-header";
+      const title = document.createElement("span");
+      title.className = "tester-linked-title";
+      title.textContent = "LINKED CARDS";
+      const icon = document.createElement("span");
+      icon.className = "tester-linked-icon";
+      icon.textContent = "🔗";
+      title.appendChild(icon);
+      const dp = document.createElement("span");
+      dp.className = "tester-linked-dp-bonus sim-linked-dp-bonus";
+      dp.textContent = "+ " + totalDp + " DP";
+      header.appendChild(title);
+      header.appendChild(dp);
+      block.appendChild(header);
+
+      linkedCards.slice().reverse().forEach(function(item) {
+        const card = getTesterCard(item.instance);
+        if (!card) return;
+        const sourceLabel = document.createElement("div");
+        sourceLabel.className = "details-source-label";
+        sourceLabel.textContent = card.name + " · " + card.code;
+        block.appendChild(sourceLabel);
+        const text = document.createElement("div");
+        text.className = "details-effect-text";
+        const effect = (typeof getTesterLinkEffect === "function" ? getTesterLinkEffect(card) : "") ||
+          (((card.effectSections || []).find(function(section) { return section.label === "Link Effect"; }) || {}).text || "");
+        appendHighlightedText(text, effect || "No linked effect text was available for this card.");
+        block.appendChild(text);
+      });
+
+      const footer = testerDetailsBodyEl.querySelector(".details-footer");
+      if (footer) {
+        testerDetailsBodyEl.insertBefore(block, footer);
+      } else {
+        testerDetailsBodyEl.appendChild(block);
+      }
     }
 
     function appendTesterStackInheritedDetails() {
       const context = state.selectedTesterStack;
       if (!context || (context.sourceZone !== "field" && context.sourceZone !== "breeding")) return;
-      if (typeof getTesterSourceArray !== "function") return;
+      if (typeof getTesterSourceArray !== "function" || typeof getTesterDigivolutionCards !== "function") return;
       const source = getTesterSourceArray(context.sourceZone === "field"
         ? { zone: "field", fieldIndex: context.fieldIndex, index: 0 }
         : { zone: "breeding", index: 0 });
       if (!source || context.index <= 0) return;
 
-      const sourceCards = source.slice(0, context.index).reverse().map(function(instance) {
-        return getTesterCard(instance);
+      const sourceCards = getTesterDigivolutionCards(source).filter(function(item) {
+        return item.index < context.index;
+      }).slice().reverse().map(function(item) {
+        return getTesterCard(item.instance);
       }).filter(Boolean);
       const inheritedSections = [];
       sourceCards.forEach(function(card) {

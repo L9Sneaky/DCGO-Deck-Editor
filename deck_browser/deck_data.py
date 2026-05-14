@@ -48,6 +48,19 @@ def parse_intish(value: Any) -> int | None:
         return None
 
 
+def parse_link_dp(value: Any) -> int | None:
+    text = none_if_dash(value)
+    if text is None:
+        return None
+    match = re.search(r"([+-]?\s*\d{3,5})\s*DP", text, re.IGNORECASE)
+    if match:
+        try:
+            return int(match.group(1).replace(" ", ""))
+        except ValueError:
+            return None
+    return parse_intish(text)
+
+
 def split_multi_value(value: Any) -> list[str]:
     text = none_if_dash(value)
     if text is None:
@@ -254,6 +267,9 @@ def card_metadata_for_code(
             "copyLimit": 4,
             "effectText": "",
             "effectSections": [],
+            "linkDP": None,
+            "linkEffect": "",
+            "linkRequirement": "",
         }
 
     name = entry.get("name") or {}
@@ -281,6 +297,9 @@ def card_metadata_for_code(
         "copyLimit": copy_limit_for_entry(entry),
         "effectText": " ".join(section["text"] for section in effect_sections),
         "effectSections": effect_sections,
+        "linkDP": parse_link_dp(entry.get("linkDP")),
+        "linkEffect": none_if_dash(entry.get("linkEffect")) or "",
+        "linkRequirement": none_if_dash(entry.get("linkRequirement")) or "",
     }
 
 
@@ -320,6 +339,9 @@ def build_card_catalog(raw_manifest: list[dict[str, Any]], by_id: dict[str, dict
             "copyLimit": meta["copyLimit"],
             "effectText": meta["effectText"],
             "effectSections": meta["effectSections"],
+            "linkDP": meta["linkDP"],
+            "linkEffect": meta["linkEffect"],
+            "linkRequirement": meta["linkRequirement"],
         }
         card["searchBlob"] = " ".join(
             filter(
@@ -401,6 +423,9 @@ def parse_deck_file(deck_path: Path, by_id: dict[str, dict[str, Any]], by_number
                 "copyLimit": meta["copyLimit"],
                 "effectText": meta["effectText"],
                 "effectSections": meta["effectSections"],
+                "linkDP": meta["linkDP"],
+                "linkEffect": meta["linkEffect"],
+                "linkRequirement": meta["linkRequirement"],
             }
         )
 
