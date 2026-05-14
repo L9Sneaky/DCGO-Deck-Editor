@@ -865,11 +865,11 @@
 
     .tester-link-card,
     .sim-stack-link-card {
-      left: calc(50% + 58px);
-      bottom: calc(5px + (var(--link-index, 0) * 7px));
+      left: calc(50% + 50px);
+      bottom: calc(8px + (var(--link-index, 0) * 8px));
       width: min(62px, calc(100% - 14px));
       opacity: 0.92;
-      transform: translateX(-50%) rotate(90deg);
+      transform: translateX(-50%) rotate(-90deg);
       transform-origin: center center;
       border-color: rgba(73, 252, 189, 0.62);
       box-shadow: 0 6px 16px rgba(0,0,0,0.40), 0 0 14px rgba(73, 252, 189, 0.12);
@@ -910,6 +910,37 @@
     .tester-field-slot:hover .tester-source-drop,
     .tester-source-drop.tester-drop-over {
       opacity: 1;
+    }
+
+    .tester-link-drop {
+      position: absolute;
+      right: 3px;
+      top: 29px;
+      bottom: 29px;
+      z-index: 24;
+      width: 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 4px;
+      border: 1px dashed rgba(73, 252, 189, 0.34);
+      background: rgba(4, 45, 34, 0.62);
+      color: rgba(226, 255, 245, 0.78);
+      font-size: 10px;
+      opacity: 0;
+      pointer-events: auto;
+      transition: opacity 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+    }
+
+    .tester-field-slot:hover .tester-link-drop,
+    .tester-breeding-slot:hover .tester-link-drop,
+    .tester-link-drop.tester-drop-over {
+      opacity: 1;
+    }
+
+    .tester-link-drop.tester-drop-over {
+      border-color: rgba(73, 252, 189, 0.92);
+      background: rgba(4, 79, 56, 0.88);
+      color: #e2fff5;
     }
 
     .tester-stack-badge {

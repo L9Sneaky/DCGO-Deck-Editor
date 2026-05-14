@@ -381,7 +381,11 @@
 
     function testerTargetLabel(target) {
       if (!target) return "Zone";
-      if (target.zone === "field") return "Battle " + (Number(target.fieldIndex || 0) + 1);
+      if (target.zone === "field") {
+        return "Battle " + (Number(target.fieldIndex || 0) + 1) + (target.mode === "link" ? " Link" : target.mode === "source" ? " Source" : "");
+      }
+      if (target.zone === "breeding" && target.mode === "link") return "Breeding Link";
+      if (target.zone === "breeding" && target.mode === "source") return "Breeding Source";
       if (target.zone === "stack") return target.position === "bottom" ? "Bottom Deck" : "Top Deck";
       if (target.zone === "security") return (target.position === "bottom" ? "Bottom Security" : "Top Security") + (target.faceUp ? " face up" : " face down");
       return testerZoneLabel(target.zone);
@@ -530,18 +534,32 @@
       return source.splice(ref.index, 1)[0] || null;
     }
 
+    function setTesterLinked(instance, linked) {
+      if (!instance) return instance;
+      if (linked) {
+        instance.linked = true;
+      } else {
+        delete instance.linked;
+      }
+      return instance;
+    }
+
     function putTesterInstance(instance, target) {
       if (!instance || !target) return;
       if (target.zone === "hand") {
+        setTesterLinked(instance, false);
         state.testHand.hand.push(setTesterFace(instance, true));
       } else if (target.zone === "trash") {
+        setTesterLinked(instance, false);
         state.testHand.trash.push(setTesterFace(instance, true));
         state.testHand.openDrawer = "trash";
       } else if (target.zone === "reveal") {
+        setTesterLinked(instance, false);
         state.testHand.reveal.push(setTesterFace(instance, true));
         state.testHand.openDrawer = "reveal";
         state.testHand.showRevealPanel = true;
       } else if (target.zone === "security") {
+        setTesterLinked(instance, false);
         setTesterFace(instance, !!target.faceUp);
         if (target.position === "bottom") {
           state.testHand.security.push(instance);
@@ -550,6 +568,7 @@
         }
         state.testHand.showSecurityPanel = true;
       } else if (target.zone === "stack") {
+        setTesterLinked(instance, false);
         setTesterFace(instance, false);
         if (target.position === "bottom") {
           state.testHand.stack.push(instance);
@@ -557,6 +576,7 @@
           state.testHand.stack.unshift(instance);
         }
       } else if (target.zone === "eggDeck") {
+        setTesterLinked(instance, false);
         setTesterFace(instance, false);
         if (target.position === "bottom") {
           state.testHand.eggDeck.push(instance);
@@ -565,18 +585,28 @@
         }
       } else if (target.zone === "breeding") {
         setTesterFace(instance, true);
-        if (target.mode === "source" && state.testHand.breeding.length) {
+        if (target.mode === "link" && state.testHand.breeding.length) {
+          setTesterLinked(instance, true);
+          state.testHand.breeding.splice(Math.max(0, state.testHand.breeding.length - 1), 0, instance);
+        } else if (target.mode === "source" && state.testHand.breeding.length) {
+          setTesterLinked(instance, false);
           state.testHand.breeding.unshift(instance);
         } else {
+          setTesterLinked(instance, false);
           state.testHand.breeding.push(instance);
         }
         state.testHand.openDrawer = "breeding";
       } else if (target.zone === "field") {
         const targetStack = state.testHand.fields[target.fieldIndex] || state.testHand.fields[0];
         setTesterFace(instance, true);
-        if (target.mode === "source" && targetStack.length) {
+        if (target.mode === "link" && targetStack.length) {
+          setTesterLinked(instance, true);
+          targetStack.splice(Math.max(0, targetStack.length - 1), 0, instance);
+        } else if (target.mode === "source" && targetStack.length) {
+          setTesterLinked(instance, false);
           targetStack.unshift(instance);
         } else {
+          setTesterLinked(instance, false);
           targetStack.push(instance);
         }
         state.testHand.openDrawer = "field:" + target.fieldIndex;
@@ -720,8 +750,9 @@
         const deck = getSelectedDeck();
         const ref = readTesterDragPayload(event);
         element.classList.remove("tester-drop-over");
-        if (!deck || !ref) return;
         event.preventDefault();
+        event.stopPropagation();
+        if (!deck || !ref) return;
         if (ref.stack) {
           moveTesterStack(deck, ref, target);
         } else {
@@ -768,14 +799,7 @@
     }
 
     function isTesterLinkCard(instanceOrCard) {
-      const card = getTesterCard(instanceOrCard);
-      if (!card) return false;
-      return Boolean(
-        card.linkEffect ||
-        card.linkRequirement ||
-        getTesterEffectSection(card, "Link Effect") ||
-        getTesterEffectSection(card, "Link Requirement")
-      );
+      return Boolean(instanceOrCard && instanceOrCard.linked);
     }
 
     function getTesterLinkEffect(card) {
@@ -1410,6 +1434,12 @@
           sourceDrop.textContent = "▽";
           attachTesterDropZone(sourceDrop, { zone: "field", fieldIndex: index, mode: "source" });
           slot.appendChild(sourceDrop);
+          const linkDrop = document.createElement("div");
+          linkDrop.className = "tester-link-drop";
+          linkDrop.textContent = "↪";
+          linkDrop.title = "Drop here to link this card to the stack.";
+          attachTesterDropZone(linkDrop, { zone: "field", fieldIndex: index, mode: "link" });
+          slot.appendChild(linkDrop);
         }
         testerBoardGridEl.appendChild(slot);
       });
@@ -1418,6 +1448,7 @@
     function renderTesterBreeding(deck) {
       testerBreedingZoneEl.className = "tester-breeding-slot" + (state.testHand.breeding.length ? "" : " empty");
       testerBreedingZoneEl.querySelectorAll(".tester-stack-bottom-drop").forEach(function(element) { element.remove(); });
+      testerBreedingZoneEl.querySelectorAll(".tester-link-drop").forEach(function(element) { element.remove(); });
       testerBreedingStackEl.innerHTML = "";
       testerBreedingStackEl.appendChild(createTesterStackElement(deck, state.testHand.breeding, "breeding", -1));
       if (state.testHand.breeding.length) {
@@ -1426,6 +1457,12 @@
         sourceDrop.textContent = "▽";
         attachTesterDropZone(sourceDrop, { zone: "breeding", mode: "source" });
         testerBreedingZoneEl.appendChild(sourceDrop);
+        const linkDrop = document.createElement("div");
+        linkDrop.className = "tester-link-drop";
+        linkDrop.textContent = "↪";
+        linkDrop.title = "Drop here to link this card to the stack.";
+        attachTesterDropZone(linkDrop, { zone: "breeding", mode: "link" });
+        testerBreedingZoneEl.appendChild(linkDrop);
       }
       testerBreedingMetaEl.textContent = state.testHand.breeding.length + " stack";
       attachTesterDropZone(testerBreedingZoneEl, { zone: "breeding" });
