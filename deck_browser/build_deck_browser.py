@@ -108,6 +108,8 @@ def sync_embed_assets(output_path: Path) -> None:
     if not SIMULATOR_DIST_DIR.is_dir():
         return
     target_dir = output_path.parent / EMBED_ASSET_DIR
+    if target_dir.exists():
+        shutil.rmtree(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
     for item in SIMULATOR_DIST_DIR.iterdir():
         destination = target_dir / item.name

@@ -8,7 +8,10 @@
 
 #test-view.tester-react-active {
   display: block;
-  min-height: 100vh;
+  grid-column: 1 / -1;
+  height: calc(100vh - 32px);
+  min-height: 0;
+  overflow: hidden;
   padding: 0;
   background: transparent;
   border: 0;
@@ -17,6 +20,8 @@
 
 #test-view.tester-react-active .deck-test-react-root {
   display: block;
+  height: 100%;
+  overflow: hidden;
 }
 
 #test-view.tester-react-active .deck-test-react-loading {
@@ -26,7 +31,7 @@
   font-size: 18px;
   font-weight: 700;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 100%;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
 }
 

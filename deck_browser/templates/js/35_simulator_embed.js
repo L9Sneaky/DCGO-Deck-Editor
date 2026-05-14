@@ -4,6 +4,8 @@
     const renderTesterLegacy = typeof window.renderTester === "function" ? window.renderTester : null;
     const openDeckTesterLegacy = typeof window.openDeckTester === "function" ? window.openDeckTester : null;
     let deckTestEmbedMounted = false;
+    let previousBodyDisplay = "";
+    let previousShellWidth = "";
 
     function deckTestEmbedAvailable() {
       return window.DCGODeckTest && typeof window.DCGODeckTest.mount === "function";
@@ -55,6 +57,13 @@
 
     function mountDeckTestBoard(deck) {
       if (!deckTestReactRootEl || !deck) return;
+      if (!deckTestEmbedMounted) {
+        previousBodyDisplay = document.body.style.display || "";
+        previousShellWidth = document.querySelector(".shell")?.style.width || "";
+      }
+      document.body.style.display = "block";
+      const shellEl = document.querySelector(".shell");
+      if (shellEl) shellEl.style.width = "100%";
       testViewEl.classList.add("tester-react-active");
       if (deckTestEmbedAvailable()) {
         window.DCGODeckTest.mount(buildDeckTestOptions(deck));
@@ -82,6 +91,9 @@
       }
       deckTestEmbedMounted = false;
       if (deckTestReactRootEl) deckTestReactRootEl.innerHTML = "";
+      document.body.style.display = previousBodyDisplay;
+      const shellEl = document.querySelector(".shell");
+      if (shellEl) shellEl.style.width = previousShellWidth;
       testViewEl.classList.remove("tester-react-active");
     }
 
