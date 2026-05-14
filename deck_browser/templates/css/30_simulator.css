@@ -420,8 +420,8 @@
     .tester-fields {
       display: grid;
       grid-template-columns: repeat(8, minmax(0, 1fr));
-      grid-template-rows: minmax(98px, 0.72fr) minmax(66px, 0.48fr);
-      gap: 4px;
+      grid-template-rows: minmax(94px, 0.72fr) minmax(64px, 0.48fr);
+      gap: 7px;
       min-height: 0;
       overflow: visible;
       padding: 0;
@@ -837,18 +837,18 @@
       position: relative;
       min-height: 0;
       height: 100%;
-      padding: 5px;
+      padding: 4px;
       cursor: pointer;
     }
 
     .tester-stack-card {
       position: absolute;
       left: 50%;
-      bottom: 5px;
-      width: min(68px, calc(100% - 10px));
+      bottom: 6px;
+      width: min(56px, calc(100% - 24px));
       aspect-ratio: 7 / 10;
       transform: translateX(-50%);
-      border-radius: 5px;
+      border-radius: 4px;
       overflow: hidden;
       border: 1px solid rgba(255,255,255,0.13);
       box-shadow: 0 8px 18px rgba(0,0,0,0.34);
@@ -865,14 +865,14 @@
 
     .tester-link-card,
     .sim-stack-link-card {
-      left: calc(50% + 50px);
-      bottom: calc(8px + (var(--link-index, 0) * 8px));
-      width: min(62px, calc(100% - 14px));
-      opacity: 0.92;
+      left: calc(50% + 32px);
+      bottom: calc(6px + (var(--link-index, 0) * 5px));
+      width: min(48px, calc(100% - 40px));
+      opacity: 0.90;
       transform: translateX(-50%) rotate(-90deg);
       transform-origin: center center;
       border-color: rgba(73, 252, 189, 0.62);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.40), 0 0 14px rgba(73, 252, 189, 0.12);
+      box-shadow: 0 5px 13px rgba(0,0,0,0.38), 0 0 12px rgba(73, 252, 189, 0.10);
     }
 
     .tester-link-card:hover,

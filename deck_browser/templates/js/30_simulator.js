@@ -1196,6 +1196,10 @@
     function createTesterStackElement(deck, stack, sourceZone, fieldIndex) {
       const wrap = document.createElement("div");
       const parts = getTesterStackParts(stack);
+      const visualSourceDepth = Math.min(parts.sources.length, 4);
+      const sourceStepPx = 4;
+      const baseBottomPx = 6;
+      const topBottomPx = baseBottomPx + visualSourceDepth * sourceStepPx;
       wrap.className = "tester-stack sim-stack" + (parts.linked.length ? " has-linked-cards" : "");
       if (!stack.length) {
         const empty = document.createElement("div");
@@ -1212,7 +1216,7 @@
         const cardEl = document.createElement("div");
         cardEl.className = "tester-stack-card sim-stack-source-card" + (instance.suspended ? " suspended" : "");
         cardEl.style.zIndex = String(10 + index);
-        cardEl.style.bottom = (8 + Math.min(sourceOrder, 9) * 7) + "px";
+        cardEl.style.bottom = (baseBottomPx + Math.min(sourceOrder, visualSourceDepth) * sourceStepPx) + "px";
         cardEl.style.opacity = "0.72";
         if (card.imageUrl) {
           const img = document.createElement("img");
@@ -1276,6 +1280,7 @@
         linkEl.className = "tester-stack-card tester-link-card sim-stack-link-card";
         linkEl.style.zIndex = String(36 + linkOrder);
         linkEl.style.setProperty("--link-index", String(linkOrder));
+        linkEl.style.bottom = (topBottomPx + Math.min(linkOrder, 3) * 5) + "px";
         if (card.imageUrl) {
           const img = document.createElement("img");
           img.src = card.imageUrl;
@@ -1321,7 +1326,7 @@
       const topEl = document.createElement("div");
       topEl.className = "tester-stack-card sim-stack-main-card" + (topInstance.suspended ? " suspended" : "");
       topEl.style.zIndex = "60";
-      topEl.style.bottom = (8 + Math.min(parts.sources.length, 9) * 7) + "px";
+      topEl.style.bottom = topBottomPx + "px";
       if (topCard.imageUrl) {
         const img = document.createElement("img");
         img.src = topCard.imageUrl;
