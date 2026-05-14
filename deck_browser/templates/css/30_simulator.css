@@ -393,10 +393,10 @@
     .tester-field-area {
       grid-area: auto;
       grid-column: 2 / 33;
-      grid-row: 5 / 11;
+      grid-row: 5 / 12;
       min-height: 0;
       display: grid;
-      grid-template-columns: 58px minmax(0, 1fr) 42px;
+      grid-template-columns: 72px minmax(0, 1fr) 42px;
       gap: 8px;
       align-items: stretch;
     }
@@ -405,9 +405,10 @@
       min-width: 0;
       min-height: 0;
       display: grid;
-      grid-template-rows: minmax(0, 1fr) auto;
-      gap: 4px;
-      align-items: stretch;
+      grid-template-rows: minmax(0, 160px) auto;
+      gap: 6px;
+      align-items: end;
+      align-self: end;
     }
 
     .tester-battle-wrap {
@@ -464,7 +465,7 @@
 
     .tester-breeding-slot {
       align-self: stretch;
-      height: min(146px, 100%);
+      height: min(160px, 100%);
     }
 
     .tester-egg-dock {
@@ -866,14 +867,23 @@
 
     .tester-link-card,
     .sim-stack-link-card {
-      left: calc(50% + 36px);
-      bottom: calc(6px + (var(--link-index, 0) * 5px));
-      width: min(51px, calc(100% - 44px));
+      left: calc(50% + 22px);
+      bottom: calc(14px + (var(--link-index, 0) * 5px));
+      width: min(49px, calc(100% - 52px));
       opacity: 0.90;
-      transform: translateX(-50%) rotate(-90deg);
+      transform: translateX(-50%) translateY(8px) rotate(-90deg);
       transform-origin: center center;
       border-color: rgba(73, 252, 189, 0.62);
       box-shadow: 0 5px 13px rgba(0,0,0,0.38), 0 0 12px rgba(73, 252, 189, 0.10);
+    }
+
+    .tester-breeding-slot .tester-stack-card {
+      width: min(68px, calc(100% - 18px));
+    }
+
+    .tester-breeding-slot .tester-link-card {
+      left: calc(50% + 24px);
+      width: min(52px, calc(100% - 46px));
     }
 
     .tester-link-card:hover,
