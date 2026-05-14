@@ -1,10 +1,6 @@
 {
-  "_index-D2vF9KLd.css": {
-    "file": "assets/index-D2vF9KLd.css",
-    "src": "_index-D2vF9KLd.css"
-  },
-  "_index-DTM0aWW1.js": {
-    "file": "assets/index-DTM0aWW1.js",
+  "_index-BFMGloOV.js": {
+    "file": "assets/index-BFMGloOV.js",
     "name": "index",
     "css": [
       "assets/index-D2vF9KLd.css"
@@ -219,13 +215,17 @@
       "assets/Frutiger_bold-BcC8UB7I.ttf"
     ]
   },
+  "_index-D2vF9KLd.css": {
+    "file": "assets/index-D2vF9KLd.css",
+    "src": "_index-D2vF9KLd.css"
+  },
   "index.html": {
-    "file": "assets/main-BZHnmdh6.js",
+    "file": "assets/main-K0dSd1uI.js",
     "name": "main",
     "src": "index.html",
     "isEntry": true,
     "imports": [
-      "_index-DTM0aWW1.js"
+      "_index-BFMGloOV.js"
     ],
     "assets": [
       "assets/discordLogo-D8wyZE9p.png",
@@ -1144,12 +1144,12 @@
     "src": "src/assets/tokens/tokenCard.jpg"
   },
   "src/embed/deckBrowserEmbed.tsx": {
-    "file": "assets/deckBrowserEmbed-DBuK0BBC.js",
+    "file": "assets/deckBrowserEmbed-stH0vV9S.js",
     "name": "deckBrowserEmbed",
     "src": "src/embed/deckBrowserEmbed.tsx",
     "isEntry": true,
     "imports": [
-      "_index-DTM0aWW1.js"
+      "_index-BFMGloOV.js"
     ]
   }
 }

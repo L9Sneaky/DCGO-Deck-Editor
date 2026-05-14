@@ -2,6 +2,8 @@
       display: grid;
       grid-template-rows: auto auto minmax(0, 1fr) auto;
       min-height: calc(100vh - 32px);
+      width: 100%;
+      max-width: none;
       overflow: hidden;
     }
 
@@ -45,7 +47,8 @@
       overflow: auto;
       padding: 22px 28px 28px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      width: 100%;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 16px;
       align-content: start;
     }
@@ -141,4 +144,3 @@
       font-size: 12px;
       line-height: 1.45;
     }
-

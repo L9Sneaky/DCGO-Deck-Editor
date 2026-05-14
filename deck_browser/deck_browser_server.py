@@ -15,7 +15,7 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 import build_deck_browser
 
@@ -331,8 +331,24 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(candidate.stat().st_size))
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
-        with candidate.open("rb") as handle:
-            shutil.copyfileobj(handle, self.wfile)
+        try:
+            with candidate.open("rb") as handle:
+                shutil.copyfileobj(handle, self.wfile)
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+            return True
+        return True
+
+    def try_send_favicon(self) -> bool:
+        candidates = [
+            self.output_path.parent / "favicon.ico",
+            self.output_path.parent / build_deck_browser.EMBED_ASSET_DIR / "favicon.ico",
+        ]
+        for candidate in candidates:
+            if candidate.is_file():
+                return self.try_send_static("/" + str(candidate.relative_to(self.output_path.parent)))
+        self.send_response(204)
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
         return True
 
     def read_json_body(self) -> dict[str, Any]:
@@ -348,7 +364,7 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
         return payload
 
     def do_GET(self) -> None:
-        path = urlparse(self.path).path
+        path = unquote(urlparse(self.path).path)
         if path in {"/", "/current_decks.html"}:
             try:
                 self.send_text(200, self.load_html(), "text/html; charset=utf-8")
@@ -358,6 +374,10 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
 
         if path == "/health":
             self.send_json(200, {"ok": True})
+            return
+
+        if path == "/favicon.ico":
+            self.try_send_favicon()
             return
 
         if self.try_send_static(path):

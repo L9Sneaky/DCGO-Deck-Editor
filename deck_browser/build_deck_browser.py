@@ -121,6 +121,8 @@ def sync_embed_assets(output_path: Path) -> None:
     assets_dir = SIMULATOR_DIST_DIR / "assets"
     if assets_dir.is_dir():
         root_assets = output_path.parent / "assets"
+        if root_assets.exists():
+            shutil.rmtree(root_assets)
         shutil.copytree(assets_dir, root_assets, dirs_exist_ok=True)
 
 
