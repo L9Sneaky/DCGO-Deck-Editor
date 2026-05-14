@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import mimetypes
 import re
 import secrets
 import shutil
@@ -310,7 +311,29 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
         html = build_deck_browser.render_html(app_data)
         self.output_path.parent.mkdir(parents=True, exist_ok=True)
         self.output_path.write_text(html, encoding="utf-8")
+        build_deck_browser.sync_embed_assets(self.output_path)
         return html
+
+    def try_send_static(self, path: str) -> bool:
+        if path in {"", "/"}:
+            return False
+        root = self.output_path.parent.resolve()
+        candidate = (root / path.lstrip("/")).resolve()
+        if root not in candidate.parents and candidate != root:
+            return False
+        if not candidate.is_file():
+            return False
+
+        content_type, _ = mimetypes.guess_type(candidate.name)
+        content_type = content_type or "application/octet-stream"
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(candidate.stat().st_size))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        with candidate.open("rb") as handle:
+            shutil.copyfileobj(handle, self.wfile)
+        return True
 
     def read_json_body(self) -> dict[str, Any]:
         length = int(self.headers.get("Content-Length", "0") or "0")
@@ -335,6 +358,9 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
 
         if path == "/health":
             self.send_json(200, {"ok": True})
+            return
+
+        if self.try_send_static(path):
             return
 
         self.send_text(404, "Not found\n")

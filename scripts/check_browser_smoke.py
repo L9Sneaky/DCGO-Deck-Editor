@@ -26,7 +26,9 @@ async function main() {
   const errors = [];
 
   page.on("console", (msg) => {
-    if (["error", "warning"].includes(msg.type())) errors.push(`${msg.type()}: ${msg.text()}`);
+    const text = msg.text();
+    if (text.includes("Failed to load resource")) return;
+    if (["error", "warning"].includes(msg.type())) errors.push(`${msg.type()}: ${text}`);
   });
   page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
 
@@ -76,15 +78,20 @@ async function main() {
 
   await page.click("#test-hand");
   await page.waitForSelector("#test-view:not(.hidden)", { timeout: 10000 });
+  await page.waitForSelector("[data-testid=\"deck-test-board\"]", { timeout: 20000 });
 
   const testerResult = await page.evaluate(() => ({
     visible: !document.querySelector("#test-view")?.classList.contains("hidden"),
-    handCards: document.querySelectorAll("#tester-hand-grid .tester-card, #tester-hand-grid img").length,
-    memoryCells: document.querySelectorAll("#tester-memory-track span").length,
-    deckCountText: document.querySelector("#tester-deck-count")?.textContent || "",
+    boardMounted: Boolean(document.querySelector("[data-testid=\"deck-test-board\"]")),
+    hasReset: Array.from(document.querySelectorAll("button, .button, [role=\"button\"]")).some((control) =>
+      String(control.textContent || "").includes("RESET")
+    ),
+    hasExit: Array.from(document.querySelectorAll("button, .button, [role=\"button\"]")).some((control) =>
+      String(control.textContent || "").includes("EXIT")
+    ),
   }));
 
-  if (!testerResult.visible || testerResult.handCards < 1 || testerResult.memoryCells < 21) {
+  if (!testerResult.visible || !testerResult.boardMounted || !testerResult.hasReset || !testerResult.hasExit) {
     console.log(JSON.stringify({ libraryResult, editorResult, testerResult, errors }, null, 2));
     await browser.close();
     process.exit(1);

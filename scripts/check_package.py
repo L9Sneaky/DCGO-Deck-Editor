@@ -16,7 +16,9 @@ REQUIRED_FILES = [
     "deck_browser/deck_browser_server.py",
     "deck_browser/templates/deck_browser.html",
     "deck_browser/templates/css/00_base.css",
+    "deck_browser/templates/css/35_simulator_embed.css",
     "deck_browser/templates/js/00_bootstrap.js",
+    "deck_browser/templates/js/35_simulator_embed.js",
     "Open Deck Editor.command",
     "Open Deck Editor.bat",
 ]
@@ -86,10 +88,26 @@ def check_html_build(root: Path) -> list[str]:
             return [f"HTML build failed: {error}"]
 
         html = output_path.read_text(encoding="utf-8")
-        for needle in ["DCGO Deck Browser", "CheckDeck", "app-version-label", "1.1.0-refactor"]:
+        for needle in ["DCGO Deck Browser", "CheckDeck", "app-version-label", "1.1.0-refactor", "deck-test-react-root"]:
             if needle not in html:
                 errors.append(f"Generated HTML is missing: {needle}")
     return errors
+
+
+def check_decktest_embed(root: Path) -> list[str]:
+    dist_root = root / "deck_browser" / "decktest_dist"
+    if not dist_root.is_dir():
+        return [f"Missing Project Drasil DeckTest bundle directory: {dist_root.relative_to(root)}"]
+
+    manifest_paths = [dist_root / "manifest.json", dist_root / ".vite" / "manifest.json"]
+    if not any(path.is_file() for path in manifest_paths):
+        return ["Missing Project Drasil DeckTest Vite manifest in deck_browser/decktest_dist"]
+
+    entry_files = list((dist_root / "assets").glob("deckBrowserEmbed-*.js"))
+    if not entry_files:
+        return ["Missing Project Drasil DeckTest embed entry asset: deck_browser/decktest_dist/assets/deckBrowserEmbed-*.js"]
+
+    return []
 
 
 def check_zip(zip_path: Path) -> list[str]:
@@ -112,6 +130,7 @@ def main() -> int:
     errors = []
     errors.extend(check_required_files(root))
     errors.extend(check_python_compile(root))
+    errors.extend(check_decktest_embed(root))
     errors.extend(check_html_build(root))
     if zip_path:
         errors.extend(check_zip(zip_path))

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 from string import Template
@@ -17,6 +18,15 @@ TEMPLATE_DIR = SCRIPT_DIR / "templates"
 HTML_TEMPLATE_PATH = TEMPLATE_DIR / "deck_browser.html"
 CSS_TEMPLATE_DIR = TEMPLATE_DIR / "css"
 JS_TEMPLATE_DIR = TEMPLATE_DIR / "js"
+SIMULATOR_DIST_CANDIDATES = [
+    SCRIPT_DIR / "decktest_dist",
+    SCRIPT_DIR.parent / "decktest_dist",
+    SCRIPT_DIR.parent / "digimon-tcg-simulator" / "frontend" / "dist",
+]
+SIMULATOR_DIST_DIR = next((path for path in SIMULATOR_DIST_CANDIDATES if path.is_dir()), SIMULATOR_DIST_CANDIDATES[0])
+SIMULATOR_MANIFEST_PATH = SIMULATOR_DIST_DIR / "manifest.json"
+SIMULATOR_MANIFEST_FALLBACK = SIMULATOR_DIST_DIR / ".vite" / "manifest.json"
+EMBED_ASSET_DIR = "decktest-assets"
 
 
 def load_template_text(path: Path) -> str:
@@ -46,6 +56,72 @@ def build_html_template() -> str:
 HTML_TEMPLATE = Template(build_html_template())
 
 
+def load_embed_manifest() -> dict[str, Any] | None:
+    manifest_path = SIMULATOR_MANIFEST_PATH if SIMULATOR_MANIFEST_PATH.is_file() else SIMULATOR_MANIFEST_FALLBACK
+    if not manifest_path.is_file():
+        return None
+    try:
+        return json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+
+
+def build_embed_assets_html() -> str:
+    manifest = load_embed_manifest()
+    if not manifest:
+        return ""
+    entry_key = next(
+        (
+            key
+            for key, value in manifest.items()
+            if isinstance(value, dict) and value.get("isEntry") and "deckBrowserEmbed" in key
+        ),
+        None,
+    )
+    if not entry_key:
+        return ""
+
+    def collect_css(key: str, seen: set[str], css_files: list[str]) -> None:
+        if key in seen or key not in manifest:
+            return
+        seen.add(key)
+        entry = manifest[key]
+        for css_file in entry.get("css", []) or []:
+            if css_file not in css_files:
+                css_files.append(css_file)
+        for imported in entry.get("imports", []) or []:
+            collect_css(imported, seen, css_files)
+
+    entry = manifest[entry_key]
+    css_files: list[str] = []
+    collect_css(entry_key, set(), css_files)
+
+    tags: list[str] = []
+    for css_file in css_files:
+        tags.append(f"<link rel=\"stylesheet\" href=\"{EMBED_ASSET_DIR}/{css_file}\">")
+    if entry.get("file"):
+        tags.append(f"<script type=\"module\" src=\"{EMBED_ASSET_DIR}/{entry['file']}\"></script>")
+    return "\n".join(tags)
+
+
+def sync_embed_assets(output_path: Path) -> None:
+    if not SIMULATOR_DIST_DIR.is_dir():
+        return
+    target_dir = output_path.parent / EMBED_ASSET_DIR
+    target_dir.mkdir(parents=True, exist_ok=True)
+    for item in SIMULATOR_DIST_DIR.iterdir():
+        destination = target_dir / item.name
+        if item.is_dir():
+            shutil.copytree(item, destination, dirs_exist_ok=True)
+        else:
+            shutil.copy2(item, destination)
+
+    assets_dir = SIMULATOR_DIST_DIR / "assets"
+    if assets_dir.is_dir():
+        root_assets = output_path.parent / "assets"
+        shutil.copytree(assets_dir, root_assets, dirs_exist_ok=True)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build a local visual browser for current DCGO decks.")
     parser.add_argument("--app-support-dir", required=True, help="DCGO app support directory")
@@ -61,6 +137,7 @@ def render_html(app_data: dict[str, Any]) -> str:
         manifest_source=json.dumps(app_data["manifestSource"], ensure_ascii=False),
         deck_root=json.dumps(app_data["deckRoot"], ensure_ascii=False),
         app_version=json.dumps(app_data.get("appVersion", APP_VERSION), ensure_ascii=False),
+        deck_browser_embed_assets=build_embed_assets_html(),
     )
 
 
@@ -68,6 +145,7 @@ def build_html(app_data: dict[str, Any], output_path: Path) -> None:
     html = render_html(app_data)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(html, encoding="utf-8")
+    sync_embed_assets(output_path)
 
 
 def main() -> int:

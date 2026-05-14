@@ -1,0 +1,1155 @@
+{
+  "_index-BFLqDyKe.js": {
+    "file": "assets/index-BFLqDyKe.js",
+    "name": "index",
+    "css": [
+      "assets/index-D2vF9KLd.css"
+    ],
+    "assets": [
+      "assets/AncientIrismon-Bm1mnS1l.png",
+      "assets/Bearmon-95JNyZkI.png",
+      "assets/Belphemon-CM2FXuAi.png",
+      "assets/BloomLordmon-FU3-_0C4.png",
+      "assets/Commandramon-CSP6gZ3d.png",
+      "assets/DarkKnightmonX-Dcewf2SI.png",
+      "assets/Diablomon-B6LSNKWw.png",
+      "assets/Guilmon-Dkqh8kqV.png",
+      "assets/Hexeblaumon-BDTchY1d.png",
+      "assets/Impmon-L1YxrP1Y.png",
+      "assets/KaiserGreymon-CrWN8kTF.png",
+      "assets/Omegamon-DxokSds5.png",
+      "assets/Sakuyamon-CCAZWqh6.png",
+      "assets/Silphymon-BjM6E5Ze.png",
+      "assets/Solarmon-DlmvD2mH.png",
+      "assets/Stingmon-DoMl6yeh.png",
+      "assets/Superstarmon-CZj8FPgb.png",
+      "assets/Tyrannomon-DLWLKxqC.png",
+      "assets/V-mon-XeYOXvGW.png",
+      "assets/WereGarurumon-Bn7MXXJS.png",
+      "assets/Gammamon-93pwa5UX.png",
+      "assets/Justimon-LlYVIieA.png",
+      "assets/Coronamon-CO1EckAe.png",
+      "assets/Hackmon-DKE9tCvU.png",
+      "assets/ClearAgumon-hp-8Dr8D.png",
+      "assets/Terriermon-3EHHl7J8.png",
+      "assets/Airdramon-CsJGzmwR.png",
+      "assets/Tailmon-D3jpjlJk.png",
+      "assets/TogemonX-XT3-Y3Fi.png",
+      "assets/WizardmonX-BTKSlkrM.png",
+      "assets/Dorumon-C0A_fOmI.png",
+      "assets/Lunamon-B7NyYxNC.png",
+      "assets/Pinochimon-krPiouB2.png",
+      "assets/PrinceMamemon-DJDAZAe2.png",
+      "assets/Lilithmon_X-Ca22wMd8.png",
+      "assets/Numemon-c0VREpVw.png",
+      "assets/Placeholder-DBpfmWkD.png",
+      "assets/HolyAngemon-CmHntJDj.png",
+      "assets/Imperialdramon_PM-BOUunxBO.png",
+      "assets/Leviamon_X-CqnKVkva.png",
+      "assets/Pandamon-BYyG0ghc.png",
+      "assets/BanchoLeomon-CZtQbUF0.png",
+      "assets/Centalmon-RcEWo9fa.png",
+      "assets/Cyberdramon_X-BzvamG3V.png",
+      "assets/Darkdramon-dWCEavYF.png",
+      "assets/Duftmon_X-BX_sZz3N.png",
+      "assets/Gekomon-GqKnpXHj.png",
+      "assets/Kunemon-BKRUjkHS.png",
+      "assets/Labramon-BpseTuV1.png",
+      "assets/Lucemon-OzSqoTax.png",
+      "assets/Mamemon_X-BTuIeNRE.png",
+      "assets/Orochimon-DafqIPXe.png",
+      "assets/Piemon-Bmta5nEE.png",
+      "assets/Reppamon-HbZV7uCg.png",
+      "assets/Rukamon-CvcUE_t6.png",
+      "assets/Vademon-BCXXUymu.png",
+      "assets/Blossomon-D4vZRViq.png",
+      "assets/Delumon-PBHZ6Xbv.png",
+      "assets/Andiramon_Data-CU_HswtI.png",
+      "assets/Amon-CnVHADg_.webp",
+      "assets/Umon-CjPoN8oj.webp",
+      "assets/Diaboromon-CTQ_WLcD.webp",
+      "assets/KoHagurumon-BbkXRBPW.webp",
+      "assets/Fujitsumon-CvXEtrHw.webp",
+      "assets/Gyuukimon-6EyJkCEK.webp",
+      "assets/tokenCard-B9zN-5JQ.jpg",
+      "assets/VoleeUndZerdruecken-C7k7krtE.webp",
+      "assets/Rapidmon-DvNKD96E.png",
+      "assets/WarGrowlmon-BLj7hXCC.png",
+      "assets/Taomon-BnmaO5dV.png",
+      "assets/Familiar_Token-284UVRdQ.webp",
+      "assets/Fox_Token-RCeGy9AT.webp",
+      "assets/Mitama_Token-L9UbGBKp.webp",
+      "assets/ARP_Token-v5lxjOyt.webp",
+      "assets/Petrification_Token-BFusNcxG.webp",
+      "assets/Hinukamuy-BQTgb4HG.png",
+      "assets/cardBack-De7Y2mLX.jpg",
+      "assets/draw-card-BpEOjEiu.mp3",
+      "assets/reveal-card-DgxuKizJ.mp3",
+      "assets/card-to-hand-eeZPaZbu.mp3",
+      "assets/trash-card-BMt2TPYA.mp3",
+      "assets/attack-6aOn3DrM.mp3",
+      "assets/coin-flip-JGK1w7r5.mp3",
+      "assets/security-reveal-BcFZA0Jo.mp3",
+      "assets/shuffle-deck-DC4W2-fQ.mp3",
+      "assets/unsuspend-1c2SZXxY.mp3",
+      "assets/opponent-place-card-DKO7Zm3z.mp3",
+      "assets/next-phase-DAkYS4Bw.mp3",
+      "assets/pass-turn-BmFqaAGF.mp3",
+      "assets/next-attack-phase-Be1a3F52.mp3",
+      "assets/effect-attack-C-euKOsS.mp3",
+      "assets/activate-effect-CKklcE6j.mp3",
+      "assets/effect-target-C8wciC4x.mp3",
+      "assets/rematch-CTcz-kZ7.mp3",
+      "assets/player-joined-UPWFMMgR.mp3",
+      "assets/countdown-B8P9su9h.mp3",
+      "assets/kick-XKeZnkoT.mp3",
+      "assets/Avant (@SadGatomon cover)-Chj9C4bD.mp3",
+      "assets/Brave Heart (@SadGatomon cover)-DoE4ovi1.mp3",
+      "assets/Break up (@SadGatomon cover)-C14TkUmk.mp3",
+      "assets/Butter-Fly (@SadGatomon cover)-CjsAHgum.mp3",
+      "assets/Digimon Survive - Main Theme (@SadGatomon cover feat.@jembei)-CGonNqcV.mp3",
+      "assets/Digimon World - Night Time in File City (@SadGatomon cover)-tDl4BO-8.mp3",
+      "assets/EVO (@SadGatomon cover)-Knc1rxCa.mp3",
+      "assets/Fire (@SadGatomon cover)-CdDYQW0-.mp3",
+      "assets/Namida no Yukue (@SadGatomon cover)-CX0FjPiq.mp3",
+      "assets/shouri zen no theme (@SadGatomon cover feat.@jembei)-Da75r7oI.mp3",
+      "assets/Target (@SadGatomon cover)-DJZ9mev6.mp3",
+      "assets/The Biggest Dreamer (@SadGatomon cover)-DYs-4BM_.mp3",
+      "assets/Drasil-BGM-1-nZkJZnOk.mp3",
+      "assets/Drasil-BGM-2-C0gNDv3-.mp3",
+      "assets/Drasil-BGM-3-CeG-j465.mp3",
+      "assets/Drasil-BGM-4-GZ0Gpx0e.mp3",
+      "assets/Drasil-BGM-5-B5XyRR_9.mp3",
+      "assets/Drasil-BGM-6-CtTn3L_9.mp3",
+      "assets/Drasil-BGM-7-TcsJcrAF.mp3",
+      "assets/Drasil-BGM-8-BiJcnv5K.mp3",
+      "assets/Drasil-BGM-9-DV4QmxT3.mp3",
+      "assets/Drasil-BGM-10-DqZI3M8k.mp3",
+      "assets/Drasil-BGM-11-CxhpXkQv.mp3",
+      "assets/Drasil-BGM-12-CixJpC54.mp3",
+      "assets/Drasil-BGM-13-Dvh68Vwm.mp3",
+      "assets/Drasil-BGM-14-DdoePVsT.mp3",
+      "assets/Drasil-BGM-15-CfZXjZL9.mp3",
+      "assets/Drasil-BGM-16-DUox9gtf.mp3",
+      "assets/Drasil-BGM-17-C_w5kAPm.mp3",
+      "assets/Drasil-BGM-18-UGneEH4P.mp3",
+      "assets/Drasil-BGM-19-CCsABRW7.mp3",
+      "assets/Drasil-BGM-20-D1G-ua5I.mp3",
+      "assets/option-DSlxR6wG.png",
+      "assets/tamer-mo-k6C3r.png",
+      "assets/egg-M7KLEIwL.png",
+      "assets/BT1_082_ROSEMON-sztdsxvA.png",
+      "assets/BT12_043_SHINEGREYMON-B6f2S70u.png",
+      "assets/EX3_034_ANGEWOMON-BbPiRRC2.png",
+      "assets/BT3_088_LADYDEVIMON-Bmpk2MR6.png",
+      "assets/BT2_066_MACHINEDRAMON-BAycbzPm.png",
+      "assets/BT14_071_LOOGAMON-DjLHwFyy.png",
+      "assets/BT15_056_RYUDAMON-CmSeh3wu.png",
+      "assets/BT3_092_MALOMYOTISMON-C0pOfazj.png",
+      "assets/BT11_086_MERVAMON_7D6-h9nI4wwG.png",
+      "assets/BT18_044_FUNBEEMON-aq97MqnK.png",
+      "assets/EX8_074_MEDIEVALGALLANTMON-C9Tzc3Xt.png",
+      "assets/EX7_015_OTAMAMON-BJzXnEgm.png",
+      "assets/EX6_057_LILITHMON-DBg5ZI8g.png",
+      "assets/EX5_073_GRACENOVAMON-CF_XiYq1.png",
+      "assets/BT4_082_DOBERMON-D--d_Sxy.png",
+      "assets/BT1_079_LILLYMON-Cyi6AnNH.png",
+      "assets/BT8_071_PSYCHEMON-Ca6Z1paN.png",
+      "assets/BT3_030_DUFTMON-CmnXcHrj.png",
+      "assets/BT17_024_SEASARMON-B1TEK3Md.png",
+      "assets/BT10_048_SUNFLOWMON-BL0ARoNa.png",
+      "assets/ST14_04_PHASCOMON-Cw8_HeFp.png",
+      "assets/BT20_069_PUNKMON-Cmi5pCu_.png",
+      "assets/BT16_020_GAOGAMON-CmZOm9tv.png",
+      "assets/BT11_056_JIJIMON_ARTIST_SHOWDOWN-DnUwoqpU.png",
+      "assets/BT7_063_DARKKNIGHTMON-dKleP4zh.png",
+      "assets/EX9_024_HANIMON-Bxd22uFF.png",
+      "assets/BT7_018_GOMAMON-CCU14CtL.png",
+      "assets/ST22_01_VIXIMON-DeAGdA_p.png",
+      "assets/BT24_001_GIGIMON-dchylGyK.png",
+      "assets/BT24_007_TSUNOMON-BFGYg2M5.png",
+      "assets/ST14_01_YAAMON-woIEqjv-.png",
+      "assets/P_148_WANYAMON-ou1dU2al.png",
+      "assets/cardBackBlack-DkkgRvZ6.jpg",
+      "assets/cardBackWhite-3thepPwV.jpg",
+      "assets/cardBackRed-Cr76V0ce.jpg",
+      "assets/cardBackBlue-BHQwSTB4.jpg",
+      "assets/cardBackGreen-CezFLuxa.jpg",
+      "assets/cardBackYellow-D_cHjXZy.jpg",
+      "assets/cardBackPurple-CM4fQdte.jpg",
+      "assets/RAINBOW-nApiMMt_.png",
+      "assets/eggBack-CWK8wLC-.jpg",
+      "assets/Hackmon-Dm29DthR.webp",
+      "assets/noiseBG-cfuzFBYZ.png",
+      "assets/square-sparkle-apng-yH_ZV1nw.png",
+      "assets/my-security-apng-EFFBPgxV.png",
+      "assets/virus-C1KN_ZVa.png",
+      "assets/data-CGvmLl6X.png",
+      "assets/vaccine-BZLBYVeZ.png",
+      "assets/free-S5xbIRmA.png",
+      "assets/unknown-CnNrRsu4.png",
+      "assets/god-BymstFHt.png",
+      "assets/game-AzR3mWkW.png",
+      "assets/life-DlrftaSV.png",
+      "assets/navi-Hq6UmU_f.png",
+      "assets/social-_CnO5sHo.png",
+      "assets/system-B7glowQT.png",
+      "assets/tool-B-xWpLiX.png",
+      "assets/BlueglassTextSelect-CiCd0eAK.cur",
+      "assets/sticker-grabbing-C7hv7tTB.cur",
+      "assets/alarm clock-Chdz0QUV.ttf",
+      "assets/amiga4ever pro2-BcwF2KTP.ttf",
+      "assets/AwsumSans-Cugn2XmG.otf",
+      "assets/AwsumSansItalic-DduGpUra.otf",
+      "assets/AwsumSansBold-D-yFDXel.otf",
+      "assets/AwsumSansBoldItalic-DaiWJ8pR.otf",
+      "assets/Cousine-Regular-CdJOIwAE.ttf",
+      "assets/Cousine-Italic-DIPzBDZ4.ttf",
+      "assets/Cousine-Bold-YWAZ9LhP.ttf",
+      "assets/Cousine-BoldItalic-CzDqrv_e.ttf",
+      "assets/MontelgoSansSerif-Dpz1Hef3.otf",
+      "assets/MontelgoSansSerifItalic-DXKjap38.otf",
+      "assets/naston-regular-BHJMPa3q.ttf",
+      "assets/Pixel Digivolve-D_A1brmM.otf",
+      "assets/Pixel Digivolve Italic-DDD-c-pK.otf",
+      "assets/Sansation_Regular-sTKQ0Ud9.ttf",
+      "assets/LeagueSpartan-Thin-CwNhvuRh.ttf",
+      "assets/LeagueSpartan-ExtraLight-CvOlYXlc.ttf",
+      "assets/LeagueSpartan-Light-BCE0vfyw.ttf",
+      "assets/LeagueSpartan-Regular-BPRtzbvb.ttf",
+      "assets/LeagueSpartan-Medium-N8FNkCtD.ttf",
+      "assets/LeagueSpartan-SemiBold-DIA_uE9S.ttf",
+      "assets/LeagueSpartan-Bold-JyyYt1F3.ttf",
+      "assets/LeagueSpartan-ExtraBold-BnAzkFTU.ttf",
+      "assets/LeagueSpartan-Black-LcDwCtfE.ttf",
+      "assets/Sakana_Regular-DsMdcxyv.ttf",
+      "assets/Frutiger-DfPjhwyg.ttf",
+      "assets/Frutiger_bold-BcC8UB7I.ttf"
+    ]
+  },
+  "_index-D2vF9KLd.css": {
+    "file": "assets/index-D2vF9KLd.css",
+    "src": "_index-D2vF9KLd.css"
+  },
+  "index.html": {
+    "file": "assets/main-DDGwnxqu.js",
+    "name": "main",
+    "src": "index.html",
+    "isEntry": true,
+    "imports": [
+      "_index-BFLqDyKe.js"
+    ],
+    "assets": [
+      "assets/discordLogo-D8wyZE9p.png",
+      "assets/crown-Bfs216yl.webp",
+      "assets/opponent-security-apng-DRTWwoRK.png",
+      "assets/gatchmon-CqbbMHZP.png",
+      "assets/favicon--JI_EdpM.ico"
+    ]
+  },
+  "public/favicon.ico": {
+    "file": "assets/favicon--JI_EdpM.ico",
+    "src": "public/favicon.ico"
+  },
+  "src/assets/Hackmon.webp": {
+    "file": "assets/Hackmon-Dm29DthR.webp",
+    "src": "src/assets/Hackmon.webp"
+  },
+  "src/assets/attribute_icons/appmon/game.png": {
+    "file": "assets/game-AzR3mWkW.png",
+    "src": "src/assets/attribute_icons/appmon/game.png"
+  },
+  "src/assets/attribute_icons/appmon/god.png": {
+    "file": "assets/god-BymstFHt.png",
+    "src": "src/assets/attribute_icons/appmon/god.png"
+  },
+  "src/assets/attribute_icons/appmon/life.png": {
+    "file": "assets/life-DlrftaSV.png",
+    "src": "src/assets/attribute_icons/appmon/life.png"
+  },
+  "src/assets/attribute_icons/appmon/navi.png": {
+    "file": "assets/navi-Hq6UmU_f.png",
+    "src": "src/assets/attribute_icons/appmon/navi.png"
+  },
+  "src/assets/attribute_icons/appmon/social.png": {
+    "file": "assets/social-_CnO5sHo.png",
+    "src": "src/assets/attribute_icons/appmon/social.png"
+  },
+  "src/assets/attribute_icons/appmon/system.png": {
+    "file": "assets/system-B7glowQT.png",
+    "src": "src/assets/attribute_icons/appmon/system.png"
+  },
+  "src/assets/attribute_icons/appmon/tool.png": {
+    "file": "assets/tool-B-xWpLiX.png",
+    "src": "src/assets/attribute_icons/appmon/tool.png"
+  },
+  "src/assets/attribute_icons/data.png": {
+    "file": "assets/data-CGvmLl6X.png",
+    "src": "src/assets/attribute_icons/data.png"
+  },
+  "src/assets/attribute_icons/free.png": {
+    "file": "assets/free-S5xbIRmA.png",
+    "src": "src/assets/attribute_icons/free.png"
+  },
+  "src/assets/attribute_icons/unknown.png": {
+    "file": "assets/unknown-CnNrRsu4.png",
+    "src": "src/assets/attribute_icons/unknown.png"
+  },
+  "src/assets/attribute_icons/vaccine.png": {
+    "file": "assets/vaccine-BZLBYVeZ.png",
+    "src": "src/assets/attribute_icons/vaccine.png"
+  },
+  "src/assets/attribute_icons/virus.png": {
+    "file": "assets/virus-C1KN_ZVa.png",
+    "src": "src/assets/attribute_icons/virus.png"
+  },
+  "src/assets/cardBack.jpg": {
+    "file": "assets/cardBack-De7Y2mLX.jpg",
+    "src": "src/assets/cardBack.jpg"
+  },
+  "src/assets/cardtype_icons/egg.png": {
+    "file": "assets/egg-M7KLEIwL.png",
+    "src": "src/assets/cardtype_icons/egg.png"
+  },
+  "src/assets/cardtype_icons/option.png": {
+    "file": "assets/option-DSlxR6wG.png",
+    "src": "src/assets/cardtype_icons/option.png"
+  },
+  "src/assets/cardtype_icons/tamer.png": {
+    "file": "assets/tamer-mo-k6C3r.png",
+    "src": "src/assets/cardtype_icons/tamer.png"
+  },
+  "src/assets/crown.webp": {
+    "file": "assets/crown-Bfs216yl.webp",
+    "src": "src/assets/crown.webp"
+  },
+  "src/assets/cursors/BlueglassTextSelect.cur": {
+    "file": "assets/BlueglassTextSelect-CiCd0eAK.cur",
+    "src": "src/assets/cursors/BlueglassTextSelect.cur"
+  },
+  "src/assets/cursors/sticker-grabbing.cur": {
+    "file": "assets/sticker-grabbing-C7hv7tTB.cur",
+    "src": "src/assets/cursors/sticker-grabbing.cur"
+  },
+  "src/assets/discordLogo.png": {
+    "file": "assets/discordLogo-D8wyZE9p.png",
+    "src": "src/assets/discordLogo.png"
+  },
+  "src/assets/eggBack.jpg": {
+    "file": "assets/eggBack-CWK8wLC-.jpg",
+    "src": "src/assets/eggBack.jpg"
+  },
+  "src/assets/fonts/AwsumSans.otf": {
+    "file": "assets/AwsumSans-Cugn2XmG.otf",
+    "src": "src/assets/fonts/AwsumSans.otf"
+  },
+  "src/assets/fonts/AwsumSansBold.otf": {
+    "file": "assets/AwsumSansBold-D-yFDXel.otf",
+    "src": "src/assets/fonts/AwsumSansBold.otf"
+  },
+  "src/assets/fonts/AwsumSansBoldItalic.otf": {
+    "file": "assets/AwsumSansBoldItalic-DaiWJ8pR.otf",
+    "src": "src/assets/fonts/AwsumSansBoldItalic.otf"
+  },
+  "src/assets/fonts/AwsumSansItalic.otf": {
+    "file": "assets/AwsumSansItalic-DduGpUra.otf",
+    "src": "src/assets/fonts/AwsumSansItalic.otf"
+  },
+  "src/assets/fonts/Cousine-Bold.ttf": {
+    "file": "assets/Cousine-Bold-YWAZ9LhP.ttf",
+    "src": "src/assets/fonts/Cousine-Bold.ttf"
+  },
+  "src/assets/fonts/Cousine-BoldItalic.ttf": {
+    "file": "assets/Cousine-BoldItalic-CzDqrv_e.ttf",
+    "src": "src/assets/fonts/Cousine-BoldItalic.ttf"
+  },
+  "src/assets/fonts/Cousine-Italic.ttf": {
+    "file": "assets/Cousine-Italic-DIPzBDZ4.ttf",
+    "src": "src/assets/fonts/Cousine-Italic.ttf"
+  },
+  "src/assets/fonts/Cousine-Regular.ttf": {
+    "file": "assets/Cousine-Regular-CdJOIwAE.ttf",
+    "src": "src/assets/fonts/Cousine-Regular.ttf"
+  },
+  "src/assets/fonts/Frutiger.ttf": {
+    "file": "assets/Frutiger-DfPjhwyg.ttf",
+    "src": "src/assets/fonts/Frutiger.ttf"
+  },
+  "src/assets/fonts/Frutiger_bold.ttf": {
+    "file": "assets/Frutiger_bold-BcC8UB7I.ttf",
+    "src": "src/assets/fonts/Frutiger_bold.ttf"
+  },
+  "src/assets/fonts/LeagueSpartan/LeagueSpartan-Black.ttf": {
+    "file": "assets/LeagueSpartan-Black-LcDwCtfE.ttf",
+    "src": "src/assets/fonts/LeagueSpartan/LeagueSpartan-Black.ttf"
+  },
+  "src/assets/fonts/LeagueSpartan/LeagueSpartan-Bold.ttf": {
+    "file": "assets/LeagueSpartan-Bold-JyyYt1F3.ttf",
+    "src": "src/assets/fonts/LeagueSpartan/LeagueSpartan-Bold.ttf"
+  },
+  "src/assets/fonts/LeagueSpartan/LeagueSpartan-ExtraBold.ttf": {
+    "file": "assets/LeagueSpartan-ExtraBold-BnAzkFTU.ttf",
+    "src": "src/assets/fonts/LeagueSpartan/LeagueSpartan-ExtraBold.ttf"
+  },
+  "src/assets/fonts/LeagueSpartan/LeagueSpartan-ExtraLight.ttf": {
+    "file": "assets/LeagueSpartan-ExtraLight-CvOlYXlc.ttf",
+    "src": "src/assets/fonts/LeagueSpartan/LeagueSpartan-ExtraLight.ttf"
+  },
+  "src/assets/fonts/LeagueSpartan/LeagueSpartan-Light.ttf": {
+    "file": "assets/LeagueSpartan-Light-BCE0vfyw.ttf",
+    "src": "src/assets/fonts/LeagueSpartan/LeagueSpartan-Light.ttf"
+  },
+  "src/assets/fonts/LeagueSpartan/LeagueSpartan-Medium.ttf": {
+    "file": "assets/LeagueSpartan-Medium-N8FNkCtD.ttf",
+    "src": "src/assets/fonts/LeagueSpartan/LeagueSpartan-Medium.ttf"
+  },
+  "src/assets/fonts/LeagueSpartan/LeagueSpartan-Regular.ttf": {
+    "file": "assets/LeagueSpartan-Regular-BPRtzbvb.ttf",
+    "src": "src/assets/fonts/LeagueSpartan/LeagueSpartan-Regular.ttf"
+  },
+  "src/assets/fonts/LeagueSpartan/LeagueSpartan-SemiBold.ttf": {
+    "file": "assets/LeagueSpartan-SemiBold-DIA_uE9S.ttf",
+    "src": "src/assets/fonts/LeagueSpartan/LeagueSpartan-SemiBold.ttf"
+  },
+  "src/assets/fonts/LeagueSpartan/LeagueSpartan-Thin.ttf": {
+    "file": "assets/LeagueSpartan-Thin-CwNhvuRh.ttf",
+    "src": "src/assets/fonts/LeagueSpartan/LeagueSpartan-Thin.ttf"
+  },
+  "src/assets/fonts/MontelgoSansSerif.otf": {
+    "file": "assets/MontelgoSansSerif-Dpz1Hef3.otf",
+    "src": "src/assets/fonts/MontelgoSansSerif.otf"
+  },
+  "src/assets/fonts/MontelgoSansSerifItalic.otf": {
+    "file": "assets/MontelgoSansSerifItalic-DXKjap38.otf",
+    "src": "src/assets/fonts/MontelgoSansSerifItalic.otf"
+  },
+  "src/assets/fonts/Pixel Digivolve Italic.otf": {
+    "file": "assets/Pixel Digivolve Italic-DDD-c-pK.otf",
+    "src": "src/assets/fonts/Pixel Digivolve Italic.otf"
+  },
+  "src/assets/fonts/Pixel Digivolve.otf": {
+    "file": "assets/Pixel Digivolve-D_A1brmM.otf",
+    "src": "src/assets/fonts/Pixel Digivolve.otf"
+  },
+  "src/assets/fonts/Sakana_Regular.ttf": {
+    "file": "assets/Sakana_Regular-DsMdcxyv.ttf",
+    "src": "src/assets/fonts/Sakana_Regular.ttf"
+  },
+  "src/assets/fonts/Sansation_Regular.ttf": {
+    "file": "assets/Sansation_Regular-sTKQ0Ud9.ttf",
+    "src": "src/assets/fonts/Sansation_Regular.ttf"
+  },
+  "src/assets/fonts/alarm clock.ttf": {
+    "file": "assets/alarm clock-Chdz0QUV.ttf",
+    "src": "src/assets/fonts/alarm clock.ttf"
+  },
+  "src/assets/fonts/amiga4ever pro2.ttf": {
+    "file": "assets/amiga4ever pro2-BcwF2KTP.ttf",
+    "src": "src/assets/fonts/amiga4ever pro2.ttf"
+  },
+  "src/assets/fonts/naston-regular.ttf": {
+    "file": "assets/naston-regular-BHJMPa3q.ttf",
+    "src": "src/assets/fonts/naston-regular.ttf"
+  },
+  "src/assets/gatchmon.png": {
+    "file": "assets/gatchmon-CqbbMHZP.png",
+    "src": "src/assets/gatchmon.png"
+  },
+  "src/assets/lotties/my-security-apng.png": {
+    "file": "assets/my-security-apng-EFFBPgxV.png",
+    "src": "src/assets/lotties/my-security-apng.png"
+  },
+  "src/assets/lotties/opponent-security-apng.png": {
+    "file": "assets/opponent-security-apng-DRTWwoRK.png",
+    "src": "src/assets/lotties/opponent-security-apng.png"
+  },
+  "src/assets/lotties/square-sparkle-apng.png": {
+    "file": "assets/square-sparkle-apng-yH_ZV1nw.png",
+    "src": "src/assets/lotties/square-sparkle-apng.png"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-1.mp3": {
+    "file": "assets/Drasil-BGM-1-nZkJZnOk.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-1.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-10.mp3": {
+    "file": "assets/Drasil-BGM-10-DqZI3M8k.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-10.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-11.mp3": {
+    "file": "assets/Drasil-BGM-11-CxhpXkQv.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-11.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-12.mp3": {
+    "file": "assets/Drasil-BGM-12-CixJpC54.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-12.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-13.mp3": {
+    "file": "assets/Drasil-BGM-13-Dvh68Vwm.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-13.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-14.mp3": {
+    "file": "assets/Drasil-BGM-14-DdoePVsT.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-14.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-15.mp3": {
+    "file": "assets/Drasil-BGM-15-CfZXjZL9.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-15.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-16.mp3": {
+    "file": "assets/Drasil-BGM-16-DUox9gtf.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-16.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-17.mp3": {
+    "file": "assets/Drasil-BGM-17-C_w5kAPm.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-17.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-18.mp3": {
+    "file": "assets/Drasil-BGM-18-UGneEH4P.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-18.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-19.mp3": {
+    "file": "assets/Drasil-BGM-19-CCsABRW7.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-19.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-2.mp3": {
+    "file": "assets/Drasil-BGM-2-C0gNDv3-.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-2.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-20.mp3": {
+    "file": "assets/Drasil-BGM-20-D1G-ua5I.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-20.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-3.mp3": {
+    "file": "assets/Drasil-BGM-3-CeG-j465.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-3.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-4.mp3": {
+    "file": "assets/Drasil-BGM-4-GZ0Gpx0e.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-4.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-5.mp3": {
+    "file": "assets/Drasil-BGM-5-B5XyRR_9.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-5.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-6.mp3": {
+    "file": "assets/Drasil-BGM-6-CtTn3L_9.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-6.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-7.mp3": {
+    "file": "assets/Drasil-BGM-7-TcsJcrAF.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-7.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-8.mp3": {
+    "file": "assets/Drasil-BGM-8-BiJcnv5K.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-8.mp3"
+  },
+  "src/assets/music/project_drasil_bgm/Drasil-BGM-9.mp3": {
+    "file": "assets/Drasil-BGM-9-DV4QmxT3.mp3",
+    "src": "src/assets/music/project_drasil_bgm/Drasil-BGM-9.mp3"
+  },
+  "src/assets/music/sad_gatomon_lofi/Avant (@SadGatomon cover).mp3": {
+    "file": "assets/Avant (@SadGatomon cover)-Chj9C4bD.mp3",
+    "src": "src/assets/music/sad_gatomon_lofi/Avant (@SadGatomon cover).mp3"
+  },
+  "src/assets/music/sad_gatomon_lofi/Brave Heart (@SadGatomon cover).mp3": {
+    "file": "assets/Brave Heart (@SadGatomon cover)-DoE4ovi1.mp3",
+    "src": "src/assets/music/sad_gatomon_lofi/Brave Heart (@SadGatomon cover).mp3"
+  },
+  "src/assets/music/sad_gatomon_lofi/Break up (@SadGatomon cover).mp3": {
+    "file": "assets/Break up (@SadGatomon cover)-C14TkUmk.mp3",
+    "src": "src/assets/music/sad_gatomon_lofi/Break up (@SadGatomon cover).mp3"
+  },
+  "src/assets/music/sad_gatomon_lofi/Butter-Fly (@SadGatomon cover).mp3": {
+    "file": "assets/Butter-Fly (@SadGatomon cover)-CjsAHgum.mp3",
+    "src": "src/assets/music/sad_gatomon_lofi/Butter-Fly (@SadGatomon cover).mp3"
+  },
+  "src/assets/music/sad_gatomon_lofi/Digimon Survive - Main Theme (@SadGatomon cover feat.@jembei).mp3": {
+    "file": "assets/Digimon Survive - Main Theme (@SadGatomon cover feat.@jembei)-CGonNqcV.mp3",
+    "src": "src/assets/music/sad_gatomon_lofi/Digimon Survive - Main Theme (@SadGatomon cover feat.@jembei).mp3"
+  },
+  "src/assets/music/sad_gatomon_lofi/Digimon World - Night Time in File City (@SadGatomon cover).mp3": {
+    "file": "assets/Digimon World - Night Time in File City (@SadGatomon cover)-tDl4BO-8.mp3",
+    "src": "src/assets/music/sad_gatomon_lofi/Digimon World - Night Time in File City (@SadGatomon cover).mp3"
+  },
+  "src/assets/music/sad_gatomon_lofi/EVO (@SadGatomon cover).mp3": {
+    "file": "assets/EVO (@SadGatomon cover)-Knc1rxCa.mp3",
+    "src": "src/assets/music/sad_gatomon_lofi/EVO (@SadGatomon cover).mp3"
+  },
+  "src/assets/music/sad_gatomon_lofi/Fire (@SadGatomon cover).mp3": {
+    "file": "assets/Fire (@SadGatomon cover)-CdDYQW0-.mp3",
+    "src": "src/assets/music/sad_gatomon_lofi/Fire (@SadGatomon cover).mp3"
+  },
+  "src/assets/music/sad_gatomon_lofi/Namida no Yukue (@SadGatomon cover).mp3": {
+    "file": "assets/Namida no Yukue (@SadGatomon cover)-CX0FjPiq.mp3",
+    "src": "src/assets/music/sad_gatomon_lofi/Namida no Yukue (@SadGatomon cover).mp3"
+  },
+  "src/assets/music/sad_gatomon_lofi/Target (@SadGatomon cover).mp3": {
+    "file": "assets/Target (@SadGatomon cover)-DJZ9mev6.mp3",
+    "src": "src/assets/music/sad_gatomon_lofi/Target (@SadGatomon cover).mp3"
+  },
+  "src/assets/music/sad_gatomon_lofi/The Biggest Dreamer (@SadGatomon cover).mp3": {
+    "file": "assets/The Biggest Dreamer (@SadGatomon cover)-DYs-4BM_.mp3",
+    "src": "src/assets/music/sad_gatomon_lofi/The Biggest Dreamer (@SadGatomon cover).mp3"
+  },
+  "src/assets/music/sad_gatomon_lofi/shouri zen no theme (@SadGatomon cover feat.@jembei).mp3": {
+    "file": "assets/shouri zen no theme (@SadGatomon cover feat.@jembei)-Da75r7oI.mp3",
+    "src": "src/assets/music/sad_gatomon_lofi/shouri zen no theme (@SadGatomon cover feat.@jembei).mp3"
+  },
+  "src/assets/noiseBG.png": {
+    "file": "assets/noiseBG-cfuzFBYZ.png",
+    "src": "src/assets/noiseBG.png"
+  },
+  "src/assets/profile_pictures/Airdramon.png": {
+    "file": "assets/Airdramon-CsJGzmwR.png",
+    "src": "src/assets/profile_pictures/Airdramon.png"
+  },
+  "src/assets/profile_pictures/AncientIrismon.png": {
+    "file": "assets/AncientIrismon-Bm1mnS1l.png",
+    "src": "src/assets/profile_pictures/AncientIrismon.png"
+  },
+  "src/assets/profile_pictures/Andiramon_Data.png": {
+    "file": "assets/Andiramon_Data-CU_HswtI.png",
+    "src": "src/assets/profile_pictures/Andiramon_Data.png"
+  },
+  "src/assets/profile_pictures/BanchoLeomon.png": {
+    "file": "assets/BanchoLeomon-CZtQbUF0.png",
+    "src": "src/assets/profile_pictures/BanchoLeomon.png"
+  },
+  "src/assets/profile_pictures/Bearmon.png": {
+    "file": "assets/Bearmon-95JNyZkI.png",
+    "src": "src/assets/profile_pictures/Bearmon.png"
+  },
+  "src/assets/profile_pictures/Belphemon.png": {
+    "file": "assets/Belphemon-CM2FXuAi.png",
+    "src": "src/assets/profile_pictures/Belphemon.png"
+  },
+  "src/assets/profile_pictures/BloomLordmon.png": {
+    "file": "assets/BloomLordmon-FU3-_0C4.png",
+    "src": "src/assets/profile_pictures/BloomLordmon.png"
+  },
+  "src/assets/profile_pictures/Blossomon.png": {
+    "file": "assets/Blossomon-D4vZRViq.png",
+    "src": "src/assets/profile_pictures/Blossomon.png"
+  },
+  "src/assets/profile_pictures/Centalmon.png": {
+    "file": "assets/Centalmon-RcEWo9fa.png",
+    "src": "src/assets/profile_pictures/Centalmon.png"
+  },
+  "src/assets/profile_pictures/ClearAgumon.png": {
+    "file": "assets/ClearAgumon-hp-8Dr8D.png",
+    "src": "src/assets/profile_pictures/ClearAgumon.png"
+  },
+  "src/assets/profile_pictures/Commandramon.png": {
+    "file": "assets/Commandramon-CSP6gZ3d.png",
+    "src": "src/assets/profile_pictures/Commandramon.png"
+  },
+  "src/assets/profile_pictures/Coronamon.png": {
+    "file": "assets/Coronamon-CO1EckAe.png",
+    "src": "src/assets/profile_pictures/Coronamon.png"
+  },
+  "src/assets/profile_pictures/Cyberdramon_X.png": {
+    "file": "assets/Cyberdramon_X-BzvamG3V.png",
+    "src": "src/assets/profile_pictures/Cyberdramon_X.png"
+  },
+  "src/assets/profile_pictures/DarkKnightmonX.png": {
+    "file": "assets/DarkKnightmonX-Dcewf2SI.png",
+    "src": "src/assets/profile_pictures/DarkKnightmonX.png"
+  },
+  "src/assets/profile_pictures/Darkdramon.png": {
+    "file": "assets/Darkdramon-dWCEavYF.png",
+    "src": "src/assets/profile_pictures/Darkdramon.png"
+  },
+  "src/assets/profile_pictures/Delumon.png": {
+    "file": "assets/Delumon-PBHZ6Xbv.png",
+    "src": "src/assets/profile_pictures/Delumon.png"
+  },
+  "src/assets/profile_pictures/Diablomon.png": {
+    "file": "assets/Diablomon-B6LSNKWw.png",
+    "src": "src/assets/profile_pictures/Diablomon.png"
+  },
+  "src/assets/profile_pictures/Dorumon.png": {
+    "file": "assets/Dorumon-C0A_fOmI.png",
+    "src": "src/assets/profile_pictures/Dorumon.png"
+  },
+  "src/assets/profile_pictures/Duftmon_X.png": {
+    "file": "assets/Duftmon_X-BX_sZz3N.png",
+    "src": "src/assets/profile_pictures/Duftmon_X.png"
+  },
+  "src/assets/profile_pictures/Gammamon.png": {
+    "file": "assets/Gammamon-93pwa5UX.png",
+    "src": "src/assets/profile_pictures/Gammamon.png"
+  },
+  "src/assets/profile_pictures/Gekomon.png": {
+    "file": "assets/Gekomon-GqKnpXHj.png",
+    "src": "src/assets/profile_pictures/Gekomon.png"
+  },
+  "src/assets/profile_pictures/Guilmon.png": {
+    "file": "assets/Guilmon-Dkqh8kqV.png",
+    "src": "src/assets/profile_pictures/Guilmon.png"
+  },
+  "src/assets/profile_pictures/Hackmon.png": {
+    "file": "assets/Hackmon-DKE9tCvU.png",
+    "src": "src/assets/profile_pictures/Hackmon.png"
+  },
+  "src/assets/profile_pictures/Hexeblaumon.png": {
+    "file": "assets/Hexeblaumon-BDTchY1d.png",
+    "src": "src/assets/profile_pictures/Hexeblaumon.png"
+  },
+  "src/assets/profile_pictures/HolyAngemon.png": {
+    "file": "assets/HolyAngemon-CmHntJDj.png",
+    "src": "src/assets/profile_pictures/HolyAngemon.png"
+  },
+  "src/assets/profile_pictures/Imperialdramon_PM.png": {
+    "file": "assets/Imperialdramon_PM-BOUunxBO.png",
+    "src": "src/assets/profile_pictures/Imperialdramon_PM.png"
+  },
+  "src/assets/profile_pictures/Impmon.png": {
+    "file": "assets/Impmon-L1YxrP1Y.png",
+    "src": "src/assets/profile_pictures/Impmon.png"
+  },
+  "src/assets/profile_pictures/Justimon.png": {
+    "file": "assets/Justimon-LlYVIieA.png",
+    "src": "src/assets/profile_pictures/Justimon.png"
+  },
+  "src/assets/profile_pictures/KaiserGreymon.png": {
+    "file": "assets/KaiserGreymon-CrWN8kTF.png",
+    "src": "src/assets/profile_pictures/KaiserGreymon.png"
+  },
+  "src/assets/profile_pictures/Kunemon.png": {
+    "file": "assets/Kunemon-BKRUjkHS.png",
+    "src": "src/assets/profile_pictures/Kunemon.png"
+  },
+  "src/assets/profile_pictures/Labramon.png": {
+    "file": "assets/Labramon-BpseTuV1.png",
+    "src": "src/assets/profile_pictures/Labramon.png"
+  },
+  "src/assets/profile_pictures/Leviamon_X.png": {
+    "file": "assets/Leviamon_X-CqnKVkva.png",
+    "src": "src/assets/profile_pictures/Leviamon_X.png"
+  },
+  "src/assets/profile_pictures/Lilithmon_X.png": {
+    "file": "assets/Lilithmon_X-Ca22wMd8.png",
+    "src": "src/assets/profile_pictures/Lilithmon_X.png"
+  },
+  "src/assets/profile_pictures/Lucemon.png": {
+    "file": "assets/Lucemon-OzSqoTax.png",
+    "src": "src/assets/profile_pictures/Lucemon.png"
+  },
+  "src/assets/profile_pictures/Lunamon.png": {
+    "file": "assets/Lunamon-B7NyYxNC.png",
+    "src": "src/assets/profile_pictures/Lunamon.png"
+  },
+  "src/assets/profile_pictures/Mamemon_X.png": {
+    "file": "assets/Mamemon_X-BTuIeNRE.png",
+    "src": "src/assets/profile_pictures/Mamemon_X.png"
+  },
+  "src/assets/profile_pictures/Numemon.png": {
+    "file": "assets/Numemon-c0VREpVw.png",
+    "src": "src/assets/profile_pictures/Numemon.png"
+  },
+  "src/assets/profile_pictures/Omegamon.png": {
+    "file": "assets/Omegamon-DxokSds5.png",
+    "src": "src/assets/profile_pictures/Omegamon.png"
+  },
+  "src/assets/profile_pictures/Orochimon.png": {
+    "file": "assets/Orochimon-DafqIPXe.png",
+    "src": "src/assets/profile_pictures/Orochimon.png"
+  },
+  "src/assets/profile_pictures/Pandamon.png": {
+    "file": "assets/Pandamon-BYyG0ghc.png",
+    "src": "src/assets/profile_pictures/Pandamon.png"
+  },
+  "src/assets/profile_pictures/Piemon.png": {
+    "file": "assets/Piemon-Bmta5nEE.png",
+    "src": "src/assets/profile_pictures/Piemon.png"
+  },
+  "src/assets/profile_pictures/Pinochimon.png": {
+    "file": "assets/Pinochimon-krPiouB2.png",
+    "src": "src/assets/profile_pictures/Pinochimon.png"
+  },
+  "src/assets/profile_pictures/Placeholder.png": {
+    "file": "assets/Placeholder-DBpfmWkD.png",
+    "src": "src/assets/profile_pictures/Placeholder.png"
+  },
+  "src/assets/profile_pictures/PrinceMamemon.png": {
+    "file": "assets/PrinceMamemon-DJDAZAe2.png",
+    "src": "src/assets/profile_pictures/PrinceMamemon.png"
+  },
+  "src/assets/profile_pictures/Reppamon.png": {
+    "file": "assets/Reppamon-HbZV7uCg.png",
+    "src": "src/assets/profile_pictures/Reppamon.png"
+  },
+  "src/assets/profile_pictures/Rukamon.png": {
+    "file": "assets/Rukamon-CvcUE_t6.png",
+    "src": "src/assets/profile_pictures/Rukamon.png"
+  },
+  "src/assets/profile_pictures/Sakuyamon.png": {
+    "file": "assets/Sakuyamon-CCAZWqh6.png",
+    "src": "src/assets/profile_pictures/Sakuyamon.png"
+  },
+  "src/assets/profile_pictures/Silphymon.png": {
+    "file": "assets/Silphymon-BjM6E5Ze.png",
+    "src": "src/assets/profile_pictures/Silphymon.png"
+  },
+  "src/assets/profile_pictures/Solarmon.png": {
+    "file": "assets/Solarmon-DlmvD2mH.png",
+    "src": "src/assets/profile_pictures/Solarmon.png"
+  },
+  "src/assets/profile_pictures/Stingmon.png": {
+    "file": "assets/Stingmon-DoMl6yeh.png",
+    "src": "src/assets/profile_pictures/Stingmon.png"
+  },
+  "src/assets/profile_pictures/Superstarmon.png": {
+    "file": "assets/Superstarmon-CZj8FPgb.png",
+    "src": "src/assets/profile_pictures/Superstarmon.png"
+  },
+  "src/assets/profile_pictures/Tailmon.png": {
+    "file": "assets/Tailmon-D3jpjlJk.png",
+    "src": "src/assets/profile_pictures/Tailmon.png"
+  },
+  "src/assets/profile_pictures/Terriermon.png": {
+    "file": "assets/Terriermon-3EHHl7J8.png",
+    "src": "src/assets/profile_pictures/Terriermon.png"
+  },
+  "src/assets/profile_pictures/TogemonX.png": {
+    "file": "assets/TogemonX-XT3-Y3Fi.png",
+    "src": "src/assets/profile_pictures/TogemonX.png"
+  },
+  "src/assets/profile_pictures/Tyrannomon.png": {
+    "file": "assets/Tyrannomon-DLWLKxqC.png",
+    "src": "src/assets/profile_pictures/Tyrannomon.png"
+  },
+  "src/assets/profile_pictures/V-mon.png": {
+    "file": "assets/V-mon-XeYOXvGW.png",
+    "src": "src/assets/profile_pictures/V-mon.png"
+  },
+  "src/assets/profile_pictures/Vademon.png": {
+    "file": "assets/Vademon-BCXXUymu.png",
+    "src": "src/assets/profile_pictures/Vademon.png"
+  },
+  "src/assets/profile_pictures/WereGarurumon.png": {
+    "file": "assets/WereGarurumon-Bn7MXXJS.png",
+    "src": "src/assets/profile_pictures/WereGarurumon.png"
+  },
+  "src/assets/profile_pictures/WizardmonX.png": {
+    "file": "assets/WizardmonX-BTKSlkrM.png",
+    "src": "src/assets/profile_pictures/WizardmonX.png"
+  },
+  "src/assets/sleeves/egg/BT24_001_GIGIMON.png": {
+    "file": "assets/BT24_001_GIGIMON-dchylGyK.png",
+    "src": "src/assets/sleeves/egg/BT24_001_GIGIMON.png"
+  },
+  "src/assets/sleeves/egg/BT24_007_TSUNOMON.png": {
+    "file": "assets/BT24_007_TSUNOMON-BFGYg2M5.png",
+    "src": "src/assets/sleeves/egg/BT24_007_TSUNOMON.png"
+  },
+  "src/assets/sleeves/egg/P_148_WANYAMON.png": {
+    "file": "assets/P_148_WANYAMON-ou1dU2al.png",
+    "src": "src/assets/sleeves/egg/P_148_WANYAMON.png"
+  },
+  "src/assets/sleeves/egg/ST14_01_YAAMON.png": {
+    "file": "assets/ST14_01_YAAMON-woIEqjv-.png",
+    "src": "src/assets/sleeves/egg/ST14_01_YAAMON.png"
+  },
+  "src/assets/sleeves/egg/ST22_01_VIXIMON.png": {
+    "file": "assets/ST22_01_VIXIMON-DeAGdA_p.png",
+    "src": "src/assets/sleeves/egg/ST22_01_VIXIMON.png"
+  },
+  "src/assets/sleeves/main/BT10_048_SUNFLOWMON.png": {
+    "file": "assets/BT10_048_SUNFLOWMON-BL0ARoNa.png",
+    "src": "src/assets/sleeves/main/BT10_048_SUNFLOWMON.png"
+  },
+  "src/assets/sleeves/main/BT11_056_JIJIMON_ARTIST_SHOWDOWN.png": {
+    "file": "assets/BT11_056_JIJIMON_ARTIST_SHOWDOWN-DnUwoqpU.png",
+    "src": "src/assets/sleeves/main/BT11_056_JIJIMON_ARTIST_SHOWDOWN.png"
+  },
+  "src/assets/sleeves/main/BT11_086_MERVAMON_7D6.png": {
+    "file": "assets/BT11_086_MERVAMON_7D6-h9nI4wwG.png",
+    "src": "src/assets/sleeves/main/BT11_086_MERVAMON_7D6.png"
+  },
+  "src/assets/sleeves/main/BT12_043_SHINEGREYMON.png": {
+    "file": "assets/BT12_043_SHINEGREYMON-B6f2S70u.png",
+    "src": "src/assets/sleeves/main/BT12_043_SHINEGREYMON.png"
+  },
+  "src/assets/sleeves/main/BT14_071_LOOGAMON.png": {
+    "file": "assets/BT14_071_LOOGAMON-DjLHwFyy.png",
+    "src": "src/assets/sleeves/main/BT14_071_LOOGAMON.png"
+  },
+  "src/assets/sleeves/main/BT15_056_RYUDAMON.png": {
+    "file": "assets/BT15_056_RYUDAMON-CmSeh3wu.png",
+    "src": "src/assets/sleeves/main/BT15_056_RYUDAMON.png"
+  },
+  "src/assets/sleeves/main/BT16_020_GAOGAMON.png": {
+    "file": "assets/BT16_020_GAOGAMON-CmZOm9tv.png",
+    "src": "src/assets/sleeves/main/BT16_020_GAOGAMON.png"
+  },
+  "src/assets/sleeves/main/BT17_024_SEASARMON.png": {
+    "file": "assets/BT17_024_SEASARMON-B1TEK3Md.png",
+    "src": "src/assets/sleeves/main/BT17_024_SEASARMON.png"
+  },
+  "src/assets/sleeves/main/BT18_044_FUNBEEMON.png": {
+    "file": "assets/BT18_044_FUNBEEMON-aq97MqnK.png",
+    "src": "src/assets/sleeves/main/BT18_044_FUNBEEMON.png"
+  },
+  "src/assets/sleeves/main/BT1_079_LILLYMON.png": {
+    "file": "assets/BT1_079_LILLYMON-Cyi6AnNH.png",
+    "src": "src/assets/sleeves/main/BT1_079_LILLYMON.png"
+  },
+  "src/assets/sleeves/main/BT1_082_ROSEMON.png": {
+    "file": "assets/BT1_082_ROSEMON-sztdsxvA.png",
+    "src": "src/assets/sleeves/main/BT1_082_ROSEMON.png"
+  },
+  "src/assets/sleeves/main/BT20_069_PUNKMON.png": {
+    "file": "assets/BT20_069_PUNKMON-Cmi5pCu_.png",
+    "src": "src/assets/sleeves/main/BT20_069_PUNKMON.png"
+  },
+  "src/assets/sleeves/main/BT2_066_MACHINEDRAMON.png": {
+    "file": "assets/BT2_066_MACHINEDRAMON-BAycbzPm.png",
+    "src": "src/assets/sleeves/main/BT2_066_MACHINEDRAMON.png"
+  },
+  "src/assets/sleeves/main/BT3_030_DUFTMON.png": {
+    "file": "assets/BT3_030_DUFTMON-CmnXcHrj.png",
+    "src": "src/assets/sleeves/main/BT3_030_DUFTMON.png"
+  },
+  "src/assets/sleeves/main/BT3_088_LADYDEVIMON.png": {
+    "file": "assets/BT3_088_LADYDEVIMON-Bmpk2MR6.png",
+    "src": "src/assets/sleeves/main/BT3_088_LADYDEVIMON.png"
+  },
+  "src/assets/sleeves/main/BT3_092_MALOMYOTISMON.png": {
+    "file": "assets/BT3_092_MALOMYOTISMON-C0pOfazj.png",
+    "src": "src/assets/sleeves/main/BT3_092_MALOMYOTISMON.png"
+  },
+  "src/assets/sleeves/main/BT4_082_DOBERMON.png": {
+    "file": "assets/BT4_082_DOBERMON-D--d_Sxy.png",
+    "src": "src/assets/sleeves/main/BT4_082_DOBERMON.png"
+  },
+  "src/assets/sleeves/main/BT7_018_GOMAMON.png": {
+    "file": "assets/BT7_018_GOMAMON-CCU14CtL.png",
+    "src": "src/assets/sleeves/main/BT7_018_GOMAMON.png"
+  },
+  "src/assets/sleeves/main/BT7_063_DARKKNIGHTMON.png": {
+    "file": "assets/BT7_063_DARKKNIGHTMON-dKleP4zh.png",
+    "src": "src/assets/sleeves/main/BT7_063_DARKKNIGHTMON.png"
+  },
+  "src/assets/sleeves/main/BT8_071_PSYCHEMON.png": {
+    "file": "assets/BT8_071_PSYCHEMON-Ca6Z1paN.png",
+    "src": "src/assets/sleeves/main/BT8_071_PSYCHEMON.png"
+  },
+  "src/assets/sleeves/main/EX3_034_ANGEWOMON.png": {
+    "file": "assets/EX3_034_ANGEWOMON-BbPiRRC2.png",
+    "src": "src/assets/sleeves/main/EX3_034_ANGEWOMON.png"
+  },
+  "src/assets/sleeves/main/EX5_073_GRACENOVAMON.png": {
+    "file": "assets/EX5_073_GRACENOVAMON-CF_XiYq1.png",
+    "src": "src/assets/sleeves/main/EX5_073_GRACENOVAMON.png"
+  },
+  "src/assets/sleeves/main/EX6_057_LILITHMON.png": {
+    "file": "assets/EX6_057_LILITHMON-DBg5ZI8g.png",
+    "src": "src/assets/sleeves/main/EX6_057_LILITHMON.png"
+  },
+  "src/assets/sleeves/main/EX7_015_OTAMAMON.png": {
+    "file": "assets/EX7_015_OTAMAMON-BJzXnEgm.png",
+    "src": "src/assets/sleeves/main/EX7_015_OTAMAMON.png"
+  },
+  "src/assets/sleeves/main/EX8_074_MEDIEVALGALLANTMON.png": {
+    "file": "assets/EX8_074_MEDIEVALGALLANTMON-C9Tzc3Xt.png",
+    "src": "src/assets/sleeves/main/EX8_074_MEDIEVALGALLANTMON.png"
+  },
+  "src/assets/sleeves/main/EX9_024_HANIMON.png": {
+    "file": "assets/EX9_024_HANIMON-Bxd22uFF.png",
+    "src": "src/assets/sleeves/main/EX9_024_HANIMON.png"
+  },
+  "src/assets/sleeves/main/RAINBOW.png": {
+    "file": "assets/RAINBOW-nApiMMt_.png",
+    "src": "src/assets/sleeves/main/RAINBOW.png"
+  },
+  "src/assets/sleeves/main/ST14_04_PHASCOMON.png": {
+    "file": "assets/ST14_04_PHASCOMON-Cw8_HeFp.png",
+    "src": "src/assets/sleeves/main/ST14_04_PHASCOMON.png"
+  },
+  "src/assets/sleeves/main/cardBackBlack.jpg": {
+    "file": "assets/cardBackBlack-DkkgRvZ6.jpg",
+    "src": "src/assets/sleeves/main/cardBackBlack.jpg"
+  },
+  "src/assets/sleeves/main/cardBackBlue.jpg": {
+    "file": "assets/cardBackBlue-BHQwSTB4.jpg",
+    "src": "src/assets/sleeves/main/cardBackBlue.jpg"
+  },
+  "src/assets/sleeves/main/cardBackGreen.jpg": {
+    "file": "assets/cardBackGreen-CezFLuxa.jpg",
+    "src": "src/assets/sleeves/main/cardBackGreen.jpg"
+  },
+  "src/assets/sleeves/main/cardBackPurple.jpg": {
+    "file": "assets/cardBackPurple-CM4fQdte.jpg",
+    "src": "src/assets/sleeves/main/cardBackPurple.jpg"
+  },
+  "src/assets/sleeves/main/cardBackRed.jpg": {
+    "file": "assets/cardBackRed-Cr76V0ce.jpg",
+    "src": "src/assets/sleeves/main/cardBackRed.jpg"
+  },
+  "src/assets/sleeves/main/cardBackWhite.jpg": {
+    "file": "assets/cardBackWhite-3thepPwV.jpg",
+    "src": "src/assets/sleeves/main/cardBackWhite.jpg"
+  },
+  "src/assets/sleeves/main/cardBackYellow.jpg": {
+    "file": "assets/cardBackYellow-D_cHjXZy.jpg",
+    "src": "src/assets/sleeves/main/cardBackYellow.jpg"
+  },
+  "src/assets/sounds/activate-effect.mp3": {
+    "file": "assets/activate-effect-CKklcE6j.mp3",
+    "src": "src/assets/sounds/activate-effect.mp3"
+  },
+  "src/assets/sounds/attack.mp3": {
+    "file": "assets/attack-6aOn3DrM.mp3",
+    "src": "src/assets/sounds/attack.mp3"
+  },
+  "src/assets/sounds/card-to-hand.mp3": {
+    "file": "assets/card-to-hand-eeZPaZbu.mp3",
+    "src": "src/assets/sounds/card-to-hand.mp3"
+  },
+  "src/assets/sounds/coin-flip.mp3": {
+    "file": "assets/coin-flip-JGK1w7r5.mp3",
+    "src": "src/assets/sounds/coin-flip.mp3"
+  },
+  "src/assets/sounds/countdown.mp3": {
+    "file": "assets/countdown-B8P9su9h.mp3",
+    "src": "src/assets/sounds/countdown.mp3"
+  },
+  "src/assets/sounds/draw-card.mp3": {
+    "file": "assets/draw-card-BpEOjEiu.mp3",
+    "src": "src/assets/sounds/draw-card.mp3"
+  },
+  "src/assets/sounds/effect-attack.mp3": {
+    "file": "assets/effect-attack-C-euKOsS.mp3",
+    "src": "src/assets/sounds/effect-attack.mp3"
+  },
+  "src/assets/sounds/effect-target.mp3": {
+    "file": "assets/effect-target-C8wciC4x.mp3",
+    "src": "src/assets/sounds/effect-target.mp3"
+  },
+  "src/assets/sounds/kick.mp3": {
+    "file": "assets/kick-XKeZnkoT.mp3",
+    "src": "src/assets/sounds/kick.mp3"
+  },
+  "src/assets/sounds/next-attack-phase.mp3": {
+    "file": "assets/next-attack-phase-Be1a3F52.mp3",
+    "src": "src/assets/sounds/next-attack-phase.mp3"
+  },
+  "src/assets/sounds/next-phase.mp3": {
+    "file": "assets/next-phase-DAkYS4Bw.mp3",
+    "src": "src/assets/sounds/next-phase.mp3"
+  },
+  "src/assets/sounds/opponent-place-card.mp3": {
+    "file": "assets/opponent-place-card-DKO7Zm3z.mp3",
+    "src": "src/assets/sounds/opponent-place-card.mp3"
+  },
+  "src/assets/sounds/pass-turn.mp3": {
+    "file": "assets/pass-turn-BmFqaAGF.mp3",
+    "src": "src/assets/sounds/pass-turn.mp3"
+  },
+  "src/assets/sounds/player-joined.mp3": {
+    "file": "assets/player-joined-UPWFMMgR.mp3",
+    "src": "src/assets/sounds/player-joined.mp3"
+  },
+  "src/assets/sounds/rematch.mp3": {
+    "file": "assets/rematch-CTcz-kZ7.mp3",
+    "src": "src/assets/sounds/rematch.mp3"
+  },
+  "src/assets/sounds/reveal-card.mp3": {
+    "file": "assets/reveal-card-DgxuKizJ.mp3",
+    "src": "src/assets/sounds/reveal-card.mp3"
+  },
+  "src/assets/sounds/security-reveal.mp3": {
+    "file": "assets/security-reveal-BcFZA0Jo.mp3",
+    "src": "src/assets/sounds/security-reveal.mp3"
+  },
+  "src/assets/sounds/shuffle-deck.mp3": {
+    "file": "assets/shuffle-deck-DC4W2-fQ.mp3",
+    "src": "src/assets/sounds/shuffle-deck.mp3"
+  },
+  "src/assets/sounds/trash-card.mp3": {
+    "file": "assets/trash-card-BMt2TPYA.mp3",
+    "src": "src/assets/sounds/trash-card.mp3"
+  },
+  "src/assets/sounds/unsuspend.mp3": {
+    "file": "assets/unsuspend-1c2SZXxY.mp3",
+    "src": "src/assets/sounds/unsuspend.mp3"
+  },
+  "src/assets/tokens/ARP_Token.webp": {
+    "file": "assets/ARP_Token-v5lxjOyt.webp",
+    "src": "src/assets/tokens/ARP_Token.webp"
+  },
+  "src/assets/tokens/Amon.webp": {
+    "file": "assets/Amon-CnVHADg_.webp",
+    "src": "src/assets/tokens/Amon.webp"
+  },
+  "src/assets/tokens/Diaboromon.webp": {
+    "file": "assets/Diaboromon-CTQ_WLcD.webp",
+    "src": "src/assets/tokens/Diaboromon.webp"
+  },
+  "src/assets/tokens/Familiar_Token.webp": {
+    "file": "assets/Familiar_Token-284UVRdQ.webp",
+    "src": "src/assets/tokens/Familiar_Token.webp"
+  },
+  "src/assets/tokens/Fox_Token.webp": {
+    "file": "assets/Fox_Token-RCeGy9AT.webp",
+    "src": "src/assets/tokens/Fox_Token.webp"
+  },
+  "src/assets/tokens/Fujitsumon.webp": {
+    "file": "assets/Fujitsumon-CvXEtrHw.webp",
+    "src": "src/assets/tokens/Fujitsumon.webp"
+  },
+  "src/assets/tokens/Gyuukimon.webp": {
+    "file": "assets/Gyuukimon-6EyJkCEK.webp",
+    "src": "src/assets/tokens/Gyuukimon.webp"
+  },
+  "src/assets/tokens/Hinukamuy.png": {
+    "file": "assets/Hinukamuy-BQTgb4HG.png",
+    "src": "src/assets/tokens/Hinukamuy.png"
+  },
+  "src/assets/tokens/KoHagurumon.webp": {
+    "file": "assets/KoHagurumon-BbkXRBPW.webp",
+    "src": "src/assets/tokens/KoHagurumon.webp"
+  },
+  "src/assets/tokens/Mitama_Token.webp": {
+    "file": "assets/Mitama_Token-L9UbGBKp.webp",
+    "src": "src/assets/tokens/Mitama_Token.webp"
+  },
+  "src/assets/tokens/Petrification_Token.webp": {
+    "file": "assets/Petrification_Token-BFusNcxG.webp",
+    "src": "src/assets/tokens/Petrification_Token.webp"
+  },
+  "src/assets/tokens/Rapidmon.png": {
+    "file": "assets/Rapidmon-DvNKD96E.png",
+    "src": "src/assets/tokens/Rapidmon.png"
+  },
+  "src/assets/tokens/Taomon.png": {
+    "file": "assets/Taomon-BnmaO5dV.png",
+    "src": "src/assets/tokens/Taomon.png"
+  },
+  "src/assets/tokens/Umon.webp": {
+    "file": "assets/Umon-CjPoN8oj.webp",
+    "src": "src/assets/tokens/Umon.webp"
+  },
+  "src/assets/tokens/VoleeUndZerdruecken.webp": {
+    "file": "assets/VoleeUndZerdruecken-C7k7krtE.webp",
+    "src": "src/assets/tokens/VoleeUndZerdruecken.webp"
+  },
+  "src/assets/tokens/WarGrowlmon.png": {
+    "file": "assets/WarGrowlmon-BLj7hXCC.png",
+    "src": "src/assets/tokens/WarGrowlmon.png"
+  },
+  "src/assets/tokens/tokenCard.jpg": {
+    "file": "assets/tokenCard-B9zN-5JQ.jpg",
+    "src": "src/assets/tokens/tokenCard.jpg"
+  },
+  "src/embed/deckBrowserEmbed.tsx": {
+    "file": "assets/deckBrowserEmbed-7Ak-LXYE.js",
+    "name": "deckBrowserEmbed",
+    "src": "src/embed/deckBrowserEmbed.tsx",
+    "isEntry": true,
+    "imports": [
+      "_index-BFLqDyKe.js"
+    ]
+  }
+}

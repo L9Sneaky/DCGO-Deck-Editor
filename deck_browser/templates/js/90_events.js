@@ -73,6 +73,10 @@
     function render() {
       readRoute();
 
+      if (state.view !== "tester" && typeof unmountDeckTestBoard === "function") {
+        unmountDeckTestBoard();
+      }
+
       if (state.view === "library") {
         libraryViewEl.classList.remove("hidden");
         editorViewEl.classList.add("hidden");
@@ -251,12 +255,20 @@
     testerNewShuffleBtn.addEventListener("click", function() {
       const deck = getSelectedDeck();
       if (!deck) return;
+      if (typeof resetDeckTestBoard === "function") {
+        resetDeckTestBoard(deck);
+        return;
+      }
       startTestHand(deck);
     });
 
     testerMulliganBtn.addEventListener("click", function() {
       const deck = getSelectedDeck();
       if (!deck) return;
+      if (typeof resetDeckTestBoard === "function") {
+        resetDeckTestBoard(deck);
+        return;
+      }
       startTestHand(deck);
     });
 

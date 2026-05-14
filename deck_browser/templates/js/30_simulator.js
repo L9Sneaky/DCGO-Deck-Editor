@@ -1,3 +1,5 @@
+    // Deprecated: legacy vanilla tester board (replaced by Project Drasil React board).
+    // Kept only for editor preview and compatibility helpers.
     const TESTER_FIELD_COUNT = 13;
 
     function createEmptyTesterFields() {
