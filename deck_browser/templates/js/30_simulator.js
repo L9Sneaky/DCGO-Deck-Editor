@@ -397,10 +397,20 @@
       state.testHand.log = state.testHand.log.slice(0, 80);
     }
 
+    function updateTesterSelectedStackHighlight() {
+      if (!testerBoardGridEl || !testerBreedingZoneEl) return;
+      const selectedStack = state.selectedTesterStack || {};
+      Array.from(testerBoardGridEl.children || []).forEach(function(slot, index) {
+        slot.classList.toggle("selected-stack", selectedStack.sourceZone === "field" && selectedStack.fieldIndex === index);
+      });
+      testerBreedingZoneEl.classList.toggle("selected-stack", selectedStack.sourceZone === "breeding");
+    }
+
     function selectTesterCard(card, stackContext) {
       if (!card) return;
       state.selectedCardCode = card.code;
       state.selectedTesterStack = stackContext || null;
+      updateTesterSelectedStackHighlight();
       if (state.view === "tester") {
         const currentDeck = getSelectedDeck();
         if (currentDeck) renderTesterCardDetails(currentDeck);
@@ -1413,9 +1423,11 @@
 
     function renderTesterFields(deck) {
       testerBoardGridEl.innerHTML = "";
+      const selectedStack = state.selectedTesterStack || {};
       state.testHand.fields.forEach(function(stack, index) {
         const slot = document.createElement("section");
-        slot.className = "tester-field-slot" + (stack.length ? "" : " empty");
+        const isSelected = selectedStack.sourceZone === "field" && selectedStack.fieldIndex === index;
+        slot.className = "tester-field-slot" + (stack.length ? "" : " empty") + (isSelected ? " selected-stack" : "");
         attachTesterDropZone(slot, { zone: "field", fieldIndex: index, mode: "top" });
         slot.addEventListener("click", function() {
           if (!stack.length) return;
@@ -1451,7 +1463,9 @@
     }
 
     function renderTesterBreeding(deck) {
-      testerBreedingZoneEl.className = "tester-breeding-slot" + (state.testHand.breeding.length ? "" : " empty");
+      const selectedStack = state.selectedTesterStack || {};
+      testerBreedingZoneEl.className = "tester-breeding-slot" + (state.testHand.breeding.length ? "" : " empty") +
+        (selectedStack.sourceZone === "breeding" ? " selected-stack" : "");
       testerBreedingZoneEl.querySelectorAll(".tester-stack-bottom-drop").forEach(function(element) { element.remove(); });
       testerBreedingZoneEl.querySelectorAll(".tester-link-drop").forEach(function(element) { element.remove(); });
       testerBreedingStackEl.innerHTML = "";

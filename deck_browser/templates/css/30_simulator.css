@@ -3,7 +3,7 @@
       min-height: 720px;
       overflow: hidden;
       display: grid;
-      grid-template-columns: clamp(220px, 14vw, 280px) minmax(0, 1fr) clamp(190px, 12vw, 245px);
+      grid-template-columns: clamp(210px, 13vw, 265px) minmax(0, 1fr) clamp(150px, 9vw, 190px);
       gap: 0;
       background:
         linear-gradient(115deg, rgba(48, 54, 126, 0.92), rgba(2, 91, 107, 0.94)),
@@ -354,7 +354,7 @@
     .tester-memory-track {
       grid-area: auto;
       grid-column: 5 / 31;
-      grid-row: 5 / 6;
+      grid-row: 4 / 5;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -392,12 +392,12 @@
 
     .tester-field-area {
       grid-area: auto;
-      grid-column: 2 / 31;
-      grid-row: 6 / 11;
+      grid-column: 2 / 33;
+      grid-row: 5 / 11;
       min-height: 0;
       display: grid;
-      grid-template-columns: 56px minmax(0, 1fr) 46px;
-      gap: 7px;
+      grid-template-columns: 58px minmax(0, 1fr) 42px;
+      gap: 8px;
       align-items: stretch;
     }
 
@@ -420,8 +420,8 @@
     .tester-fields {
       display: grid;
       grid-template-columns: repeat(8, minmax(0, 1fr));
-      grid-template-rows: minmax(94px, 0.72fr) minmax(64px, 0.48fr);
-      gap: 7px;
+      grid-template-rows: minmax(108px, 0.72fr) minmax(72px, 0.48fr);
+      gap: 9px;
       min-height: 0;
       overflow: visible;
       padding: 0;
@@ -433,19 +433,20 @@
       min-width: 0;
       min-height: 0;
       border-radius: 3px;
-      border: 1px solid rgba(185, 221, 255, 0.18);
-      background: rgba(7, 25, 45, 0.22);
+      border: 1px solid rgba(185, 221, 255, 0.14);
+      background: rgba(7, 25, 45, 0.15);
       overflow: visible;
       display: grid;
       grid-template-rows: minmax(0, 1fr);
-      box-shadow: inset 0 0 18px rgba(255,255,255,0.045);
+      box-shadow: inset 0 0 12px rgba(255,255,255,0.026);
     }
 
     .tester-field-slot.empty,
     .tester-breeding-slot.empty {
       border-style: solid;
-      border-color: rgba(185, 221, 255, 0.10);
-      background: rgba(10, 33, 62, 0.08);
+      border-color: rgba(185, 221, 255, 0.065);
+      background: rgba(10, 33, 62, 0.045);
+      box-shadow: none;
     }
 
     .tester-field-slot.empty .tester-field-label,
@@ -463,7 +464,7 @@
 
     .tester-breeding-slot {
       align-self: stretch;
-      height: min(132px, 100%);
+      height: min(146px, 100%);
     }
 
     .tester-egg-dock {
@@ -845,7 +846,7 @@
       position: absolute;
       left: 50%;
       bottom: 6px;
-      width: min(56px, calc(100% - 24px));
+      width: min(62px, calc(100% - 26px));
       aspect-ratio: 7 / 10;
       transform: translateX(-50%);
       border-radius: 4px;
@@ -865,9 +866,9 @@
 
     .tester-link-card,
     .sim-stack-link-card {
-      left: calc(50% + 32px);
+      left: calc(50% + 36px);
       bottom: calc(6px + (var(--link-index, 0) * 5px));
-      width: min(48px, calc(100% - 40px));
+      width: min(51px, calc(100% - 44px));
       opacity: 0.90;
       transform: translateX(-50%) rotate(-90deg);
       transform-origin: center center;
@@ -945,8 +946,8 @@
 
     .tester-stack-badge {
       position: absolute;
-      top: 18px;
-      right: 5px;
+      top: 14px;
+      right: 4px;
       z-index: 30;
       padding: 2px 5px;
       border-radius: 999px;
@@ -955,6 +956,23 @@
       font-family: var(--font-display);
       font-size: 11px;
       line-height: 1;
+    }
+
+    .tester-field-slot.selected-stack,
+    .tester-breeding-slot.selected-stack {
+      border-color: rgba(73, 252, 189, 0.46);
+      background: rgba(6, 38, 47, 0.24);
+      box-shadow:
+        inset 0 0 18px rgba(73, 252, 189, 0.08),
+        0 0 18px rgba(73, 252, 189, 0.12);
+    }
+
+    .tester-field-slot.selected-stack .sim-stack-main-card,
+    .tester-breeding-slot.selected-stack .sim-stack-main-card {
+      box-shadow:
+        0 8px 18px rgba(0,0,0,0.36),
+        0 0 0 1px rgba(73, 252, 189, 0.82),
+        0 0 14px rgba(73, 252, 189, 0.20);
     }
 
     .tester-link-indicator,
@@ -1193,10 +1211,10 @@
     .tester-drawer {
       min-width: 0;
       min-height: 0;
-      margin: clamp(170px, 22vh, 240px) 6px clamp(88px, 13vh, 122px) 0;
+      margin: clamp(190px, 25vh, 260px) 5px clamp(116px, 17vh, 160px) 0;
       border-radius: 3px;
-      border: 1px solid rgba(185, 221, 255, 0.24);
-      background: rgba(3, 16, 28, 0.42);
+      border: 1px solid rgba(185, 221, 255, 0.18);
+      background: rgba(3, 16, 28, 0.34);
       display: grid;
       grid-template-rows: auto minmax(0, 1fr) auto;
       overflow: hidden;
@@ -1204,13 +1222,13 @@
     }
 
     .tester-drawer .tester-card-grid {
-      padding: 6px;
+      padding: 5px;
       overflow: auto;
       scrollbar-width: none;
     }
 
     .tester-drawer .tester-card {
-      width: 62px;
+      width: 54px;
     }
 
     .tester-context-menu {
@@ -1256,12 +1274,12 @@
     }
 
     .tester-log {
-      max-height: 78px;
-      padding: 6px;
+      max-height: 62px;
+      padding: 5px;
       overflow: auto;
       border-top: 1px solid rgba(95, 212, 255, 0.14);
       color: rgba(237,247,255,0.68);
-      font-size: 9px;
+      font-size: 8.5px;
       line-height: 1.35;
       scrollbar-width: none;
     }
