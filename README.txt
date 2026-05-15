@@ -59,6 +59,15 @@ What the editor can do
 - Export a deck image.
 - Test opening hands.
 - Update the local card database from GitHub.
+- Check GitHub Releases for editor updates and install newer release ZIPs.
+
+Updates
+-------
+The editor checks GitHub Releases on startup and shows update status in the
+Deck Library footer. Use "Check for Updates" to refresh manually. If a newer
+release is available, "Install Update" downloads the release ZIP, validates it,
+backs up the current folder under backups/update-backup-*, preserves local data,
+installs the new files, and tries to relaunch the editor.
 
 Where files are written
 -----------------------

@@ -5,6 +5,10 @@ set "SCRIPT_DIR=%~dp0"
 set "OUTPUT_HTML=%SCRIPT_DIR%deck_browser\output\current_decks.html"
 set "SERVER_SCRIPT=%SCRIPT_DIR%deck_browser\deck_browser_server.py"
 set "BUILDER_SCRIPT=%SCRIPT_DIR%deck_browser\build_deck_browser.py"
+set "DATA_SCRIPT=%SCRIPT_DIR%deck_browser\deck_data.py"
+set "HTML_TEMPLATE=%SCRIPT_DIR%deck_browser\templates\deck_browser.html"
+set "CSS_TEMPLATE_DIR=%SCRIPT_DIR%deck_browser\templates\css"
+set "JS_TEMPLATE_DIR=%SCRIPT_DIR%deck_browser\templates\js"
 
 if defined DCGO_DECK_ROOT (
   if exist "%DCGO_DECK_ROOT%\" set "DECK_ROOT=%DCGO_DECK_ROOT%"
@@ -30,16 +34,44 @@ if defined DCGO_APP_SUPPORT_DIR (
   set "APP_SUPPORT_DIR=%SCRIPT_DIR%deck_browser_data"
 )
 
+if not exist "%BUILDER_SCRIPT%" (
+  echo Missing deck editor file:
+  echo %BUILDER_SCRIPT%
+  pause
+  exit /b 1
+)
+
+if not exist "%DATA_SCRIPT%" (
+  echo Missing deck editor file:
+  echo %DATA_SCRIPT%
+  pause
+  exit /b 1
+)
+
 if not exist "%SERVER_SCRIPT%" (
-  echo Missing deck browser server:
+  echo Missing deck editor file:
   echo %SERVER_SCRIPT%
   pause
   exit /b 1
 )
 
-if not exist "%BUILDER_SCRIPT%" (
-  echo Missing deck browser builder:
-  echo %BUILDER_SCRIPT%
+if not exist "%HTML_TEMPLATE%" (
+  echo Missing deck editor file:
+  echo %HTML_TEMPLATE%
+  pause
+  exit /b 1
+)
+
+if not exist "%CSS_TEMPLATE_DIR%\" (
+  echo Missing deck editor template folder:
+  echo %CSS_TEMPLATE_DIR%
+  pause
+  exit /b 1
+)
+
+if not exist "%JS_TEMPLATE_DIR%\" (
+  echo Missing deck editor template folder:
+  echo %JS_TEMPLATE_DIR%
   pause
   exit /b 1
 )
@@ -59,6 +91,8 @@ if not exist "%SCRIPT_DIR%deck_browser\output" mkdir "%SCRIPT_DIR%deck_browser\o
 if not exist "%APP_SUPPORT_DIR%" mkdir "%APP_SUPPORT_DIR%"
 
 if defined DECK_ROOT (
+  echo Deck folder: %DECK_ROOT%
+  echo Editor data: %APP_SUPPORT_DIR%
   %PYTHON_CMD% "%SERVER_SCRIPT%" --app-support-dir "%APP_SUPPORT_DIR%" --deck-root "%DECK_ROOT%" --output "%OUTPUT_HTML%" --open
 ) else (
   echo Could not find Assets\Decks automatically.
