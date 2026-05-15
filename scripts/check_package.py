@@ -14,13 +14,16 @@ REQUIRED_FILES = [
     "deck_browser/build_deck_browser.py",
     "deck_browser/deck_data.py",
     "deck_browser/deck_browser_server.py",
+    "deck_browser/updater.py",
     "deck_browser/templates/deck_browser.html",
     "deck_browser/templates/css/00_base.css",
     "deck_browser/templates/css/35_simulator_embed.css",
     "deck_browser/templates/js/00_bootstrap.js",
     "deck_browser/templates/js/35_simulator_embed.js",
     "Open Deck Editor.command",
+    "Open Deck Browser.command",
     "Open Deck Editor.bat",
+    "app_version.json",
 ]
 
 
@@ -88,7 +91,7 @@ def check_html_build(root: Path) -> list[str]:
             return [f"HTML build failed: {error}"]
 
         html = output_path.read_text(encoding="utf-8")
-        for needle in ["DCGO Deck Browser", "CheckDeck", "app-version-label", "1.1.0-refactor", "deck-test-react-root"]:
+        for needle in ["DCGO Deck Browser", "CheckDeck", "app-version-label", "v1.1.0", "deck-test-react-root"]:
             if needle not in html:
                 errors.append(f"Generated HTML is missing: {needle}")
     return errors

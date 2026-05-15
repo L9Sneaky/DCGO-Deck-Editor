@@ -51,6 +51,15 @@ Keep the terminal/command window open while using the editor.
 - Export deck images.
 - Test opening hands.
 - Update local card metadata from GitHub.
+- Check GitHub Releases for Deck Editor updates and install newer release ZIPs from inside the app.
+
+## Updates
+
+The editor checks the latest GitHub release on startup and shows update status in the Deck Library footer.
+
+Use **Check for Updates** to manually refresh the release check. If a newer release is available, use **Install Update**. The updater downloads the release ZIP, validates it, backs up the current folder under `backups/update-backup-*`, preserves `deck_browser_data/`, installs the new files, and tries to relaunch the editor.
+
+If an update fails, the updater rolls back from the backup and keeps the current install usable.
 
 ## macOS Notes
 

@@ -25,6 +25,8 @@ $deck_browser_css
           <input id="library-search" class="input library-search" type="search" placeholder="Search decks or included cards">
           <button id="new-deck-button" class="button primary" type="button" title="Create an empty deck file in the shared deck folder">New Deck</button>
           <button id="update-card-database" class="button" type="button" title="Force-refresh card metadata from GitHub">Update Card DB</button>
+          <button id="check-app-update" class="button" type="button" title="Check GitHub Releases for a newer Deck Editor">Check for Updates</button>
+          <button id="install-app-update" class="button success hidden" type="button" title="Install the downloaded GitHub release update">Install Update</button>
         </div>
         <div class="library-toolbar-right tiny">Generated: <span id="library-generated-at-label"></span></div>
       </div>
@@ -32,7 +34,8 @@ $deck_browser_css
       <div class="library-footer">
         Built from <span id="library-deck-root-label"></span><br>
         Metadata source: <span id="library-manifest-source-label"></span><br>
-        Version: <span id="app-version-label"></span>
+        Version: <span id="app-version-label"></span><br>
+        Updates: <span id="update-status-label">Checking...</span>
       </div>
     </section>
 

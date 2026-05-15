@@ -19,7 +19,7 @@ IMAGE_BASE_URL = "https://raw.githubusercontent.com/TakaOtaku/Digimon-Card-App/m
 CACHE_MAX_AGE_SECONDS = 12 * 60 * 60
 DECK_LINE_RE = re.compile(r"^\s*(\d+)\s+(.+?)\s+([A-Za-z0-9-]+(?:_[A-Za-z0-9-]+)?)\s*$")
 COLOR_ORDER = ["Red", "Blue", "Yellow", "Green", "Black", "Purple", "White"]
-APP_VERSION = "1.1.0-refactor"
+APP_VERSION = "v1.1.0"
 
 
 def ensure_text(value: Any) -> str:

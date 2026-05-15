@@ -180,6 +180,99 @@
       }
     });
 
+    function renderUpdateStatus(payload) {
+      if (!updateStatusLabelEl) return;
+      const current = payload.current_version || APP_VERSION;
+      const latest = payload.latest_version || "";
+      const message = payload.message || payload.status || "";
+      if (payload.update_available && latest) {
+        updateStatusLabelEl.textContent = "Update available: " + latest + " (current " + current + ")";
+        installAppUpdateBtn.classList.remove("hidden");
+      } else if (payload.status === "failed") {
+        updateStatusLabelEl.textContent = message || "Update check failed; using current version.";
+        installAppUpdateBtn.classList.add("hidden");
+      } else if (payload.status === "disabled") {
+        updateStatusLabelEl.textContent = "Automatic update checks are disabled.";
+        installAppUpdateBtn.classList.add("hidden");
+      } else {
+        updateStatusLabelEl.textContent = latest ? "Up to date (" + current + ")" : "Current version: " + current;
+        installAppUpdateBtn.classList.add("hidden");
+      }
+    }
+
+    async function fetchUpdateStatus() {
+      try {
+        const response = await fetch("/api/version", { cache: "no-store" });
+        const payload = await response.json().catch(function() { return {}; });
+        if (!response.ok) throw new Error(payload.error || "Version request failed.");
+        renderUpdateStatus(payload);
+        return payload;
+      } catch (error) {
+        renderUpdateStatus({ status: "failed", message: "Update status unavailable: " + error.message, current_version: APP_VERSION });
+        return null;
+      }
+    }
+
+    async function checkForAppUpdate(showAlert) {
+      if (needsDeckBrowserServer("Check for Updates")) return;
+      const original = checkAppUpdateBtn.textContent;
+      checkAppUpdateBtn.disabled = true;
+      checkAppUpdateBtn.textContent = "Checking...";
+      renderUpdateStatus({ status: "checking", message: "Checking for updates...", current_version: APP_VERSION });
+      try {
+        const response = await fetch("/api/check-update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({})
+        });
+        const payload = await response.json().catch(function() { return {}; });
+        if (!response.ok) throw new Error(payload.error || "Update check failed.");
+        renderUpdateStatus(payload);
+        if (showAlert) window.alert(payload.message || "Update check complete.");
+      } catch (error) {
+        renderUpdateStatus({ status: "failed", message: "Update check failed: " + error.message, current_version: APP_VERSION });
+        if (showAlert) window.alert("Could not check for updates: " + error.message);
+      } finally {
+        checkAppUpdateBtn.disabled = false;
+        checkAppUpdateBtn.textContent = original;
+      }
+    }
+
+    checkAppUpdateBtn.addEventListener("click", function() {
+      checkForAppUpdate(true);
+    });
+
+    installAppUpdateBtn.addEventListener("click", async function() {
+      if (needsDeckBrowserServer("Install Update")) return;
+      if (hasUnsavedChanges() && !window.confirm("Installing an update will restart the editor. Discard unsaved deck edits?")) {
+        return;
+      }
+      if (!window.confirm("Install the latest GitHub release now? The editor will close briefly and relaunch if macOS allows it.")) {
+        return;
+      }
+
+      const original = installAppUpdateBtn.textContent;
+      installAppUpdateBtn.disabled = true;
+      installAppUpdateBtn.textContent = "Installing...";
+      renderUpdateStatus({ status: "installing", message: "Downloading and installing update...", current_version: APP_VERSION });
+      try {
+        const response = await fetch("/api/install-update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({})
+        });
+        const payload = await response.json().catch(function() { return {}; });
+        if (!response.ok) throw new Error(payload.error || "Update install failed.");
+        renderUpdateStatus(payload);
+        window.alert(payload.message || "Update installer started. Relaunch the editor if it does not reopen automatically.");
+      } catch (error) {
+        renderUpdateStatus({ status: "failed", message: "Update install failed: " + error.message, current_version: APP_VERSION });
+        window.alert("Could not install update: " + error.message);
+        installAppUpdateBtn.disabled = false;
+        installAppUpdateBtn.textContent = original;
+      }
+    });
+
     updateCardDatabaseBtn.addEventListener("click", async function() {
       if (needsDeckBrowserServer("Update Card DB")) return;
       if (hasUnsavedChanges() && !window.confirm("Updating the card database reloads this page. Discard unsaved deck edits?")) {
@@ -619,6 +712,7 @@
     libraryManifestSourceEl.textContent = MANIFEST_SOURCE;
     libraryDeckRootEl.textContent = DECK_ROOT;
     appVersionEl.textContent = APP_VERSION;
+    fetchUpdateStatus();
 
     window.addEventListener("hashchange", render);
     window.addEventListener("beforeunload", function(event) {

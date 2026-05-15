@@ -44,7 +44,19 @@ async function main() {
     version: document.querySelector("#app-version-label")?.textContent || "",
     hasNewDeck: Boolean(document.querySelector("#new-deck-button")),
     hasUpdateDb: Boolean(document.querySelector("#update-card-database")),
+    hasUpdateCheck: Boolean(document.querySelector("#check-app-update")),
+    updateStatus: document.querySelector("#update-status-label")?.textContent || "",
   }));
+
+  const versionResult = await page.evaluate(async () => {
+    const response = await fetch("/api/version");
+    const payload = await response.json();
+    return {
+      ok: response.ok,
+      currentVersion: payload.current_version || "",
+      status: payload.status || "",
+    };
+  });
 
   if (
     errors.length ||
@@ -53,9 +65,12 @@ async function main() {
     !libraryResult.deckRoot ||
     !libraryResult.version ||
     !libraryResult.hasNewDeck ||
-    !libraryResult.hasUpdateDb
+    !libraryResult.hasUpdateDb ||
+    !libraryResult.hasUpdateCheck ||
+    !versionResult.ok ||
+    !versionResult.currentVersion
   ) {
-    console.log(JSON.stringify({ libraryResult, errors }, null, 2));
+    console.log(JSON.stringify({ libraryResult, versionResult, errors }, null, 2));
     await browser.close();
     process.exit(1);
   }
@@ -71,7 +86,7 @@ async function main() {
   }));
 
   if (!editorResult.visible || editorResult.dirtyText || !editorResult.saveDisabled) {
-    console.log(JSON.stringify({ libraryResult, editorResult, errors }, null, 2));
+    console.log(JSON.stringify({ libraryResult, versionResult, editorResult, errors }, null, 2));
     await browser.close();
     process.exit(1);
   }
@@ -92,12 +107,12 @@ async function main() {
   }));
 
   if (!testerResult.visible || !testerResult.boardMounted || !testerResult.hasReset || !testerResult.hasExit) {
-    console.log(JSON.stringify({ libraryResult, editorResult, testerResult, errors }, null, 2));
+    console.log(JSON.stringify({ libraryResult, versionResult, editorResult, testerResult, errors }, null, 2));
     await browser.close();
     process.exit(1);
   }
 
-  console.log(JSON.stringify({ libraryResult, editorResult, testerResult }, null, 2));
+  console.log(JSON.stringify({ libraryResult, versionResult, editorResult, testerResult }, null, 2));
   await browser.close();
 }
 

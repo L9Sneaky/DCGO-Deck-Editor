@@ -795,6 +795,7 @@ a.goToAndStop(ge-a.firstFrame-1,!0)}ve.type==="loop"&&(pe===null||pe!==ve.frames
     height: 100%;
     min-width: 100vw;
     min-height: 100vh;
+    pointer-events: none;
     //max-width: 100vw;
     //max-height: 100vh;
     background: linear-gradient(
@@ -858,6 +859,7 @@ a.goToAndStop(ge-a.firstFrame-1,!0)}ve.type==="loop"&&(pe===null||pe!==ve.frames
     opacity: 0.4;
     z-index: 0;
     overflow: hidden;
+    pointer-events: none;
 
     @keyframes bg-animation {
         0% {

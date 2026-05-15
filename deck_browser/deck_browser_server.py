@@ -5,11 +5,15 @@ import argparse
 import base64
 import json
 import mimetypes
+import os
 import re
 import secrets
 import shutil
 import string
+import subprocess
 import sys
+import tempfile
+import threading
 import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -18,6 +22,7 @@ from typing import Any
 from urllib.parse import unquote, urlparse
 
 import build_deck_browser
+import updater
 
 
 SUFFIX_ALPHABET = string.ascii_letters + string.digits
@@ -272,6 +277,7 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
     app_support_dir: Path
     deck_root: Path | None
     output_path: Path
+    package_root: Path
 
     server_version = "DCGODeckBrowser/1.0"
 
@@ -376,6 +382,10 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
             self.send_json(200, {"ok": True})
             return
 
+        if path == "/api/version":
+            self.send_json(200, updater.version_payload(self.package_root, self.app_support_dir))
+            return
+
         if path == "/favicon.ico":
             self.try_send_favicon()
             return
@@ -462,6 +472,76 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
                 self.send_json(400, {"error": str(error)})
             return
 
+        if path == "/api/check-update":
+            try:
+                self.read_json_body()
+                self.send_json(200, updater.check_latest_release(self.package_root, self.app_support_dir))
+            except Exception as error:
+                self.send_json(400, {"error": str(error)})
+            return
+
+        if path == "/api/install-update":
+            try:
+                self.read_json_body()
+                state = updater.check_latest_release(self.package_root, self.app_support_dir)
+                if not state.get("update_available"):
+                    self.send_json(200, state)
+                    return
+
+                temp_root = Path(tempfile.mkdtemp(prefix="dcgo-update-"))
+                zip_path = temp_root / str(state.get("asset_name") or "DCGO Deck Editor.zip")
+                checksum_path = temp_root / "SHA256SUMS.txt" if state.get("checksum_url") else None
+                updater.write_json(
+                    updater.update_state_path(self.app_support_dir),
+                    {**state, "status": "downloading", "message": "Downloading update..."},
+                )
+                updater.download_file(str(state["asset_url"]), zip_path)
+                if checksum_path:
+                    updater.download_file(str(state["checksum_url"]), checksum_path)
+                updater.verify_checksum_if_present(zip_path, checksum_path, str(state.get("asset_name") or zip_path.name))
+                updater.validate_zip(zip_path)
+
+                updater.write_json(
+                    updater.update_state_path(self.app_support_dir),
+                    {**state, "status": "installing", "message": "Installing update. The app will close briefly."},
+                )
+                command = [
+                    sys.executable,
+                    str(Path(updater.__file__).resolve()),
+                    "--install-worker",
+                    "--package-root",
+                    str(self.package_root),
+                    "--app-support-dir",
+                    str(self.app_support_dir),
+                    "--zip",
+                    str(zip_path),
+                    "--asset-name",
+                    str(state.get("asset_name") or zip_path.name),
+                ]
+                if checksum_path:
+                    command.extend(["--checksum", str(checksum_path)])
+                subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                self.send_json(
+                    202,
+                    {
+                        **state,
+                        "status": "installing",
+                        "message": "Update downloaded. Installing now; this server will stop and the app will relaunch if macOS allows it.",
+                    },
+                )
+                threading.Thread(target=self.server.shutdown, daemon=True).start()
+            except Exception as error:
+                updater.write_json(
+                    updater.update_state_path(self.app_support_dir),
+                    {
+                        "status": "failed",
+                        "message": f"Update install failed: {error}",
+                        "current_version": updater.current_version(self.package_root),
+                    },
+                )
+                self.send_json(400, {"error": str(error)})
+            return
+
         if path == "/api/export-image":
             try:
                 payload = self.read_json_body()
@@ -493,6 +573,21 @@ def main() -> int:
     handler_class.app_support_dir = Path(args.app_support_dir).expanduser()
     handler_class.deck_root = Path(args.deck_root).expanduser() if args.deck_root else None
     handler_class.output_path = Path(args.output).expanduser()
+    handler_class.package_root = Path(__file__).resolve().parents[1]
+
+    def startup_update_check() -> None:
+        if str(os.environ.get("DCGO_DISABLE_AUTO_UPDATE", "")).lower() in {"1", "true", "yes"}:
+            updater.write_json(
+                updater.update_state_path(handler_class.app_support_dir),
+                {
+                    "current_version": updater.current_version(handler_class.package_root),
+                    "status": "disabled",
+                    "message": "Automatic update checks are disabled.",
+                    "update_available": False,
+                },
+            )
+            return
+        updater.check_latest_release(handler_class.package_root, handler_class.app_support_dir)
 
     server = ThreadingHTTPServer((args.host, args.port), handler_class)
     host, port = server.server_address[:2]
@@ -502,6 +597,8 @@ def main() -> int:
     print("Keep this window open while using deck write actions and card database updates.", flush=True)
     if args.open:
         webbrowser.open(url)
+
+    threading.Thread(target=startup_update_check, daemon=True).start()
 
     try:
         server.serve_forever()

@@ -1,6 +1,6 @@
 {
-  "_index-BFMGloOV.js": {
-    "file": "assets/index-BFMGloOV.js",
+  "_index-2cjrbyn3.js": {
+    "file": "assets/index-2cjrbyn3.js",
     "name": "index",
     "css": [
       "assets/index-D2vF9KLd.css"
@@ -220,12 +220,12 @@
     "src": "_index-D2vF9KLd.css"
   },
   "index.html": {
-    "file": "assets/main-K0dSd1uI.js",
+    "file": "assets/main-WEAafsEY.js",
     "name": "main",
     "src": "index.html",
     "isEntry": true,
     "imports": [
-      "_index-BFMGloOV.js"
+      "_index-2cjrbyn3.js"
     ],
     "assets": [
       "assets/discordLogo-D8wyZE9p.png",
@@ -1144,12 +1144,12 @@
     "src": "src/assets/tokens/tokenCard.jpg"
   },
   "src/embed/deckBrowserEmbed.tsx": {
-    "file": "assets/deckBrowserEmbed-D08bWbWj.js",
+    "file": "assets/deckBrowserEmbed-BoQrp5ZS.js",
     "name": "deckBrowserEmbed",
     "src": "src/embed/deckBrowserEmbed.tsx",
     "isEntry": true,
     "imports": [
-      "_index-BFMGloOV.js"
+      "_index-2cjrbyn3.js"
     ]
   }
 }

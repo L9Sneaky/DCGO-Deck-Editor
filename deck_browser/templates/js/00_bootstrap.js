@@ -14,8 +14,11 @@
     const libraryManifestSourceEl = document.getElementById("library-manifest-source-label");
     const libraryDeckRootEl = document.getElementById("library-deck-root-label");
     const appVersionEl = document.getElementById("app-version-label");
+    const updateStatusLabelEl = document.getElementById("update-status-label");
     const newDeckButtonEl = document.getElementById("new-deck-button");
     const updateCardDatabaseBtn = document.getElementById("update-card-database");
+    const checkAppUpdateBtn = document.getElementById("check-app-update");
+    const installAppUpdateBtn = document.getElementById("install-app-update");
     const cardSearchEl = document.getElementById("card-search");
     const catalogGridEl = document.getElementById("catalog-grid");
     const catalogSummaryEl = document.getElementById("catalog-summary");
