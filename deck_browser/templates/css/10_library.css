@@ -43,22 +43,26 @@
       width: min(460px, 100%);
     }
 
-    .library-grid {
-      overflow: auto;
-      padding: 22px 28px 28px;
-      display: grid;
-      width: 100%;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 16px;
-      align-content: start;
-    }
+	    .library-grid {
+	      overflow: auto;
+	      padding: 22px 28px 28px;
+	      display: grid;
+	      width: 100%;
+	      grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 320px));
+	      gap: 16px;
+	      align-content: start;
+	      align-items: start;
+	      justify-content: start;
+	    }
 
-    .library-deck-card {
-      display: grid;
-      grid-template-columns: 86px minmax(0, 1fr);
-      gap: 14px;
-      min-height: 150px;
-      padding: 14px;
+	    .library-deck-card {
+	      display: grid;
+	      grid-template-columns: 86px minmax(0, 1fr);
+	      gap: 14px;
+	      width: 100%;
+	      max-width: 320px;
+	      min-height: 150px;
+	      padding: 14px;
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,0.07);
       background:
