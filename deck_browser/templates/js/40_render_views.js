@@ -10,9 +10,9 @@
       return selected;
     }
 
-    function openDeckEditor(deck) {
+    async function openDeckEditor(deck) {
       const currentDeck = getSelectedDeck();
-      if (currentDeck && currentDeck.id !== deck.id && !confirmDiscardUnsaved(currentDeck)) {
+      if (currentDeck && currentDeck.id !== deck.id && !(await confirmDiscardUnsaved(currentDeck))) {
         return;
       }
       state.selectedDeckId = deck.id;
@@ -47,10 +47,10 @@
         item.addEventListener("click", function() {
           openDeckEditor(deck);
         });
-        item.addEventListener("keydown", function(event) {
+        item.addEventListener("keydown", async function(event) {
           if (event.key !== "Enter" && event.key !== " ") return;
           event.preventDefault();
-          openDeckEditor(deck);
+          await openDeckEditor(deck);
         });
 
         const cover = document.createElement("div");
@@ -99,28 +99,22 @@
 
     function renderHero(deck) {
       const stats = getDeckStats(deck);
+      const validation = validateDeck(deck);
       heroTitleEl.textContent = deck.name;
       heroSubtitleEl.textContent = deck.fileName;
 
-      statsGridEl.innerHTML = "";
-      [
-        ["Main", stats.mainCount],
-        ["Egg", stats.eggCount],
-        ["Unique", stats.uniqueCount],
-        ["Total", stats.totalCount]
-      ].forEach(function(stat) {
-        const card = document.createElement("div");
-        card.className = "stat-card";
-        const label = document.createElement("div");
-        label.className = "stat-label";
-        label.textContent = stat[0];
-        const value = document.createElement("div");
-        value.className = "stat-value";
-        value.textContent = stat[1];
-        card.appendChild(label);
-        card.appendChild(value);
-        statsGridEl.appendChild(card);
-      });
+      const isInsights = state.deckInfoMode === "insights";
+      deckInfoSummaryBtn.className = "info-tab" + (!isInsights ? " active" : "");
+      deckInfoSummaryBtn.setAttribute("aria-selected", String(!isInsights));
+      deckInfoInsightsBtn.className = "info-tab" + (isInsights ? " active" : "");
+      deckInfoInsightsBtn.setAttribute("aria-selected", String(isInsights));
+      deckInfoContentEl.innerHTML = "";
+
+      if (isInsights) {
+        renderDeckInsights(deck);
+      } else {
+        renderDeckSummary(deck, stats, validation);
+      }
 
       heroChipsEl.innerHTML = "";
       if (deck.keyCard && deck.keyCard !== "-1") {
@@ -134,6 +128,144 @@
           heroChipsEl.appendChild(createColorChip(color));
         });
       }
+    }
+
+    function renderDeckSummary(deck, stats, validation) {
+      const status = validation.errors.length ? "Invalid" : "Valid";
+      const summary = document.createElement("div");
+      summary.className = "info-summary-line" + (validation.errors.length ? " invalid" : " valid");
+      summary.textContent = status + " · " + stats.mainCount + " main / " + stats.eggCount + " egg · " +
+        stats.uniqueCount + " unique · " + stats.totalCount + " total";
+      if (validation.errors.length || validation.warnings.length) {
+        summary.title = validation.errors.concat(validation.warnings).join("\n");
+      }
+
+      const colorBar = createColorRatioBar(getColorProfile(deck.cards));
+      colorBar.classList.add("compact-color-ratio");
+
+      deckInfoContentEl.appendChild(summary);
+      deckInfoContentEl.appendChild(colorBar);
+    }
+
+    function renderDeckInsights(deck) {
+      const analytics = getDeckAnalytics(deck);
+      const levels = Object.keys(analytics.levelCounts).map(Number).sort(function(a, b) { return a - b; });
+      const playCosts = Object.keys(analytics.playCostCounts).map(Number).sort(function(a, b) { return a - b; });
+      const colorProfile = getColorProfile(deck.cards);
+      const costPeak = playCosts.reduce(function(best, cost) {
+        const count = analytics.playCostCounts[cost] || 0;
+        if (!best || count > best.count || (count === best.count && cost < best.cost)) return { cost: cost, count: count };
+        return best;
+      }, null);
+      const maxLevelCount = levels.reduce(function(max, level) {
+        return Math.max(max, analytics.levelCounts[level] || 0);
+      }, 0);
+
+      const typeLine = document.createElement("div");
+      typeLine.className = "info-summary-line";
+      typeLine.textContent = "Type: " + analytics.typeCounts.Digimon + " Digimon · " +
+        analytics.typeCounts.Option + " Option · " + analytics.typeCounts.Tamer + " Tamer";
+
+      const levelLine = document.createElement("div");
+      levelLine.className = "info-minor-line";
+      levelLine.textContent = levels.length ? "Levels: " + levels.map(function(level) {
+        return "Lv" + level + " " + analytics.levelCounts[level];
+      }).join(" · ") : "Levels: No level data";
+
+      const costLine = document.createElement("div");
+      costLine.className = "info-minor-line";
+      costLine.textContent = costPeak ? "Cost peak: " + costPeak.cost + " memory · " + costPeak.count + " cards" : "Cost peak: No play cost data";
+
+      const colorLine = document.createElement("div");
+      colorLine.className = "info-minor-line";
+      colorLine.textContent = colorProfile.length ? "Colors: " + colorProfile.slice(0, 3).map(function(segment) {
+        return segment.color + " " + segment.percent + "%";
+      }).join(" · ") : "Colors: No color data";
+
+      const histogram = document.createElement("div");
+      histogram.className = "level-histogram";
+      levels.forEach(function(level) {
+        const bar = document.createElement("span");
+        bar.className = "level-histogram-bar";
+        bar.style.height = (maxLevelCount ? Math.max(18, Math.round((analytics.levelCounts[level] / maxLevelCount) * 44)) : 18) + "px";
+        bar.title = "Lv" + level + ": " + analytics.levelCounts[level];
+        histogram.appendChild(bar);
+      });
+
+      const toggle = document.createElement("button");
+      toggle.className = "button info-breakdown-button";
+      toggle.type = "button";
+      toggle.textContent = state.insightsExpanded ? "Show Less ▴" : "Show More ▾";
+      toggle.addEventListener("click", function() {
+        state.insightsExpanded = !state.insightsExpanded;
+        renderHero(deck);
+      });
+
+      deckInfoContentEl.appendChild(typeLine);
+      deckInfoContentEl.appendChild(levelLine);
+      deckInfoContentEl.appendChild(costLine);
+      deckInfoContentEl.appendChild(colorLine);
+      deckInfoContentEl.appendChild(histogram);
+      deckInfoContentEl.appendChild(toggle);
+      if (state.insightsExpanded) {
+        deckInfoContentEl.appendChild(createInsightsBreakdownPanel(analytics, colorProfile, levels, playCosts));
+      }
+    }
+
+    function appendBreakdownList(parent, title, values, emptyText) {
+      const section = document.createElement("div");
+      section.className = "insights-breakdown-section";
+      const heading = document.createElement("div");
+      heading.className = "insights-breakdown-title";
+      heading.textContent = title;
+      const body = document.createElement("div");
+      body.className = "insights-breakdown-values";
+      body.textContent = values.length ? values.join(" · ") : emptyText;
+      section.appendChild(heading);
+      section.appendChild(body);
+      parent.appendChild(section);
+    }
+
+    function sortedEntries(counts) {
+      return Object.keys(counts).map(function(key) {
+        return { key: key, count: counts[key] };
+      }).sort(function(a, b) {
+        if (b.count !== a.count) return b.count - a.count;
+        return String(a.key).localeCompare(String(b.key));
+      });
+    }
+
+    function createInsightsBreakdownPanel(analytics, colorProfile, levels, playCosts) {
+      const panel = document.createElement("div");
+      panel.className = "insights-breakdown-panel";
+
+      appendBreakdownList(panel, "Type breakdown", [
+        analytics.typeCounts.Digimon + " Digimon",
+        analytics.typeCounts.Option + " Option",
+        analytics.typeCounts.Tamer + " Tamer"
+      ], "No type data");
+
+      appendBreakdownList(panel, "Level breakdown", levels.map(function(level) {
+        return "Lv" + level + " " + analytics.levelCounts[level];
+      }), "No level data");
+
+      appendBreakdownList(panel, "Play cost curve", playCosts.map(function(cost) {
+        return cost + "c " + analytics.playCostCounts[cost];
+      }), "No play cost data");
+
+      appendBreakdownList(panel, "Color breakdown", colorProfile.map(function(segment) {
+        return segment.color + " " + segment.percent + "%";
+      }), "No color data");
+
+      appendBreakdownList(panel, "Trait highlights", sortedEntries(analytics.traitCounts).slice(0, 5).map(function(item) {
+        return item.key + " " + item.count;
+      }), "No trait data");
+
+      appendBreakdownList(panel, "Block highlights", sortedEntries(analytics.blockCounts).slice(0, 5).map(function(item) {
+        return item.key + " " + item.count;
+      }), "No block data");
+
+      return panel;
     }
 
     function renderCards(deck) {

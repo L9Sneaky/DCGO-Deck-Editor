@@ -127,13 +127,13 @@
       mountDeckTestBoard(deck);
     };
 
-    window.openDeckTester = function(deck) {
+    window.openDeckTester = async function(deck) {
       if (!deckTestReactRootEl && openDeckTesterLegacy) {
         openDeckTesterLegacy(deck);
         return;
       }
       const currentDeck = getSelectedDeck();
-      if (state.view === "editor" && currentDeck && currentDeck.id !== deck.id && !confirmDiscardUnsaved(currentDeck)) {
+      if (state.view === "editor" && currentDeck && currentDeck.id !== deck.id && !(await confirmDiscardUnsaved(currentDeck))) {
         return;
       }
       state.selectedDeckId = deck.id;

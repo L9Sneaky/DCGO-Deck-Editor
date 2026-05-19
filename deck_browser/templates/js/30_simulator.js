@@ -304,7 +304,7 @@
     function setupTestHand(deck) {
       const mainPool = expandedMainDeckCards(deck);
       if (mainPool.length < 5) {
-        window.alert("This deck needs at least 5 non-egg cards to test a hand.");
+        showMessage("Test hand unavailable", "This deck needs at least 5 non-egg cards to test a hand.");
         return false;
       }
 
@@ -473,9 +473,9 @@
       testHandBtn.textContent = "Test Hand";
     }
 
-    function openDeckTester(deck) {
+    async function openDeckTester(deck) {
       const currentDeck = getSelectedDeck();
-      if (state.view === "editor" && currentDeck && currentDeck.id !== deck.id && !confirmDiscardUnsaved(currentDeck)) {
+      if (state.view === "editor" && currentDeck && currentDeck.id !== deck.id && !(await confirmDiscardUnsaved(currentDeck))) {
         return;
       }
       state.selectedDeckId = deck.id;

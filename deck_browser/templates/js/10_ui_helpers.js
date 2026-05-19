@@ -114,6 +114,81 @@
       });
     }
 
+    function showAppDialog(options) {
+      return new Promise(function(resolve) {
+        const config = options || {};
+        appDialogTitleEl.textContent = config.title || "Deck Editor";
+        appDialogMessageEl.innerHTML = "";
+        appendPlainTextWithBreaks(appDialogMessageEl, config.message || "");
+        appDialogActionsEl.innerHTML = "";
+
+        const wantsInput = config.type === "prompt";
+        appDialogInputEl.classList.toggle("hidden", !wantsInput);
+        appDialogInputEl.value = wantsInput ? (config.defaultValue || "") : "";
+        appDialogInputEl.placeholder = config.placeholder || "";
+
+        function close(value) {
+          appDialogEl.classList.add("hidden");
+          document.body.classList.remove("modal-open");
+          document.removeEventListener("keydown", onKeyDown);
+          resolve(value);
+        }
+
+        function addAction(label, value, variant) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "button" + (variant ? " " + variant : "");
+          button.textContent = label;
+          button.addEventListener("click", function() {
+            close(value === "__input__" ? appDialogInputEl.value : value);
+          });
+          appDialogActionsEl.appendChild(button);
+          return button;
+        }
+
+        function onKeyDown(event) {
+          if (event.key === "Escape") close(config.type === "alert" ? true : null);
+          if (event.key === "Enter" && !event.shiftKey && wantsInput) {
+            event.preventDefault();
+            close(appDialogInputEl.value);
+          }
+        }
+
+        if (config.type === "confirm") {
+          addAction(config.cancelLabel || "Cancel", false, "");
+          addAction(config.confirmLabel || "Continue", true, config.danger ? "danger" : "primary");
+        } else if (wantsInput) {
+          addAction(config.cancelLabel || "Cancel", null, "");
+          addAction(config.confirmLabel || "Apply", "__input__", "primary");
+        } else {
+          addAction(config.confirmLabel || "OK", true, "primary");
+        }
+
+        document.addEventListener("keydown", onKeyDown);
+        appDialogEl.classList.remove("hidden");
+        document.body.classList.add("modal-open");
+        if (wantsInput) {
+          appDialogInputEl.focus();
+          appDialogInputEl.select();
+        } else {
+          const primary = appDialogActionsEl.querySelector(".primary, .danger") || appDialogActionsEl.querySelector("button");
+          if (primary) primary.focus();
+        }
+      });
+    }
+
+    function showMessage(title, message) {
+      return showAppDialog({ type: "alert", title: title, message: message });
+    }
+
+    function showConfirm(title, message, options) {
+      return showAppDialog(Object.assign({ type: "confirm", title: title, message: message }, options || {}));
+    }
+
+    function showPrompt(title, message, defaultValue, options) {
+      return showAppDialog(Object.assign({ type: "prompt", title: title, message: message, defaultValue: defaultValue }, options || {}));
+    }
+
     const DETAIL_TIMINGS = {
       "On Play": true,
       "When Digivolving": true,

@@ -21,6 +21,67 @@
       overflow: hidden;
     }
 
+    .app-dialog {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(1, 5, 9, 0.72);
+      backdrop-filter: blur(10px);
+    }
+
+    .app-dialog-panel {
+      width: min(460px, 100%);
+      display: grid;
+      gap: 14px;
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(128, 198, 255, 0.22);
+      background: rgba(8, 18, 29, 0.98);
+      box-shadow: 0 24px 72px rgba(0,0,0,0.58);
+    }
+
+    .app-dialog-title {
+      margin: 0;
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .app-dialog-message {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      white-space: normal;
+    }
+
+    .app-dialog-input {
+      width: 100%;
+      resize: vertical;
+      min-height: 90px;
+      border: 1px solid rgba(121, 188, 255, 0.22);
+      background: rgba(4, 10, 17, 0.72);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font: inherit;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .app-dialog-input:focus {
+      border-color: var(--accent);
+    }
+
+    .app-dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     .image-viewer {
       position: fixed;
       inset: 0;
@@ -124,8 +185,8 @@
         overflow: visible;
       }
 
-      .stats-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      .deck-info-strip {
+        grid-template-columns: 1fr;
       }
 
       .cards-grid {
@@ -159,15 +220,16 @@
 
     @media (max-width: 620px) {
       .hero-title {
-        font-size: 34px;
+        font-size: 30px;
       }
 
       .title {
         font-size: 28px;
       }
 
-      .stats-grid {
-        grid-template-columns: 1fr 1fr;
+      .deck-info-content {
+        display: grid;
+        gap: 8px;
       }
 
       .card-tile {

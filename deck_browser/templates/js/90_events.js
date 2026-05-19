@@ -35,7 +35,7 @@
       if (!deck) {
         heroTitleEl.textContent = "No deck selected";
         heroSubtitleEl.textContent = "No deck matched the current search.";
-        statsGridEl.innerHTML = "";
+        deckInfoContentEl.innerHTML = "";
         heroChipsEl.innerHTML = "";
         cardsGridEl.innerHTML = '<div class="empty-state" style="grid-column:1 / -1">No decks available.</div>';
         detailsBodyEl.innerHTML = '<div class="empty-state">No deck selected.</div>';
@@ -110,6 +110,48 @@
       render();
     });
 
+    function closeMoreActionsMenu() {
+      moreActionsMenuEl.classList.add("hidden");
+      moreActionsToggleBtn.setAttribute("aria-expanded", "false");
+    }
+
+    function toggleMoreActionsMenu() {
+      const willOpen = moreActionsMenuEl.classList.contains("hidden");
+      moreActionsMenuEl.classList.toggle("hidden", !willOpen);
+      moreActionsToggleBtn.setAttribute("aria-expanded", String(willOpen));
+    }
+
+    deckInfoSummaryBtn.addEventListener("click", function() {
+      state.deckInfoMode = "summary";
+      state.insightsExpanded = false;
+      renderEditor();
+    });
+
+    deckInfoInsightsBtn.addEventListener("click", function() {
+      state.deckInfoMode = "insights";
+      renderEditor();
+    });
+
+    moreActionsToggleBtn.addEventListener("click", function(event) {
+      event.stopPropagation();
+      toggleMoreActionsMenu();
+    });
+
+    moreActionsMenuEl.addEventListener("click", function(event) {
+      event.stopPropagation();
+      if (event.target.closest(".menu-action")) closeMoreActionsMenu();
+    });
+
+    document.addEventListener("click", function(event) {
+      if (moreActionsMenuEl.classList.contains("hidden")) return;
+      if (moreActionsMenuEl.contains(event.target) || moreActionsToggleBtn.contains(event.target)) return;
+      closeMoreActionsMenu();
+    });
+
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "Escape") closeMoreActionsMenu();
+    });
+
     Object.keys(filterEls).forEach(function(key) {
       if (key === "clear") return;
       filterEls[key].addEventListener("input", render);
@@ -137,9 +179,9 @@
       render();
     });
 
-    backToLibraryBtn.addEventListener("click", function() {
+    backToLibraryBtn.addEventListener("click", async function() {
       const deck = getSelectedDeck();
-      if (deck && !confirmDiscardUnsaved(deck)) return;
+      if (deck && !(await confirmDiscardUnsaved(deck))) return;
       window.location.hash = "";
       state.selectedCardCode = null;
       resetTestHand();
@@ -149,7 +191,7 @@
     newDeckButtonEl.addEventListener("click", async function() {
       if (needsDeckBrowserServer("New Deck")) return;
 
-      const deckName = window.prompt("New deck name:", "NewDeck");
+      const deckName = await showPrompt("New deck", "Deck name", "NewDeck");
       if (deckName === null) return;
 
       const original = newDeckButtonEl.textContent;
@@ -171,9 +213,9 @@
         sortDeckLibrary();
         librarySearchEl.value = "";
         state.deckQuery = "";
-        openDeckEditor(payload.deck);
+        await openDeckEditor(payload.deck);
       } catch (error) {
-        window.alert("Could not create deck file: " + error.message);
+        await showMessage("Could not create deck", error.message);
       } finally {
         newDeckButtonEl.disabled = false;
         newDeckButtonEl.textContent = original;
@@ -228,10 +270,10 @@
         const payload = await response.json().catch(function() { return {}; });
         if (!response.ok) throw new Error(payload.error || "Update check failed.");
         renderUpdateStatus(payload);
-        if (showAlert) window.alert(payload.message || "Update check complete.");
+        if (showAlert) await showMessage("Update check", payload.message || "Update check complete.");
       } catch (error) {
         renderUpdateStatus({ status: "failed", message: "Update check failed: " + error.message, current_version: APP_VERSION });
-        if (showAlert) window.alert("Could not check for updates: " + error.message);
+        if (showAlert) await showMessage("Could not check for updates", error.message);
       } finally {
         checkAppUpdateBtn.disabled = false;
         checkAppUpdateBtn.textContent = original;
@@ -244,10 +286,10 @@
 
     installAppUpdateBtn.addEventListener("click", async function() {
       if (needsDeckBrowserServer("Install Update")) return;
-      if (hasUnsavedChanges() && !window.confirm("Installing an update will restart the editor. Discard unsaved deck edits?")) {
+      if (hasUnsavedChanges() && !(await showConfirm("Unsaved changes", "Installing an update will restart the editor. Discard unsaved deck edits?", { confirmLabel: "Discard", danger: true }))) {
         return;
       }
-      if (!window.confirm("Install the latest GitHub release now? The editor will close briefly and relaunch if macOS allows it.")) {
+      if (!(await showConfirm("Install update", "Install the latest GitHub release now? The editor will close briefly and relaunch if macOS allows it.", { confirmLabel: "Install" }))) {
         return;
       }
 
@@ -264,10 +306,10 @@
         const payload = await response.json().catch(function() { return {}; });
         if (!response.ok) throw new Error(payload.error || "Update install failed.");
         renderUpdateStatus(payload);
-        window.alert(payload.message || "Update installer started. Relaunch the editor if it does not reopen automatically.");
+        await showMessage("Update installer started", payload.message || "Relaunch the editor if it does not reopen automatically.");
       } catch (error) {
         renderUpdateStatus({ status: "failed", message: "Update install failed: " + error.message, current_version: APP_VERSION });
-        window.alert("Could not install update: " + error.message);
+        await showMessage("Could not install update", error.message);
         installAppUpdateBtn.disabled = false;
         installAppUpdateBtn.textContent = original;
       }
@@ -275,10 +317,10 @@
 
     updateCardDatabaseBtn.addEventListener("click", async function() {
       if (needsDeckBrowserServer("Update Card DB")) return;
-      if (hasUnsavedChanges() && !window.confirm("Updating the card database reloads this page. Discard unsaved deck edits?")) {
+      if (hasUnsavedChanges() && !(await showConfirm("Unsaved changes", "Updating the card database reloads this page. Discard unsaved deck edits?", { confirmLabel: "Discard", danger: true }))) {
         return;
       }
-      if (!window.confirm("Download the latest card metadata from GitHub and reload the deck browser?")) {
+      if (!(await showConfirm("Update card database", "Download the latest card metadata from GitHub and reload the deck browser?", { confirmLabel: "Update" }))) {
         return;
       }
 
@@ -296,10 +338,10 @@
         if (!response.ok) {
           throw new Error(payload.error || "Update failed.");
         }
-        window.alert("Card database updated: " + payload.cardCount + " cards loaded. Reloading now.");
+        await showMessage("Card database updated", payload.cardCount + " cards loaded. Reloading now.");
         window.location.reload();
       } catch (error) {
-        window.alert("Could not update card database: " + error.message);
+        await showMessage("Could not update card database", error.message);
         updateCardDatabaseBtn.disabled = false;
         updateCardDatabaseBtn.textContent = original;
       }
@@ -545,11 +587,11 @@
       const deck = getSelectedDeck();
       if (!deck || needsDeckBrowserServer("Rename")) return;
       if (isDeckDirty(deck)) {
-        window.alert("Save or discard unsaved changes before renaming this deck.");
+        await showMessage("Unsaved changes", "Save or discard unsaved changes before renaming this deck.");
         return;
       }
 
-      const newName = window.prompt("Rename deck:", deck.name);
+      const newName = await showPrompt("Rename deck", "Deck name", deck.name);
       if (newName === null) return;
 
       const original = renameDeckBtn.textContent;
@@ -572,7 +614,7 @@
         window.location.hash = "deck/" + encodeURIComponent(deck.id);
         render();
       } catch (error) {
-        window.alert("Could not rename deck: " + error.message);
+        await showMessage("Could not rename deck", error.message);
       } finally {
         renameDeckBtn.disabled = false;
         renameDeckBtn.textContent = original;
@@ -583,11 +625,11 @@
       const deck = getSelectedDeck();
       if (!deck || needsDeckBrowserServer("Duplicate")) return;
       if (isDeckDirty(deck)) {
-        window.alert("Save or discard unsaved changes before duplicating this deck.");
+        await showMessage("Unsaved changes", "Save or discard unsaved changes before duplicating this deck.");
         return;
       }
 
-      const newName = window.prompt("Duplicate deck as:", deck.name + " Copy");
+      const newName = await showPrompt("Duplicate deck", "New deck name", deck.name + " Copy");
       if (newName === null) return;
 
       const original = duplicateDeckBtn.textContent;
@@ -608,9 +650,9 @@
         sortDeckLibrary();
         librarySearchEl.value = "";
         state.deckQuery = "";
-        openDeckEditor(payload.deck);
+        await openDeckEditor(payload.deck);
       } catch (error) {
-        window.alert("Could not duplicate deck: " + error.message);
+        await showMessage("Could not duplicate deck", error.message);
       } finally {
         duplicateDeckBtn.disabled = false;
         duplicateDeckBtn.textContent = original;
@@ -621,10 +663,10 @@
       const deck = getSelectedDeck();
       if (!deck || needsDeckBrowserServer("Delete")) return;
       if (isDeckDirty(deck)) {
-        window.alert("Save or discard unsaved changes before deleting this deck.");
+        await showMessage("Unsaved changes", "Save or discard unsaved changes before deleting this deck.");
         return;
       }
-      if (!window.confirm("Move '" + deck.name + "' to deleted_decks? This removes it from DCGO but keeps a recoverable copy.")) {
+      if (!(await showConfirm("Delete deck", "Move '" + deck.name + "' to deleted_decks? This removes it from DCGO but keeps a recoverable copy.", { confirmLabel: "Delete", danger: true }))) {
         return;
       }
 
@@ -644,11 +686,11 @@
         }
         removeDeckFromLibrary(deck);
         resetTestHand();
-        window.alert("Deck moved to: " + payload.deletedPath);
+        await showMessage("Deck deleted", "Deck moved to: " + payload.deletedPath);
         window.location.hash = "";
         render();
       } catch (error) {
-        window.alert("Could not delete deck: " + error.message);
+        await showMessage("Could not delete deck", error.message);
       } finally {
         deleteDeckBtn.disabled = false;
         deleteDeckBtn.textContent = original;
@@ -669,12 +711,12 @@
         const importedCards = buildImportedCards(parsed);
         const importValidation = validateCards(importedCards);
         if (importValidation.errors.length) {
-          window.alert(buildImportPreviewText(parsed, importedCards).replace("Replace the current deck list with this import?", "Import blocked until errors are fixed."));
+          await showMessage("Import blocked", buildImportPreviewText(parsed, importedCards).replace("Replace the current deck list with this import?", "Import blocked until errors are fixed."));
           importClipboardBtn.textContent = original;
           importClipboardBtn.disabled = false;
           return;
         }
-        if (!window.confirm(buildImportPreviewText(parsed, importedCards))) {
+        if (!(await showConfirm("Import deck list", buildImportPreviewText(parsed, importedCards), { confirmLabel: "Import" }))) {
           importClipboardBtn.textContent = original;
           importClipboardBtn.disabled = false;
           return;
@@ -690,7 +732,7 @@
           importClipboardBtn.disabled = false;
         }, 1200);
       } catch (error) {
-        window.alert("Import failed: " + error.message);
+        await showMessage("Import failed", error.message);
         importClipboardBtn.textContent = original;
         importClipboardBtn.disabled = false;
       }

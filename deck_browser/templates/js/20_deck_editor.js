@@ -209,6 +209,41 @@
       });
     }
 
+    function getDeckAnalytics(deck) {
+      const typeCounts = { Digimon: 0, Option: 0, Tamer: 0 };
+      const levelCounts = {};
+      const playCostCounts = {};
+      const traitCounts = {};
+      const blockCounts = {};
+
+      deck.cards.forEach(function(card) {
+        const count = Number(card.count) || 0;
+        if (Object.prototype.hasOwnProperty.call(typeCounts, card.type)) {
+          typeCounts[card.type] += count;
+        }
+        if (card.level !== null && card.level !== undefined) {
+          const level = Number(card.level);
+          if (!Number.isNaN(level)) levelCounts[level] = (levelCounts[level] || 0) + count;
+        }
+        if (card.type !== "Digi-Egg" && card.playCost !== null && card.playCost !== undefined) {
+          const playCost = Number(card.playCost);
+          if (!Number.isNaN(playCost)) playCostCounts[playCost] = (playCostCounts[playCost] || 0) + count;
+        }
+        (card.digitype || []).forEach(function(trait) {
+          traitCounts[trait] = (traitCounts[trait] || 0) + count;
+        });
+        if (card.block) blockCounts[card.block] = (blockCounts[card.block] || 0) + count;
+      });
+
+      return {
+        typeCounts: typeCounts,
+        levelCounts: levelCounts,
+        playCostCounts: playCostCounts,
+        traitCounts: traitCounts,
+        blockCounts: blockCounts
+      };
+    }
+
     function canAddCard(deck, card) {
       const stats = getDeckStats(deck);
       const currentCount = getDeckCardNumberCount(deck, card);
@@ -354,9 +389,12 @@
       return APP_DATA.decks.some(function(deck) { return isDeckDirty(deck); });
     }
 
-    function confirmDiscardUnsaved(deck) {
+    async function confirmDiscardUnsaved(deck) {
       if (!isDeckDirty(deck)) return true;
-      return window.confirm("This deck has unsaved changes. Discard them and continue?");
+      return showConfirm("Unsaved changes", "This deck has unsaved changes. Discard them and continue?", {
+        confirmLabel: "Discard",
+        danger: true
+      });
     }
 
     function applySavedDeck(deck, savedDeck) {
@@ -368,7 +406,7 @@
 
     function needsDeckBrowserServer(actionName) {
       if (window.location.protocol !== "file:") return false;
-      window.alert(actionName + " needs the local deck browser server. Open it with Open Deck Browser.command.");
+      showMessage("Local server required", actionName + " needs the local deck browser server. Open it with Open Deck Browser.command.");
       return true;
     }
 
@@ -451,37 +489,6 @@
     }
 
     function renderValidationPanel(deck) {
-      const validation = validateDeck(deck);
-      validationPanelEl.className = "validation-panel" + (validation.errors.length ? " error" : " ok");
+      validationPanelEl.className = "validation-panel hidden";
       validationPanelEl.innerHTML = "";
-
-      if (!validation.errors.length && !validation.warnings.length) {
-        validationPanelEl.className = "validation-panel ok compact";
-        validationPanelEl.textContent = "Valid · " + validation.stats.mainCount + " main / " + validation.stats.eggCount + " egg";
-        return;
-      }
-
-      const title = document.createElement("h3");
-      title.className = "validation-title";
-      title.textContent = validation.errors.length ? "Deck Validation: Action Needed" : "Deck Validation";
-      validationPanelEl.appendChild(title);
-
-      const list = document.createElement("ul");
-      list.className = "validation-list";
-
-      validation.errors.forEach(function(message) {
-        const item = document.createElement("li");
-        item.className = "error";
-        item.textContent = message;
-        list.appendChild(item);
-      });
-
-      validation.warnings.forEach(function(message) {
-        const item = document.createElement("li");
-        item.className = "warning";
-        item.textContent = message;
-        list.appendChild(item);
-      });
-
-      validationPanelEl.appendChild(list);
     }

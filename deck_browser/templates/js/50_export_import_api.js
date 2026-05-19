@@ -172,7 +172,7 @@
 
         if (response.status === 409) {
           const payload = await response.json().catch(function() { return {}; });
-          const overwrite = window.confirm("Export image already exists. Overwrite?");
+          const overwrite = await showConfirm("Export image exists", "Export image already exists. Overwrite?", { confirmLabel: "Overwrite" });
           if (!overwrite) throw new Error("Export cancelled.");
           const retry = await fetch("/api/export-image", {
             method: "POST",
@@ -194,7 +194,7 @@
           exportDeckImageBtn.disabled = false;
         }, 1400);
       } catch (error) {
-        window.alert("Export failed: " + error.message);
+        await showMessage("Export failed", error.message);
         exportDeckImageBtn.textContent = original;
         exportDeckImageBtn.disabled = false;
       }
@@ -379,29 +379,29 @@
           return await navigator.clipboard.readText();
         }
       } catch (error) {
-        const fallback = window.prompt("Paste deck text or JSON here:");
+        const fallback = await showPrompt("Import from clipboard", "Paste deck text or JSON here:", "", { confirmLabel: "Import" });
         if (fallback !== null) return fallback;
         throw error;
       }
 
-      const fallback = window.prompt("Paste deck text or JSON here:");
+      const fallback = await showPrompt("Import from clipboard", "Paste deck text or JSON here:", "", { confirmLabel: "Import" });
       if (fallback === null) throw new Error("Import cancelled.");
       return fallback;
     }
 
     async function saveDeckChanges(deck) {
       if (window.location.protocol === "file:") {
-        window.alert("Save Changes needs the local deck browser server. Open it with Open Deck Browser.command.");
+        await showMessage("Local server required", "Save Changes needs the local deck browser server. Open it with Open Deck Browser.command.");
         return;
       }
 
       const validation = validateDeck(deck);
       if (validation.errors.length) {
-        window.alert("Fix validation errors before saving:\n\n" + validation.errors.slice(0, 8).join("\n"));
+        await showMessage("Fix validation errors before saving", validation.errors.slice(0, 8).join("\n"));
         return;
       }
 
-      if (validation.warnings.length && !window.confirm("Save with warnings?\n\n" + validation.warnings.slice(0, 8).join("\n"))) {
+      if (validation.warnings.length && !(await showConfirm("Save with warnings?", validation.warnings.slice(0, 8).join("\n"), { confirmLabel: "Save" }))) {
         return;
       }
 
@@ -431,7 +431,7 @@
           renderDirtyStatus(deck);
         }, 1200);
       } catch (error) {
-        window.alert("Could not save deck: " + error.message);
+        await showMessage("Could not save deck", error.message);
         saveChangesBtn.textContent = original;
         renderDirtyStatus(deck);
       }

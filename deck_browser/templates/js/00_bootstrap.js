@@ -44,13 +44,17 @@
     };
     const heroTitleEl = document.getElementById("hero-title");
     const heroSubtitleEl = document.getElementById("hero-subtitle");
-    const statsGridEl = document.getElementById("stats-grid");
+    const deckInfoContentEl = document.getElementById("deck-info-content");
+    const deckInfoSummaryBtn = document.getElementById("deck-info-summary");
+    const deckInfoInsightsBtn = document.getElementById("deck-info-insights");
     const heroChipsEl = document.getElementById("hero-chips");
     const cardsGridEl = document.getElementById("cards-grid");
     const detailsBodyEl = document.getElementById("details-body");
     const cardSearchSummaryEl = document.getElementById("card-search-summary");
     const backToLibraryBtn = document.getElementById("back-to-library");
     const saveChangesBtn = document.getElementById("save-changes");
+    const moreActionsToggleBtn = document.getElementById("more-actions-toggle");
+    const moreActionsMenuEl = document.getElementById("more-actions-menu");
     const exportDeckImageBtn = document.getElementById("export-deck-image");
     const importClipboardBtn = document.getElementById("import-clipboard");
     const testHandBtn = document.getElementById("test-hand");
@@ -127,6 +131,11 @@
     const testerStackViewerTitleEl = document.getElementById("tester-stack-viewer-title");
     const testerStackViewerGridEl = document.getElementById("tester-stack-viewer-grid");
     const testerStackViewerCloseBtn = document.getElementById("tester-stack-viewer-close");
+    const appDialogEl = document.getElementById("app-dialog");
+    const appDialogTitleEl = document.getElementById("app-dialog-title");
+    const appDialogMessageEl = document.getElementById("app-dialog-message");
+    const appDialogInputEl = document.getElementById("app-dialog-input");
+    const appDialogActionsEl = document.getElementById("app-dialog-actions");
 
     const COLOR_MAP = {
       "Red": "#f25757",
@@ -160,6 +169,8 @@
       view: "library",
       deckQuery: "",
       cardQuery: "",
+      deckInfoMode: "summary",
+      insightsExpanded: false,
       selectedDeckId: APP_DATA.decks.length ? APP_DATA.decks[0].id : null,
       selectedCardCode: null,
       testHand: {
