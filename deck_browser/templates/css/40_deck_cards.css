@@ -113,10 +113,14 @@
 
     .deck-card-actions {
       display: grid;
-      grid-template-columns: 24px minmax(0, 1fr) 24px;
-      gap: 5px;
+      grid-template-columns: 28px 32px 28px;
+      gap: 4px;
       align-items: center;
-      margin-top: 6px;
+      justify-content: center;
+      width: 100%;
+      min-height: 28px;
+      margin-top: 8px;
+      white-space: nowrap;
     }
 
     .count-button,
@@ -130,14 +134,17 @@
     }
 
     .count-button {
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      min-width: 28px;
+      height: 28px;
+      padding: 0;
       border-radius: 8px;
       background: rgba(255,255,255,0.055);
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
+      line-height: 1;
     }
 
     .count-button:hover,
@@ -163,10 +170,17 @@
     }
 
     .deck-card-count {
+      width: 32px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       text-align: center;
       color: var(--muted);
       font-size: 12px;
       font-family: var(--font-mono);
+      line-height: 1;
+      white-space: nowrap;
     }
 
     .card-thumb {
