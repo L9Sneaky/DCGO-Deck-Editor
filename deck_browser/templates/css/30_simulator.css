@@ -470,9 +470,12 @@
 
     .tester-egg-dock {
       display: grid;
+      grid-template-columns: 20px auto 20px;
+      grid-template-rows: auto auto;
       justify-items: center;
-      align-content: end;
-      gap: 0;
+      align-items: center;
+      justify-content: end;
+      gap: 4px;
     }
 
     .tester-trash-drop {
@@ -546,18 +549,19 @@
 
     .tester-security-dock {
       align-self: end;
-      align-content: end;
+      align-content: center;
       justify-items: center;
-      gap: 5px;
+      gap: 4px;
       grid-template-rows: auto auto;
     }
 
     .tester-deck-dock {
       align-self: end;
-      align-content: end;
+      align-content: center;
       justify-items: center;
-      gap: 0;
-      grid-template-rows: auto auto auto;
+      gap: 4px;
+      grid-template-columns: 20px auto 20px;
+      grid-template-rows: auto auto;
     }
 
     .tester-hand-row {
@@ -588,9 +592,10 @@
     }
 
     .tester-deck-stack-button {
+      grid-column: 1 / -1;
       width: 54px;
       height: 72px;
-      margin-bottom: 4px;
+      margin-bottom: 0;
       position: relative;
       border: 1px solid rgba(95, 212, 255, 0.24);
       border-radius: 5px;
@@ -636,39 +641,58 @@
     }
 
     .tester-deck-count {
-      min-width: 46px;
-      padding: 1px 5px;
-      border-radius: 3px;
-      background: rgba(0,0,0,0.34);
+      grid-column: 2;
+      position: relative;
+      min-width: 32px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(2, 8, 14, 0.42);
       color: rgba(237,247,255,0.88);
       font-family: var(--font-display);
       font-size: 15px;
       font-style: italic;
-      line-height: 1.25;
+      line-height: 1;
       text-align: center;
     }
 
-    .tester-deck-count::before,
-    .tester-deck-count::after {
-      content: "△";
-      color: rgba(237,247,255,0.38);
-      margin: 0 3px;
+    .tester-deck-bottom-drop {
+      grid-column: 3;
+      width: 24px;
+      height: 20px;
+      min-height: 20px;
+      border: 0;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      place-items: center;
+      color: rgba(237,247,255,0.64);
+      background: transparent;
       font-family: var(--font-mono);
-      font-size: 10px;
-      vertical-align: 1px;
+      font-size: 13px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .tester-deck-count::before {
+      content: "△";
+      position: absolute;
+      transform: translateX(-25px);
+      color: rgba(237,247,255,0.64);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1;
     }
 
     .tester-deck-bottom-drop {
-      width: 56px;
-      min-height: 17px;
-      border: 1px dashed rgba(95, 212, 255, 0.24);
-      border-radius: 0 0 4px 4px;
-      display: grid;
-      place-items: center;
-      color: rgba(237,247,255,0.56);
-      background: rgba(0,0,0,0.22);
-      font-size: 11px;
-      letter-spacing: 0.04em;
+      transform: none;
+    }
+
+    .tester-deck-bottom-drop.tester-drop-over {
+      border-color: transparent !important;
+      background: rgba(95, 212, 255, 0.14) !important;
+      color: rgba(237,247,255,0.9);
+      box-shadow: 0 0 0 1px rgba(95, 212, 255, 0.3);
     }
 
     .tester-hand-tools {
@@ -737,6 +761,12 @@
       background: rgba(2, 8, 14, 0.38);
       color: rgba(237,247,255,0.82);
       font-size: 10px;
+    }
+
+    #tester-security-count {
+      min-width: 32px;
+      text-align: center;
+      line-height: 1;
     }
 
     .tester-security-cards,

@@ -1149,7 +1149,7 @@
       testerRevealAllSecurityBtn.disabled = !state.testHand.security.length;
       testerToggleSecurityBtn.textContent = state.testHand.showSecurity ? "🙈" : "👁";
       testerSecurityMetaEl.textContent = state.testHand.security.length + " cards";
-      testerSecurityCountEl.textContent = state.testHand.security.length + " sec";
+      testerSecurityCountEl.textContent = String(state.testHand.security.length);
       testerRevealMetaEl.textContent = revealed.length + " shown";
       testerRevealPanelEl.classList.toggle("hidden", !revealed.length && !state.testHand.showRevealPanel);
       testerSecurityPanelEl.classList.toggle("hidden", !state.testHand.showSecurityPanel);
