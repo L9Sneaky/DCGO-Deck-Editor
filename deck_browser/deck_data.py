@@ -367,6 +367,19 @@ def build_card_catalog(raw_manifest: list[dict[str, Any]], by_id: dict[str, dict
     return sorted(catalog, key=lambda card: (card["cardNumber"] or card["code"], card["code"]))
 
 
+def deck_card_sort_key(card: dict[str, Any]) -> tuple[int, int, str, str]:
+    type_order = {"Digi-Egg": 0, "Digimon": 1, "Tamer": 2, "Option": 3}
+    card_type = card.get("type")
+    level = card.get("level")
+    level_sort = level if card_type == "Digimon" and isinstance(level, int) else -1
+    return (
+        type_order.get(card_type, 9),
+        level_sort,
+        str(card.get("cardNumber") or card.get("code") or ""),
+        str(card.get("code") or ""),
+    )
+
+
 def parse_deck_file(deck_path: Path, by_id: dict[str, dict[str, Any]], by_number: dict[str, dict[str, Any]]) -> dict[str, Any] | None:
     if deck_path.name == "Deck lists will save here.txt":
         return None
@@ -428,6 +441,8 @@ def parse_deck_file(deck_path: Path, by_id: dict[str, dict[str, Any]], by_number
                 "linkRequirement": meta["linkRequirement"],
             }
         )
+
+    cards.sort(key=deck_card_sort_key)
 
     main_count = 0
     egg_count = 0

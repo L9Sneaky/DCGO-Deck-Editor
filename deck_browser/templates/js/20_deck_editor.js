@@ -256,14 +256,14 @@
     }
 
     function sortDeckCards(deck) {
-      const typeOrder = { "Digi-Egg": 0, "Option": 1, "Tamer": 2, "Digimon": 3 };
+      const typeOrder = { "Digi-Egg": 0, "Digimon": 1, "Tamer": 2, "Option": 3 };
       deck.cards.sort(function(a, b) {
         const typeA = Object.prototype.hasOwnProperty.call(typeOrder, a.type) ? typeOrder[a.type] : 9;
         const typeB = Object.prototype.hasOwnProperty.call(typeOrder, b.type) ? typeOrder[b.type] : 9;
         if (typeA !== typeB) return typeA - typeB;
         const levelA = a.level !== null && a.level !== undefined ? a.level : -1;
         const levelB = b.level !== null && b.level !== undefined ? b.level : -1;
-        if (levelA !== levelB) return levelA - levelB;
+        if (a.type === "Digimon" && levelA !== levelB) return levelA - levelB;
         const numberCompare = String(a.cardNumber || a.code).localeCompare(String(b.cardNumber || b.code));
         if (numberCompare !== 0) return numberCompare;
         return String(a.code || "").localeCompare(String(b.code || ""));
