@@ -12,7 +12,7 @@ from typing import Any
 from deck_data import load_app_data
 
 
-APP_VERSION = "v1.1.0"
+APP_VERSION = "v1.1.1"
 SCRIPT_DIR = Path(__file__).resolve().parent
 TEMPLATE_DIR = SCRIPT_DIR / "templates"
 HTML_TEMPLATE_PATH = TEMPLATE_DIR / "deck_browser.html"
