@@ -152,29 +152,16 @@
       const levels = Object.keys(analytics.levelCounts).map(Number).sort(function(a, b) { return a - b; });
       const playCosts = Object.keys(analytics.playCostCounts).map(Number).sort(function(a, b) { return a - b; });
       const colorProfile = getColorProfile(deck.cards);
-      const costPeak = playCosts.reduce(function(best, cost) {
-        const count = analytics.playCostCounts[cost] || 0;
-        if (!best || count > best.count || (count === best.count && cost < best.cost)) return { cost: cost, count: count };
-        return best;
-      }, null);
       const maxLevelCount = levels.reduce(function(max, level) {
         return Math.max(max, analytics.levelCounts[level] || 0);
       }, 0);
-
+      const maxPlayCostCount = playCosts.reduce(function(max, cost) {
+        return Math.max(max, analytics.playCostCounts[cost] || 0);
+      }, 0);
       const typeLine = document.createElement("div");
       typeLine.className = "info-summary-line";
       typeLine.textContent = "Type: " + analytics.typeCounts.Digimon + " Digimon · " +
         analytics.typeCounts.Option + " Option · " + analytics.typeCounts.Tamer + " Tamer";
-
-      const levelLine = document.createElement("div");
-      levelLine.className = "info-minor-line";
-      levelLine.textContent = levels.length ? "Levels: " + levels.map(function(level) {
-        return "Lv" + level + " " + analytics.levelCounts[level];
-      }).join(" · ") : "Levels: No level data";
-
-      const costLine = document.createElement("div");
-      costLine.className = "info-minor-line";
-      costLine.textContent = costPeak ? "Cost peak: " + costPeak.cost + " memory · " + costPeak.count + " cards" : "Cost peak: No play cost data";
 
       const colorLine = document.createElement("div");
       colorLine.className = "info-minor-line";
@@ -182,15 +169,39 @@
         return segment.color + " " + segment.percent + "%";
       }).join(" · ") : "Colors: No color data";
 
-      const histogram = document.createElement("div");
-      histogram.className = "level-histogram";
+      const costRow = document.createElement("div");
+      costRow.className = "metric-histogram-row";
+      const costLabel = document.createElement("span");
+      costLabel.className = "metric-histogram-label";
+      costLabel.textContent = "Cost";
+      const costHistogram = document.createElement("span");
+      costHistogram.className = "play-cost-histogram metric-histogram-bars";
+      playCosts.forEach(function(cost) {
+        const bar = document.createElement("span");
+        bar.className = "play-cost-histogram-bar";
+        bar.style.height = (maxPlayCostCount ? Math.max(10, Math.round((analytics.playCostCounts[cost] / maxPlayCostCount) * 34)) : 10) + "px";
+        bar.title = cost + " memory: " + analytics.playCostCounts[cost];
+        costHistogram.appendChild(bar);
+      });
+      costRow.appendChild(costLabel);
+      costRow.appendChild(costHistogram);
+
+      const levelRow = document.createElement("div");
+      levelRow.className = "metric-histogram-row";
+      const levelLabel = document.createElement("span");
+      levelLabel.className = "metric-histogram-label";
+      levelLabel.textContent = "Lv";
+      const histogram = document.createElement("span");
+      histogram.className = "level-histogram metric-histogram-bars";
       levels.forEach(function(level) {
         const bar = document.createElement("span");
         bar.className = "level-histogram-bar";
-        bar.style.height = (maxLevelCount ? Math.max(18, Math.round((analytics.levelCounts[level] / maxLevelCount) * 44)) : 18) + "px";
+        bar.style.height = (maxLevelCount ? Math.max(10, Math.round((analytics.levelCounts[level] / maxLevelCount) * 34)) : 10) + "px";
         bar.title = "Lv" + level + ": " + analytics.levelCounts[level];
         histogram.appendChild(bar);
       });
+      levelRow.appendChild(levelLabel);
+      levelRow.appendChild(histogram);
 
       const toggle = document.createElement("button");
       toggle.className = "button info-breakdown-button";
@@ -202,10 +213,9 @@
       });
 
       deckInfoContentEl.appendChild(typeLine);
-      deckInfoContentEl.appendChild(levelLine);
-      deckInfoContentEl.appendChild(costLine);
       deckInfoContentEl.appendChild(colorLine);
-      deckInfoContentEl.appendChild(histogram);
+      deckInfoContentEl.appendChild(levelRow);
+      deckInfoContentEl.appendChild(costRow);
       deckInfoContentEl.appendChild(toggle);
       if (state.insightsExpanded) {
         deckInfoContentEl.appendChild(createInsightsBreakdownPanel(analytics, colorProfile, levels, playCosts));
@@ -221,6 +231,31 @@
       const body = document.createElement("div");
       body.className = "insights-breakdown-values";
       body.textContent = values.length ? values.join(" · ") : emptyText;
+      section.appendChild(heading);
+      section.appendChild(body);
+      parent.appendChild(section);
+    }
+
+    function appendPlayCostHistogram(parent, playCosts, counts) {
+      const section = document.createElement("div");
+      section.className = "insights-breakdown-section";
+      const heading = document.createElement("div");
+      heading.className = "insights-breakdown-title";
+      heading.textContent = "Play cost curve";
+      const body = document.createElement("div");
+      body.className = "play-cost-histogram insights-play-cost-histogram";
+      const maxCount = playCosts.reduce(function(max, cost) {
+        return Math.max(max, counts[cost] || 0);
+      }, 0);
+
+      playCosts.forEach(function(cost) {
+        const bar = document.createElement("span");
+        bar.className = "play-cost-histogram-bar";
+        bar.style.height = (maxCount ? Math.max(10, Math.round((counts[cost] / maxCount) * 34)) : 10) + "px";
+        bar.title = cost + " memory: " + counts[cost];
+        body.appendChild(bar);
+      });
+
       section.appendChild(heading);
       section.appendChild(body);
       parent.appendChild(section);
@@ -246,12 +281,10 @@
       ], "No type data");
 
       appendBreakdownList(panel, "Level breakdown", levels.map(function(level) {
-        return "Lv" + level + " " + analytics.levelCounts[level];
+        return "Lv" + level + " [" + analytics.levelCounts[level] + "]";
       }), "No level data");
 
-      appendBreakdownList(panel, "Play cost curve", playCosts.map(function(cost) {
-        return cost + "c " + analytics.playCostCounts[cost];
-      }), "No play cost data");
+      appendPlayCostHistogram(panel, playCosts, analytics.playCostCounts);
 
       appendBreakdownList(panel, "Color breakdown", colorProfile.map(function(segment) {
         return segment.color + " " + segment.percent + "%";

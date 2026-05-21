@@ -100,20 +100,62 @@
       display: none;
     }
 
+    .metric-histogram-row {
+      display: grid;
+      grid-template-columns: 42px minmax(72px, auto);
+      align-items: center;
+      gap: 8px;
+      min-width: 140px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .metric-histogram-label {
+      color: #d7e7f2;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .metric-histogram-bars {
+      justify-self: start;
+    }
+
     .level-histogram {
-      height: 46px;
+      height: 34px;
       display: inline-flex;
       align-items: end;
-      gap: 3px;
+      gap: 2px;
       padding: 0 2px;
     }
 
     .level-histogram-bar {
-      width: 10px;
-      min-height: 18px;
+      width: 8px;
+      min-height: 10px;
       border-radius: 4px 4px 2px 2px;
       background: linear-gradient(180deg, rgba(95, 212, 255, 0.95), rgba(28, 107, 159, 0.82));
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+    }
+
+    .play-cost-histogram {
+      height: 34px;
+      display: inline-flex;
+      align-items: end;
+      gap: 2px;
+      padding: 0 2px;
+    }
+
+    .play-cost-histogram-bar {
+      width: 8px;
+      min-height: 10px;
+      border-radius: 3px 3px 2px 2px;
+      background: linear-gradient(180deg, rgba(255, 196, 97, 0.94), rgba(169, 91, 34, 0.82));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+    }
+
+    .insights-play-cost-histogram {
+      height: 38px;
+      align-self: end;
     }
 
     .info-breakdown-button {
