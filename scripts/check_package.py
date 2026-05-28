@@ -91,7 +91,7 @@ def check_html_build(root: Path) -> list[str]:
             return [f"HTML build failed: {error}"]
 
         html = output_path.read_text(encoding="utf-8")
-        for needle in ["DCGO Deck Browser", "CheckDeck", "app-version-label", "v1.1.1", "deck-test-react-root"]:
+        for needle in ["DCGO Deck Browser", "CheckDeck", "app-version-label", "v1.1.4", "deck-test-react-root", "open-collection", "collection-main", "collection-import-list", "collection-edit-enabled"]:
             if needle not in html:
                 errors.append(f"Generated HTML is missing: {needle}")
     return errors

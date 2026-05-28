@@ -20,10 +20,11 @@
       ctx.drawImage(image, sx, sy, sw, sh, x, y, width, height);
     }
 
-    function drawCountPill(ctx, text, x, y) {
-      const paddingX = 12;
-      const paddingY = 7;
-      const fontSize = 22;
+    function drawCountPill(ctx, text, x, y, scale) {
+      const sizeScale = Number(scale) || 1;
+      const paddingX = 12 * sizeScale;
+      const paddingY = 7 * sizeScale;
+      const fontSize = 22 * sizeScale;
       ctx.font = "700 " + fontSize + "px " + getComputedStyle(document.body).fontFamily;
       const metrics = ctx.measureText(text);
       const pillWidth = metrics.width + paddingX * 2;
@@ -134,6 +135,78 @@
       });
     }
 
+    async function buildWantedListImageBlobForCards(wantedCards) {
+      const columns = Math.min(6, Math.max(1, wantedCards.length));
+      const imageWidth = 150;
+      const imageHeight = Math.round(imageWidth / 0.7);
+      const cellWidth = imageWidth;
+      const cellHeight = imageHeight;
+      const gap = 8;
+      const padding = 12;
+      const rows = Math.max(1, Math.ceil(wantedCards.length / columns));
+      const canvasWidth = padding * 2 + columns * cellWidth + (columns - 1) * gap;
+      const canvasHeight = padding * 2 + rows * cellHeight + (rows - 1) * gap;
+      if (canvasHeight > 32767) {
+        throw new Error("Wanted list image is too tall for this browser to export as one PNG.");
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#09111a";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let index = 0; index < wantedCards.length; index += 1) {
+        const item = wantedCards[index];
+        const card = item.card;
+        const row = Math.floor(index / columns);
+        const col = index % columns;
+        const x = padding + col * (cellWidth + gap);
+        const y = padding + row * (cellHeight + gap);
+
+        ctx.fillStyle = "rgba(16, 39, 62, 1)";
+        ctx.fillRect(x, y, imageWidth, imageHeight);
+
+        if (card.imageUrl) {
+          try {
+            const image = await loadImageBitmap(card.imageUrl);
+            drawCoverImage(ctx, image, x, y, imageWidth, imageHeight);
+          } catch (error) {
+            // Keep fallback background when image fails.
+          }
+        }
+
+        drawCountPill(ctx, "x" + item.count, x + imageWidth - 7, y + imageHeight - 7, 0.78);
+      }
+
+      return await new Promise(function(resolve, reject) {
+        canvas.toBlob(function(blob) {
+          if (!blob) {
+            reject(new Error("The browser could not render this wanted list image."));
+            return;
+          }
+          resolve(blob);
+        }, "image/png");
+      });
+    }
+
+    async function buildWantedListImageBlobs() {
+      const wantedCards = getCollectionWantedCards();
+      if (!wantedCards.length) throw new Error("Wanted list is empty.");
+
+      return [{
+        name: "Looking for these cards",
+        blob: await buildWantedListImageBlobForCards(wantedCards)
+      }];
+    }
+
+    async function buildWantedListImageBlob() {
+      const exports = await buildWantedListImageBlobs();
+      return exports[0].blob;
+    }
+
     async function copyImageToClipboard(blob) {
       if (!blob) return false;
       if (!navigator.clipboard || !window.ClipboardItem || !window.isSecureContext) return false;
@@ -143,6 +216,24 @@
       } catch (error) {
         return false;
       }
+    }
+
+    async function imageBlobToDataUrl(blob) {
+      return await new Promise(function(resolve) {
+        const reader = new FileReader();
+        reader.onloadend = function() { resolve(reader.result); };
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    async function saveImageExport(exportName, blob, overwrite) {
+      const dataUrl = await imageBlobToDataUrl(blob);
+      const imageData = String(dataUrl).split(",")[1] || "";
+      return await fetch("/api/export-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deckName: exportName, imageData: imageData, overwrite: overwrite })
+      });
     }
 
     async function exportDeckAsImage() {
@@ -157,28 +248,13 @@
       try {
         const blob = await buildDeckImageBlob(deck);
         const copied = await copyImageToClipboard(blob);
-        const dataUrl = await new Promise(function(resolve) {
-          const reader = new FileReader();
-          reader.onloadend = function() { resolve(reader.result); };
-          reader.readAsDataURL(blob);
-        });
-        const imageData = String(dataUrl).split(",")[1] || "";
-
-        const response = await fetch("/api/export-image", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ deckName: deck.name, imageData: imageData, overwrite: false })
-        });
+        const response = await saveImageExport(deck.name, blob, false);
 
         if (response.status === 409) {
           const payload = await response.json().catch(function() { return {}; });
           const overwrite = await showConfirm("Export image exists", "Export image already exists. Overwrite?", { confirmLabel: "Overwrite" });
           if (!overwrite) throw new Error("Export cancelled.");
-          const retry = await fetch("/api/export-image", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ deckName: deck.name, imageData: imageData, overwrite: true })
-          });
+          const retry = await saveImageExport(deck.name, blob, true);
           if (!retry.ok) {
             const retryPayload = await retry.json().catch(function() { return {}; });
             throw new Error(retryPayload.error || "Export failed.");
@@ -197,6 +273,57 @@
         await showMessage("Export failed", error.message);
         exportDeckImageBtn.textContent = original;
         exportDeckImageBtn.disabled = false;
+      }
+    }
+
+    async function exportWantedListAsImage() {
+      if (!getCollectionWantedCards().length) return;
+      if (needsDeckBrowserServer("Export Wanted Image")) return;
+
+      const original = collectionExportImageBtn.textContent;
+      collectionExportImageBtn.disabled = true;
+      collectionExportImageBtn.textContent = "Exporting...";
+
+      try {
+        const exports = await buildWantedListImageBlobs();
+        const copied = exports.length === 1 ? await copyImageToClipboard(exports[0].blob) : false;
+
+        let overwriteExisting = false;
+        let askedOverwrite = false;
+        for (let index = 0; index < exports.length; index += 1) {
+          const item = exports[index];
+          const response = await saveImageExport(item.name, item.blob, false);
+
+          if (response.status === 409) {
+            if (!askedOverwrite) {
+              overwriteExisting = await showConfirm(
+                "Export image exists",
+                (exports.length > 1 ? "One or more wanted list images already exist." : "Wanted list image already exists.") + " Overwrite?",
+                { confirmLabel: "Overwrite" }
+              );
+              askedOverwrite = true;
+            }
+            if (!overwriteExisting) throw new Error("Export cancelled.");
+            const retry = await saveImageExport(item.name, item.blob, true);
+            if (!retry.ok) {
+              const retryPayload = await retry.json().catch(function() { return {}; });
+              throw new Error(retryPayload.error || "Export failed while saving " + item.name + ".");
+            }
+          } else if (!response.ok) {
+            const payload = await response.json().catch(function() { return {}; });
+            throw new Error(payload.error || "Export failed while saving " + item.name + ".");
+          }
+        }
+
+        collectionExportImageBtn.textContent = copied ? "Exported + Copied" : exports.length > 1 ? "Exported " + exports.length : "Exported";
+        window.setTimeout(function() {
+          collectionExportImageBtn.textContent = original;
+          collectionExportImageBtn.disabled = !getCollectionWantedCards().length;
+        }, 1400);
+      } catch (error) {
+        await showMessage("Export failed", error.message);
+        collectionExportImageBtn.textContent = original;
+        collectionExportImageBtn.disabled = !getCollectionWantedCards().length;
       }
     }
 

@@ -178,6 +178,18 @@ def export_image_path(app_support_dir: Path, deck_name: Any) -> Path:
     return export_dir / f"{file_name}.png"
 
 
+def collection_wanted_path(app_support_dir: Path) -> Path:
+    return app_support_dir / "deck_browser" / "collection_wanted_list.txt"
+
+
+def normalize_collection_wanted_text(value: Any) -> str:
+    text = str(value or "").replace("\r\n", "\n").replace("\r", "\n")
+    if len(text.encode("utf-8")) > 1024 * 1024:
+        raise ValueError("Collection wanted list is too large.")
+    lines = [line.strip() for line in text.split("\n") if line.strip()]
+    return ("\n".join(lines) + "\n") if lines else ""
+
+
 def find_deck_by_path(app_data: dict[str, Any], deck_path: Path) -> dict[str, Any]:
     deck_path_resolved = deck_path.resolve()
     for deck in app_data["decks"]:
@@ -386,6 +398,14 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
             self.send_json(200, updater.version_payload(self.package_root, self.app_support_dir))
             return
 
+        if path == "/api/collection-wanted":
+            target_path = collection_wanted_path(self.app_support_dir)
+            if target_path.is_file():
+                self.send_text(200, target_path.read_text(encoding="utf-8", errors="replace"))
+            else:
+                self.send_text(200, "")
+            return
+
         if path == "/favicon.ico":
             self.try_send_favicon()
             return
@@ -562,9 +582,37 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
                 self.send_json(400, {"error": str(error)})
             return
 
+        if path == "/api/collection-wanted":
+            try:
+                payload = self.read_json_body()
+                text = normalize_collection_wanted_text(payload.get("text"))
+                target_path = collection_wanted_path(self.app_support_dir)
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                temp_path = target_path.with_name(target_path.name + ".tmp")
+                temp_path.write_text(text, encoding="utf-8")
+                temp_path.replace(target_path)
+                self.send_json(200, {"savedPath": str(target_path)})
+            except Exception as error:
+                self.send_json(400, {"error": str(error)})
+            return
+
         else:
             self.send_json(404, {"error": "Not found"})
             return
+
+    def do_DELETE(self) -> None:
+        path = urlparse(self.path).path
+        if path == "/api/collection-wanted":
+            try:
+                target_path = collection_wanted_path(self.app_support_dir)
+                if target_path.exists():
+                    target_path.unlink()
+                self.send_json(200, {"deleted": True})
+            except Exception as error:
+                self.send_json(400, {"error": str(error)})
+            return
+
+        self.send_json(404, {"error": "Not found"})
 
 
 def main() -> int:

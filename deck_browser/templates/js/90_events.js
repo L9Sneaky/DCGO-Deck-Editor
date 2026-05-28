@@ -14,6 +14,14 @@
         }
       }
 
+      if (hash === "collection") {
+        state.view = "collection";
+        if (!state.selectedCardCode && APP_DATA.cardCatalog.length) {
+          state.selectedCardCode = APP_DATA.cardCatalog[0].code;
+        }
+        return;
+      }
+
       if (hash.startsWith("deck/")) {
         const deckId = decodeURIComponent(hash.slice("deck/".length));
         const deck = APP_DATA.decks.find(function(item) { return item.id === deckId; });
@@ -28,6 +36,22 @@
       }
 
       state.view = "library";
+    }
+
+    function showDeckEditorCenter() {
+      editorViewEl.classList.remove("collection-view");
+      deckEditorHeroEl.classList.remove("hidden");
+      deckEditorToolbarEl.classList.remove("hidden");
+      deckEditorCardsPanelEl.classList.remove("hidden");
+      collectionMainEl.classList.add("hidden");
+    }
+
+    function showCollectionCenter() {
+      editorViewEl.classList.add("collection-view");
+      deckEditorHeroEl.classList.add("hidden");
+      deckEditorToolbarEl.classList.add("hidden");
+      deckEditorCardsPanelEl.classList.add("hidden");
+      collectionMainEl.classList.remove("hidden");
     }
 
     function renderEditor() {
@@ -85,6 +109,15 @@
         return;
       }
 
+      if (state.view === "collection") {
+        libraryViewEl.classList.add("hidden");
+        testViewEl.classList.add("hidden");
+        editorViewEl.classList.remove("hidden");
+        showCollectionCenter();
+        renderCollection();
+        return;
+      }
+
       if (state.view === "tester") {
         const deck = getSelectedDeck();
         libraryViewEl.classList.add("hidden");
@@ -97,6 +130,7 @@
       libraryViewEl.classList.add("hidden");
       testViewEl.classList.add("hidden");
       editorViewEl.classList.remove("hidden");
+      showDeckEditorCenter();
       renderEditor();
     }
 
@@ -154,8 +188,14 @@
 
     Object.keys(filterEls).forEach(function(key) {
       if (key === "clear") return;
-      filterEls[key].addEventListener("input", render);
-      filterEls[key].addEventListener("change", render);
+      filterEls[key].addEventListener("input", function() {
+        if (state.view === "collection") resetCollectionVisibleLimit();
+        render();
+      });
+      filterEls[key].addEventListener("change", function() {
+        if (state.view === "collection") resetCollectionVisibleLimit();
+        render();
+      });
     });
 
     filterEls.clear.addEventListener("click", function() {
@@ -176,7 +216,151 @@
       filterEls.effect.value = "";
       filterEls.ace.checked = false;
       filterEls.altArts.checked = true;
+      if (state.view === "collection") resetCollectionVisibleLimit();
       render();
+    });
+
+    openCollectionBtn.addEventListener("click", function() {
+      resetCollectionVisibleLimit();
+      window.location.hash = "collection";
+      render();
+    });
+
+    collectionBackLibraryBtn.addEventListener("click", function() {
+      window.location.hash = "";
+      render();
+    });
+
+    collectionWantedOnlyBtn.addEventListener("click", function() {
+      state.collection.wantedOnly = !state.collection.wantedOnly;
+      renderCollection();
+    });
+
+    collectionEditEnabledEl.addEventListener("change", function(event) {
+      state.collection.editEnabled = event.target.checked;
+      renderCollectionGrid();
+    });
+
+    collectionGridEl.addEventListener("scroll", function() {
+      maybeLoadMoreCollectionCards();
+    });
+
+    async function readCollectionImportFileText() {
+      return await new Promise(function(resolve, reject) {
+        let settled = false;
+
+        function cleanup() {
+          collectionImportFileEl.removeEventListener("change", onChange);
+          window.removeEventListener("focus", onFocus);
+        }
+
+        function finish(value) {
+          if (settled) return;
+          settled = true;
+          cleanup();
+          resolve(value);
+        }
+
+        function fail(error) {
+          if (settled) return;
+          settled = true;
+          cleanup();
+          reject(error);
+        }
+
+        function onFocus() {
+          window.setTimeout(function() {
+            if (!settled && !collectionImportFileEl.files.length) finish(null);
+          }, 500);
+        }
+
+        function onChange() {
+          const file = collectionImportFileEl.files && collectionImportFileEl.files[0];
+          if (!file) {
+            finish(null);
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = function() { finish(String(reader.result || "")); };
+          reader.onerror = function() { fail(new Error("Could not read import file.")); };
+          reader.readAsText(file);
+        }
+
+        collectionImportFileEl.value = "";
+        collectionImportFileEl.addEventListener("change", onChange);
+        window.addEventListener("focus", onFocus);
+        collectionImportFileEl.click();
+      });
+    }
+
+    async function readCollectionImportText() {
+      const source = await showChoice("Import looking-for list", "Paste list text or upload a plain text file.", [
+        { label: "Paste Text", value: "paste", variant: "primary" },
+        { label: "Upload File", value: "file" },
+        { label: "Cancel", value: null }
+      ]);
+      if (!source) return null;
+
+      if (source === "file") {
+        return await readCollectionImportFileText();
+      }
+
+      return await showPrompt(
+        "Paste looking-for list",
+        "Supported examples:\n4 BT25-001\nBT25-003 x4\n4x BT25-005",
+        "",
+        { confirmLabel: "Parse" }
+      );
+    }
+
+    async function importCollectionWantedList() {
+      const original = collectionImportListBtn.textContent;
+      collectionImportListBtn.disabled = true;
+      collectionImportListBtn.textContent = "Importing...";
+
+      try {
+        const text = await readCollectionImportText();
+        if (text === null) {
+          collectionImportListBtn.textContent = original;
+          collectionImportListBtn.disabled = false;
+          return;
+        }
+
+        const parsedImport = parseCollectionWantedImport(text);
+        const mode = await showChoice("Import mode", buildCollectionImportSummary(parsedImport, "add") + "\n\nChoose how to apply this list.", [
+          { label: "Add to Current", value: "add", variant: "primary" },
+          { label: "Replace Current", value: "replace" },
+          { label: "Cancel", value: null }
+        ]);
+        if (!mode) {
+          collectionImportListBtn.textContent = original;
+          collectionImportListBtn.disabled = false;
+          return;
+        }
+
+        applyCollectionWantedImport(parsedImport, mode);
+        resetCollectionVisibleLimit();
+        renderCollection();
+        await showMessage("Import complete", buildCollectionImportSummary(parsedImport, mode));
+        collectionImportListBtn.textContent = original;
+        collectionImportListBtn.disabled = false;
+      } catch (error) {
+        await showMessage("Import failed", error.message);
+        collectionImportListBtn.textContent = original;
+        collectionImportListBtn.disabled = false;
+      }
+    }
+
+    collectionImportListBtn.addEventListener("click", importCollectionWantedList);
+
+    collectionClearWantedBtn.addEventListener("click", async function() {
+      if (!getCollectionWantedCards().length) return;
+      if (!(await showConfirm("Clear wanted list", "Clear the saved Collection wanted list?", { confirmLabel: "Clear", danger: true }))) {
+        return;
+      }
+      clearCollectionWantedList();
+      renderCollection();
     });
 
     backToLibraryBtn.addEventListener("click", async function() {
@@ -355,6 +539,10 @@
 
     exportDeckImageBtn.addEventListener("click", function() {
       exportDeckAsImage();
+    });
+
+    collectionExportImageBtn.addEventListener("click", function() {
+      exportWantedListAsImage();
     });
 
     imageViewerCloseBtn.addEventListener("click", closeImageViewer);
@@ -764,3 +952,6 @@
     });
 
     render();
+    restoreCollectionStateFromServer().then(function(restored) {
+      if (restored) render();
+    });

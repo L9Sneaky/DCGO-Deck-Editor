@@ -23,6 +23,7 @@ $deck_browser_css
       <div class="library-toolbar">
         <div class="library-toolbar-left">
           <input id="library-search" class="input library-search" type="search" placeholder="Search decks or included cards">
+          <button id="open-collection" class="button" type="button" title="Browse the card database and build a temporary wanted list">Collection</button>
           <button id="new-deck-button" class="button primary" type="button" title="Create an empty deck file in the shared deck folder">New Deck</button>
           <button id="update-card-database" class="button" type="button" title="Force-refresh card metadata from GitHub">Update Card DB</button>
           <button id="check-app-update" class="button" type="button" title="Check GitHub Releases for a newer Deck Editor">Check for Updates</button>
@@ -45,7 +46,7 @@ $deck_browser_css
       </aside>
 
       <main class="panel main">
-        <section class="deck-hero">
+        <section id="deck-editor-hero" class="deck-hero">
           <div class="hero-top">
             <div>
               <p class="eyebrow">SELECTED DECK</p>
@@ -97,14 +98,38 @@ $deck_browser_css
             <div id="test-hand-grid" class="test-hand-grid"></div>
           </div>
         </section>
-        <section class="toolbar">
+        <section id="deck-editor-toolbar" class="toolbar">
           <div class="toolbar-left">
             <input id="card-search" class="input" type="search" placeholder="Filter cards in this deck" style="min-width: 240px; max-width: 320px;">
           </div>
           <div class="toolbar-right tiny" id="card-search-summary"></div>
         </section>
-        <section class="cards-panel">
+        <section id="deck-editor-cards-panel" class="cards-panel">
           <div id="cards-grid" class="cards-grid"></div>
+        </section>
+        <section id="collection-main" class="collection-main hidden" aria-label="Collection Mode">
+          <section class="collection-toolbar" aria-label="Collection controls">
+            <div class="collection-toolbar-left">
+              <span class="collection-mode-label">Collection Mode</span>
+              <span id="collection-summary" class="tiny"></span>
+              <span class="collection-count-chip">Wanted <strong id="collection-wanted-total">0</strong></span>
+              <span class="collection-count-chip">Unique <strong id="collection-wanted-unique">0</strong></span>
+              <label class="collection-edit-toggle"><input id="collection-edit-enabled" type="checkbox"> Collection</label>
+              <span id="collection-shortcut-hint" class="collection-shortcut-hint">Enable Collection to edit wanted counts</span>
+            </div>
+            <div class="collection-toolbar-actions">
+              <button id="collection-wanted-only" class="button collection-toggle-button" type="button" aria-pressed="false">Wanted Only</button>
+              <button id="collection-import-list" class="button" type="button">Import List</button>
+              <button id="collection-export-image" class="button primary" type="button" disabled>Export</button>
+              <button id="collection-clear-wanted" class="button" type="button" disabled>Clear</button>
+              <button id="collection-back-library" class="button collection-back-button" type="button">Back to Decks</button>
+              <input id="collection-import-file" class="hidden" type="file" accept=".txt,text/plain">
+            </div>
+          </section>
+
+          <section class="collection-results-panel" aria-label="Collection cards">
+            <div id="collection-grid" class="cards-grid collection-grid"></div>
+          </section>
         </section>
       </main>
 

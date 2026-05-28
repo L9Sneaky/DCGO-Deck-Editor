@@ -154,7 +154,11 @@
           }
         }
 
-        if (config.type === "confirm") {
+        if (config.type === "choice") {
+          (config.choices || []).forEach(function(choice) {
+            addAction(choice.label, choice.value, choice.variant || "");
+          });
+        } else if (config.type === "confirm") {
           addAction(config.cancelLabel || "Cancel", false, "");
           addAction(config.confirmLabel || "Continue", true, config.danger ? "danger" : "primary");
         } else if (wantsInput) {
@@ -187,6 +191,10 @@
 
     function showPrompt(title, message, defaultValue, options) {
       return showAppDialog(Object.assign({ type: "prompt", title: title, message: message, defaultValue: defaultValue }, options || {}));
+    }
+
+    function showChoice(title, message, choices) {
+      return showAppDialog({ type: "choice", title: title, message: message, choices: choices || [] });
     }
 
     const DETAIL_TIMINGS = {
