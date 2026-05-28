@@ -1,6 +1,5 @@
 
-    function pickSelectedCard(deck) {
-      const candidates = deck.cards.concat(APP_DATA.cardCatalog);
+    function pickSelectedCardFrom(candidates) {
       if (!candidates.length) return null;
       let selected = candidates.find(function(card) { return card.code === state.selectedCardCode; });
       if (!selected) {
@@ -8,6 +7,14 @@
         state.selectedCardCode = selected.code;
       }
       return selected;
+    }
+
+    function pickSelectedCard(deck) {
+      return pickSelectedCardFrom((deck && deck.cards ? deck.cards : []).concat(APP_DATA.cardCatalog));
+    }
+
+    function pickSelectedCollectionCard() {
+      return pickSelectedCardFrom(APP_DATA.cardCatalog);
     }
 
     async function openDeckEditor(deck) {
@@ -301,6 +308,101 @@
       return panel;
     }
 
+    function createCardThumb(card, className) {
+      const thumb = document.createElement("div");
+      thumb.className = className;
+      if (card.imageUrl) {
+        const img = document.createElement("img");
+        img.src = card.imageUrl;
+        img.alt = card.name;
+        img.loading = "lazy";
+        img.addEventListener("error", function() {
+          img.remove();
+          thumb.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
+        });
+        thumb.appendChild(img);
+      } else {
+        thumb.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
+      }
+      attachCardImageViewerTrigger(thumb, card);
+      return thumb;
+    }
+
+    function appendCountPill(parent, count) {
+      const countPill = document.createElement("div");
+      countPill.className = "count-pill";
+      countPill.textContent = "x" + count;
+      parent.appendChild(countPill);
+      return countPill;
+    }
+
+    function createCardTile(card, options) {
+      const config = options || {};
+      const tile = document.createElement("div");
+      tile.className = "card-tile" + (config.active ? " active" : "") + (config.extraClass ? " " + config.extraClass : "");
+      tile.addEventListener("click", function(event) {
+        if (config.onSelect) config.onSelect(card, event);
+      });
+      if (config.onContextMenu) {
+        tile.addEventListener("contextmenu", function(event) {
+          config.onContextMenu(card, event);
+        });
+      }
+
+      const thumb = createCardThumb(card, "card-thumb");
+      if (config.count !== null && config.count !== undefined) {
+        const pill = appendCountPill(thumb, config.count);
+        if (config.onCountClick) {
+          pill.classList.add("editable-count-pill");
+          pill.title = "Click to edit wanted quantity";
+          pill.addEventListener("click", function(event) {
+            event.stopPropagation();
+            config.onCountClick(card);
+          });
+        }
+      }
+      tile.appendChild(thumb);
+
+      if (config.actions) {
+        tile.appendChild(config.actions);
+      }
+
+      return tile;
+    }
+
+    function createDeckCountActions(deck, card) {
+      const actions = document.createElement("div");
+      actions.className = "deck-card-actions";
+      const minus = document.createElement("button");
+      minus.type = "button";
+      minus.className = "count-button minus";
+      minus.textContent = "-";
+      minus.addEventListener("click", function(event) {
+        event.stopPropagation();
+        removeCardFromDeck(deck, card);
+      });
+
+      const count = document.createElement("div");
+      count.className = "deck-card-count";
+      count.textContent = "x" + card.count;
+
+      const plus = document.createElement("button");
+      plus.type = "button";
+      plus.className = "count-button plus";
+      plus.textContent = "+";
+      plus.disabled = !canAddCard(deck, card);
+      plus.title = plus.disabled ? "Copy limit reached for " + (card.cardNumber || card.code) : "Add one copy";
+      plus.addEventListener("click", function(event) {
+        event.stopPropagation();
+        addCardToDeck(deck, card);
+      });
+
+      actions.appendChild(minus);
+      actions.appendChild(count);
+      actions.appendChild(plus);
+      return actions;
+    }
+
     function renderCards(deck) {
       const cards = getFilteredCards(deck);
       cardSearchSummaryEl.textContent = cards.length + " of " + deck.cards.length + " cards shown";
@@ -316,68 +418,16 @@
       }
 
       cards.forEach(function(card) {
-        const tile = document.createElement("div");
-        tile.className = "card-tile" + (card.code === state.selectedCardCode ? " active" : "");
-        tile.addEventListener("click", function() {
-          state.selectedCardCode = card.code;
-          renderDetails(deck);
-          renderCards(deck);
+        const tile = createCardTile(card, {
+          active: card.code === state.selectedCardCode,
+          count: card.count,
+          actions: createDeckCountActions(deck, card),
+          onSelect: function(selectedCard) {
+            state.selectedCardCode = selectedCard.code;
+            renderDetails(deck);
+            renderCards(deck);
+          }
         });
-
-        const thumb = document.createElement("div");
-        thumb.className = "card-thumb";
-        if (card.imageUrl) {
-          const img = document.createElement("img");
-          img.src = card.imageUrl;
-          img.alt = card.name;
-          img.loading = "lazy";
-          img.addEventListener("error", function() {
-            img.remove();
-            thumb.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
-          });
-          thumb.appendChild(img);
-        } else {
-          thumb.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
-        }
-        attachCardImageViewerTrigger(thumb, card);
-
-        const countPill = document.createElement("div");
-        countPill.className = "count-pill";
-        countPill.textContent = "x" + card.count;
-        thumb.appendChild(countPill);
-
-        const actions = document.createElement("div");
-        actions.className = "deck-card-actions";
-        const minus = document.createElement("button");
-        minus.type = "button";
-        minus.className = "count-button minus";
-        minus.textContent = "-";
-        minus.addEventListener("click", function(event) {
-          event.stopPropagation();
-          removeCardFromDeck(deck, card);
-        });
-
-        const count = document.createElement("div");
-        count.className = "deck-card-count";
-        count.textContent = "x" + card.count;
-
-        const plus = document.createElement("button");
-        plus.type = "button";
-        plus.className = "count-button plus";
-        plus.textContent = "+";
-        plus.disabled = !canAddCard(deck, card);
-        plus.title = plus.disabled ? "Copy limit reached for " + (card.cardNumber || card.code) : "Add one copy";
-        plus.addEventListener("click", function(event) {
-          event.stopPropagation();
-          addCardToDeck(deck, card);
-        });
-
-        actions.appendChild(minus);
-        actions.appendChild(count);
-        actions.appendChild(plus);
-
-        tile.appendChild(thumb);
-        tile.appendChild(actions);
         cardsGridEl.appendChild(tile);
       });
     }
@@ -413,22 +463,7 @@
           renderDetails(deck);
         });
 
-        const thumb = document.createElement("div");
-        thumb.className = "catalog-thumb";
-        if (card.imageUrl) {
-          const img = document.createElement("img");
-          img.src = card.imageUrl;
-          img.alt = card.name;
-          img.loading = "lazy";
-          img.addEventListener("error", function() {
-            img.remove();
-            thumb.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
-          });
-          thumb.appendChild(img);
-        } else {
-          thumb.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
-        }
-        attachCardImageViewerTrigger(thumb, card);
+        const thumb = createCardThumb(card, "catalog-thumb");
 
         const body = document.createElement("div");
         const name = document.createElement("h3");
@@ -468,8 +503,135 @@
       });
     }
 
-    function renderDetailsInto(targetEl, deck) {
-      const card = pickSelectedCard(deck);
+    function renderCollectionCatalogStatus(totalCards) {
+      const filters = readCatalogFilters();
+      catalogGridEl.innerHTML = "";
+      catalogSummaryEl.textContent = hasActiveCatalogFilters(filters)
+        ? totalCards + " matching cards"
+        : APP_DATA.cardCatalog.length + " cards loaded";
+
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = hasActiveCatalogFilters(filters)
+        ? "Filtered cards appear in the Collection grid."
+        : "Use these filters to narrow the Collection grid.";
+      catalogGridEl.appendChild(empty);
+    }
+
+    function selectCollectionCard(card) {
+      state.selectedCardCode = card.code;
+      renderCollectionDetails();
+      renderCollectionGrid();
+    }
+
+    function applyCollectionTileShortcut(card, event, direction) {
+      event.preventDefault();
+      event.stopPropagation();
+      state.selectedCardCode = card.code;
+      if (!state.collection.editEnabled) {
+        renderCollectionDetails();
+        renderCollectionGrid();
+        return;
+      }
+
+      const amount = event.shiftKey ? 4 : 1;
+      setCollectionWantedCount(card, getCollectionWantedCount(card) + direction * amount);
+      renderCollection();
+    }
+
+    function getCollectionGridCards() {
+      const allCards = getFilteredCollectionCards();
+      if (state.collection.wantedOnly) {
+        const wantedCards = getFilteredCollectionWantedCards();
+        return { allCards: wantedCards, visibleCards: wantedCards, hasMore: false };
+      }
+      const visibleCards = allCards.slice(0, state.collection.visibleLimit);
+      return { allCards: allCards, visibleCards: visibleCards, hasMore: visibleCards.length < allCards.length };
+    }
+
+    function renderCollectionToolbar(gridState) {
+      const wantedCards = getCollectionWantedCards();
+      const totalCount = wantedCards.reduce(function(total, item) {
+        return total + item.count;
+      }, 0);
+      collectionWantedTotalEl.textContent = String(totalCount);
+      collectionWantedUniqueEl.textContent = String(wantedCards.length);
+      collectionExportImageBtn.disabled = !wantedCards.length;
+      collectionClearWantedBtn.disabled = !wantedCards.length;
+      collectionWantedOnlyBtn.classList.toggle("active", state.collection.wantedOnly);
+      collectionWantedOnlyBtn.setAttribute("aria-pressed", String(state.collection.wantedOnly));
+      collectionEditEnabledEl.checked = Boolean(state.collection.editEnabled);
+      collectionShortcutHintEl.textContent = state.collection.editEnabled
+        ? "Click +1 · Right-click -1 · Shift = 4"
+        : "Enable Collection to edit wanted counts";
+
+      collectionSummaryEl.textContent = state.collection.wantedOnly
+        ? gridState.visibleCards.length + " wanted shown"
+        : gridState.visibleCards.length + " of " + gridState.allCards.length + " cards shown";
+    }
+
+    let collectionAutoLoadPausedUntil = 0;
+
+    function renderCollectionGrid() {
+      const gridState = getCollectionGridCards();
+      const allCards = gridState.allCards;
+      const visibleCards = gridState.visibleCards;
+      renderCollectionToolbar(gridState);
+      collectionGridEl.innerHTML = "";
+
+      if (!allCards.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.style.gridColumn = "1 / -1";
+        empty.textContent = state.collection.wantedOnly
+          ? "No wanted cards matched the current filters."
+          : "No cards matched the current search.";
+        collectionGridEl.appendChild(empty);
+        return;
+      }
+
+      visibleCards.forEach(function(card) {
+        const wantedCount = getCollectionWantedCount(card);
+        const tile = createCardTile(card, {
+          active: card.code === state.selectedCardCode,
+          count: wantedCount > 0 ? wantedCount : null,
+          extraClass: "collection-card-tile" + (wantedCount > 0 ? " wanted" : ""),
+          onSelect: function(selectedCard, event) {
+            applyCollectionTileShortcut(selectedCard, event, 1);
+          },
+          onContextMenu: function(selectedCard, event) {
+            applyCollectionTileShortcut(selectedCard, event, -1);
+          }
+        });
+        tile.title = state.collection.editEnabled
+          ? "Click +1 wanted copy. Right-click -1. Hold Shift for 4."
+          : "Enable Collection to edit wanted counts.";
+        collectionGridEl.appendChild(tile);
+      });
+    }
+
+    function maybeLoadMoreCollectionCards() {
+      if (state.view !== "collection" || state.collection.wantedOnly) return;
+      if (Date.now() < collectionAutoLoadPausedUntil) return;
+      const allCards = getFilteredCollectionCards();
+      if (state.collection.visibleLimit >= allCards.length) return;
+
+      const remainingScroll = collectionGridEl.scrollHeight - collectionGridEl.scrollTop - collectionGridEl.clientHeight;
+      if (remainingScroll > 700) return;
+
+      collectionAutoLoadPausedUntil = Date.now() + 200;
+      state.collection.visibleLimit += COLLECTION_PAGE_SIZE;
+      renderCollectionGrid();
+    }
+
+    function renderCollection() {
+      renderCollectionDetails();
+      const allCards = getFilteredCollectionCards();
+      renderCollectionGrid();
+      renderCollectionCatalogStatus(allCards.length);
+    }
+
+    function renderCardDetailsInto(targetEl, card) {
       targetEl.innerHTML = "";
 
       if (!card) {
@@ -634,8 +796,16 @@
       targetEl.appendChild(footer);
     }
 
+    function renderDetailsInto(targetEl, deck) {
+      renderCardDetailsInto(targetEl, pickSelectedCard(deck));
+    }
+
     function renderDetails(deck) {
       renderDetailsInto(detailsBodyEl, deck);
+    }
+
+    function renderCollectionDetails() {
+      renderCardDetailsInto(detailsBodyEl, pickSelectedCollectionCard());
     }
 
     function renderTesterCardDetails(deck) {

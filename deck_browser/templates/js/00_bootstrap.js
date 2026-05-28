@@ -3,6 +3,7 @@
     const MANIFEST_SOURCE = $manifest_source;
     const DECK_ROOT = $deck_root;
     const APP_VERSION = $app_version;
+    const COLLECTION_STORAGE_KEY = "dcgo.collectionWantedList.v1";
 
     const libraryViewEl = document.getElementById("library-view");
     const editorViewEl = document.getElementById("editor-view");
@@ -16,6 +17,7 @@
     const appVersionEl = document.getElementById("app-version-label");
     const updateStatusLabelEl = document.getElementById("update-status-label");
     const newDeckButtonEl = document.getElementById("new-deck-button");
+    const openCollectionBtn = document.getElementById("open-collection");
     const updateCardDatabaseBtn = document.getElementById("update-card-database");
     const checkAppUpdateBtn = document.getElementById("check-app-update");
     const installAppUpdateBtn = document.getElementById("install-app-update");
@@ -72,6 +74,22 @@
     const mulliganTestHandBtn = document.getElementById("mulligan-test-hand");
     const drawTestCardBtn = document.getElementById("draw-test-card");
     const resetTestHandBtn = document.getElementById("reset-test-hand");
+    const deckEditorHeroEl = document.getElementById("deck-editor-hero");
+    const deckEditorToolbarEl = document.getElementById("deck-editor-toolbar");
+    const deckEditorCardsPanelEl = document.getElementById("deck-editor-cards-panel");
+    const collectionMainEl = document.getElementById("collection-main");
+    const collectionGridEl = document.getElementById("collection-grid");
+    const collectionSummaryEl = document.getElementById("collection-summary");
+    const collectionWantedTotalEl = document.getElementById("collection-wanted-total");
+    const collectionWantedUniqueEl = document.getElementById("collection-wanted-unique");
+    const collectionEditEnabledEl = document.getElementById("collection-edit-enabled");
+    const collectionShortcutHintEl = document.getElementById("collection-shortcut-hint");
+    const collectionWantedOnlyBtn = document.getElementById("collection-wanted-only");
+    const collectionImportListBtn = document.getElementById("collection-import-list");
+    const collectionImportFileEl = document.getElementById("collection-import-file");
+    const collectionExportImageBtn = document.getElementById("collection-export-image");
+    const collectionBackLibraryBtn = document.getElementById("collection-back-library");
+    const collectionClearWantedBtn = document.getElementById("collection-clear-wanted");
     const testerDetailsBodyEl = document.getElementById("tester-details-body");
     const testerTitleEl = document.getElementById("tester-title");
     const testerSubtitleEl = document.getElementById("tester-subtitle");
@@ -173,6 +191,12 @@
       insightsExpanded: false,
       selectedDeckId: APP_DATA.decks.length ? APP_DATA.decks[0].id : null,
       selectedCardCode: null,
+      collection: {
+        visibleLimit: 120,
+        editEnabled: false,
+        wantedOnly: false,
+        wanted: []
+      },
       testHand: {
         visible: false,
         deckId: null,
@@ -196,3 +220,112 @@
         log: []
       }
     };
+
+    function normalizeStoredCollectionWanted(payload) {
+      const rawEntries = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload && payload.wanted)
+          ? payload.wanted
+          : [];
+      const grouped = {};
+      rawEntries.forEach(function(item) {
+        const rawCode = typeof item === "string" ? item : item && item.code;
+        const card = CARD_BY_CODE[String(rawCode || "").trim().toUpperCase()];
+        const count = typeof item === "string" ? 1 : Math.max(0, Math.floor(Number(item && item.count) || 0));
+        if (!card || count <= 0) return;
+        grouped[card.code] = (grouped[card.code] || 0) + count;
+      });
+      return Object.keys(grouped).map(function(code) {
+        return { code: code, count: grouped[code] };
+      });
+    }
+
+    function buildCollectionWantedText() {
+      const lines = getCollectionWantedCards().map(function(item) {
+        return item.count + " " + item.card.code;
+      });
+      return lines.length ? lines.join("\n") + "\n" : "";
+    }
+
+    function restoreCollectionState() {
+      try {
+        const raw = window.localStorage && window.localStorage.getItem(COLLECTION_STORAGE_KEY);
+        if (!raw) return;
+        state.collection.wanted = normalizeStoredCollectionWanted(JSON.parse(raw));
+      } catch (error) {
+        state.collection.wanted = [];
+      }
+    }
+
+    let collectionPersistTimer = null;
+
+    function saveCollectionWantedTextToServer() {
+      if (window.location.protocol === "file:") return;
+      const text = buildCollectionWantedText();
+      fetch("/api/collection-wanted", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text })
+      }).catch(function() {
+        // localStorage remains the fallback when the local server is unavailable.
+      });
+    }
+
+    function scheduleCollectionWantedTextSave() {
+      if (collectionPersistTimer) window.clearTimeout(collectionPersistTimer);
+      collectionPersistTimer = window.setTimeout(saveCollectionWantedTextToServer, 180);
+    }
+
+    function persistCollectionState() {
+      try {
+        const wanted = normalizeStoredCollectionWanted(state.collection.wanted);
+        state.collection.wanted = wanted;
+        if (window.localStorage) {
+          if (!wanted.length) {
+            window.localStorage.removeItem(COLLECTION_STORAGE_KEY);
+          } else {
+            window.localStorage.setItem(COLLECTION_STORAGE_KEY, JSON.stringify({ wanted: wanted }));
+          }
+        }
+      } catch (error) {
+        // Collection persistence should never affect deck editing.
+      }
+      scheduleCollectionWantedTextSave();
+    }
+
+    function clearCollectionPersistedState() {
+      try {
+        if (window.localStorage) window.localStorage.removeItem(COLLECTION_STORAGE_KEY);
+      } catch (error) {
+        // Ignore localStorage failures.
+      }
+      if (window.location.protocol !== "file:") {
+        fetch("/api/collection-wanted", { method: "DELETE" }).catch(function() {
+          // Ignore server persistence failures.
+        });
+      }
+    }
+
+    async function restoreCollectionStateFromServer() {
+      if (window.location.protocol === "file:") return false;
+      try {
+        const response = await fetch("/api/collection-wanted", { cache: "no-store" });
+        if (!response.ok) return false;
+        const text = await response.text();
+        if (!text.trim()) return false;
+        const parsed = parseCollectionWantedImport(text);
+        state.collection.wanted = normalizeStoredCollectionWanted(parsed.entries);
+        try {
+          if (window.localStorage) {
+            window.localStorage.setItem(COLLECTION_STORAGE_KEY, JSON.stringify({ wanted: state.collection.wanted }));
+          }
+        } catch (error) {
+          // Ignore localStorage failures.
+        }
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    restoreCollectionState();

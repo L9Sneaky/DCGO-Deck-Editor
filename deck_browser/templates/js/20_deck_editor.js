@@ -1,3 +1,5 @@
+    const COLLECTION_PAGE_SIZE = 120;
+
     function deckMatchesQuery(deck, query) {
       if (!query) return true;
       return deck.searchBlob.includes(query);
@@ -114,6 +116,279 @@
       return APP_DATA.cardCatalog.filter(function(card) {
         return cardMatchesCatalogFilters(card, filters);
       }).slice(0, 120);
+    }
+
+    function findCatalogCardByCode(code) {
+      return APP_DATA.cardCatalog.find(function(card) {
+        return card.code === code;
+      }) || null;
+    }
+
+    function getFilteredCollectionCards() {
+      const filters = readCatalogFilters();
+      if (!hasActiveCatalogFilters(filters)) return APP_DATA.cardCatalog;
+      return APP_DATA.cardCatalog.filter(function(card) {
+        return cardMatchesCatalogFilters(card, filters);
+      });
+    }
+
+    function compareCollectionCards(left, right) {
+      const leftNumber = String(left.cardNumber || left.code || "");
+      const rightNumber = String(right.cardNumber || right.code || "");
+      const numberCompare = leftNumber.localeCompare(rightNumber);
+      if (numberCompare !== 0) return numberCompare;
+      const codeCompare = String(left.code || "").localeCompare(String(right.code || ""));
+      if (codeCompare !== 0) return codeCompare;
+      return String(left.name || "").localeCompare(String(right.name || ""));
+    }
+
+    function sortCollectionCards(cards) {
+      return cards.slice().sort(compareCollectionCards);
+    }
+
+    function getFilteredCollectionWantedCards() {
+      const filters = readCatalogFilters();
+      return sortCollectionCards(getCollectionWantedCards().map(function(item) {
+        return item.card;
+      }).filter(function(card) {
+        return !hasActiveCatalogFilters(filters) || cardMatchesCatalogFilters(card, filters);
+      }));
+    }
+
+    function getVisibleCollectionCards() {
+      if (state.collection.wantedOnly) return getFilteredCollectionWantedCards();
+      return getFilteredCollectionCards().slice(0, state.collection.visibleLimit);
+    }
+
+    function resetCollectionVisibleLimit() {
+      state.collection.visibleLimit = COLLECTION_PAGE_SIZE;
+    }
+
+    function collectionCodeFor(cardOrCode) {
+      return typeof cardOrCode === "string" ? cardOrCode : String(cardOrCode && cardOrCode.code || "");
+    }
+
+    function getCollectionWantedItem(cardOrCode) {
+      const code = collectionCodeFor(cardOrCode);
+      return state.collection.wanted.find(function(item) {
+        return item.code === code;
+      }) || null;
+    }
+
+    function getCollectionWantedCount(cardOrCode) {
+      const item = getCollectionWantedItem(cardOrCode);
+      return item ? Number(item.count) || 0 : 0;
+    }
+
+    function setCollectionWantedCount(cardOrCode, count, options) {
+      let code = collectionCodeFor(cardOrCode);
+      const catalogCard = findCatalogCardByCode(code) || CARD_BY_CODE[String(code || "").trim().toUpperCase()];
+      if (!code || !catalogCard) return;
+      code = catalogCard.code;
+
+      const nextCount = Math.max(0, Math.floor(Number(count) || 0));
+      const existing = getCollectionWantedItem(code);
+      if (nextCount <= 0) {
+        state.collection.wanted = state.collection.wanted.filter(function(item) {
+          return item.code !== code;
+        });
+      } else if (existing) {
+        existing.count = nextCount;
+      } else {
+        state.collection.wanted.push({ code: code, count: nextCount });
+      }
+      state.selectedCardCode = code;
+      if (!options || options.persist !== false) persistCollectionState();
+    }
+
+    function addCardToWantedList(card, amount) {
+      setCollectionWantedCount(card, getCollectionWantedCount(card) + (Number(amount) || 1));
+    }
+
+    function removeCardFromWantedList(cardOrCode, amount) {
+      setCollectionWantedCount(cardOrCode, getCollectionWantedCount(cardOrCode) - (Number(amount) || 1));
+    }
+
+    function clearCollectionWantedList() {
+      state.collection.wanted = [];
+      clearCollectionPersistedState();
+    }
+
+    function getCollectionWantedCards() {
+      const wantedCards = state.collection.wanted.map(function(item) {
+        const card = findCatalogCardByCode(item.code);
+        if (!card) return null;
+        return {
+          card: card,
+          count: Math.max(0, Math.floor(Number(item.count) || 0))
+        };
+      }).filter(function(item) {
+        return item && item.count > 0;
+      });
+      return wantedCards.sort(function(left, right) {
+        return compareCollectionCards(left.card, right.card);
+      });
+    }
+
+    function normalizeCollectionImportRef(value) {
+      return String(value || "")
+        .trim()
+        .replace(/^["']|["']$$/g, "")
+        .replace(/[],;]+$$/g, "")
+        .toUpperCase();
+    }
+
+    function normalizeCollectionName(value) {
+      return String(value || "").trim().replace(/\s+/g, " ").toLowerCase();
+    }
+
+    function collectionImportCodeTokens(value) {
+      return String(value || "").match(/[A-Za-z0-9]+-[A-Za-z0-9]+(?:_[A-Za-z0-9]+)?/g) || [];
+    }
+
+    function preferredCollectionNumberMatch(matches) {
+      return matches.find(function(card) { return !card.isAltArt; }) || matches[0] || null;
+    }
+
+    function findCollectionImportCardByRef(ref) {
+      const rawRef = String(ref || "").trim().replace(/^["']|["']$$/g, "").replace(/[],;]+$$/g, "");
+      const checked = {};
+      const candidates = [rawRef].concat(collectionImportCodeTokens(rawRef));
+
+      for (let index = 0; index < candidates.length; index += 1) {
+        const key = normalizeCollectionImportRef(candidates[index]);
+        if (!key || checked[key]) continue;
+        checked[key] = true;
+        if (CARD_BY_CODE[key]) return { card: CARD_BY_CODE[key], warning: "" };
+
+        const numberMatches = CARDS_BY_NUMBER[key] || [];
+        if (numberMatches.length) {
+          const card = preferredCollectionNumberMatch(numberMatches);
+          return {
+            card: card,
+            warning: numberMatches.length > 1 ? key + " matched " + (card.cardNumber || card.code) + "; alternate versions were ignored." : ""
+          };
+        }
+      }
+
+      const nameKey = normalizeCollectionName(rawRef);
+      if (!nameKey) return { card: null, warning: "", ambiguous: false };
+      const nameMatches = APP_DATA.cardCatalog.filter(function(card) {
+        return normalizeCollectionName(card.name) === nameKey || normalizeCollectionName(card.printedName) === nameKey;
+      });
+      if (nameMatches.length === 1) return { card: nameMatches[0], warning: "" };
+      if (nameMatches.length > 1) return { card: null, warning: "", ambiguous: true };
+      return { card: null, warning: "", ambiguous: false };
+    }
+
+    function parseCollectionImportLine(line) {
+      const cleaned = String(line || "").replace(/\s*(\/\/|#).*$$/, "").trim();
+      let match;
+      if (!cleaned) return null;
+
+      match = cleaned.match(/^(\d+)\s*x?\s+(.+)$$/i);
+      if (match) return { count: Number(match[1]), ref: match[2].trim(), raw: cleaned };
+
+      match = cleaned.match(/^(.+?)\s+x\s*(\d+)$$/i);
+      if (match) return { count: Number(match[2]), ref: match[1].trim(), raw: cleaned };
+
+      match = cleaned.match(/^(.+?)\s+(\d+)$$/);
+      if (match) return { count: Number(match[2]), ref: match[1].trim(), raw: cleaned };
+
+      return { count: 1, ref: cleaned, raw: cleaned };
+    }
+
+    function parseCollectionWantedImport(rawText) {
+      const text = String(rawText || "").trim();
+      if (!text) throw new Error("Import text is empty.");
+
+      const grouped = {};
+      const skipped = [];
+      const ambiguous = [];
+      const warnings = [];
+      let parsedLines = 0;
+
+      text.split(/\r?\n/).forEach(function(line) {
+        const parsed = parseCollectionImportLine(line);
+        if (!parsed) return;
+        parsedLines += 1;
+        if (!Number.isFinite(parsed.count) || parsed.count <= 0) {
+          skipped.push(parsed.raw);
+          return;
+        }
+
+        const match = findCollectionImportCardByRef(parsed.ref);
+        if (match.ambiguous) {
+          ambiguous.push(parsed.raw);
+          return;
+        }
+        if (!match.card) {
+          skipped.push(parsed.raw);
+          return;
+        }
+        if (match.warning) warnings.push(match.warning);
+        grouped[match.card.code] = (grouped[match.card.code] || 0) + Math.floor(parsed.count);
+      });
+
+      const entries = Object.keys(grouped).map(function(code) {
+        return { code: code, count: grouped[code] };
+      }).filter(function(item) {
+        return item.count > 0;
+      });
+
+      if (!entries.length) {
+        throw new Error("No matching card codes, card numbers, or unambiguous names were found.");
+      }
+
+      return {
+        entries: entries,
+        skipped: skipped,
+        ambiguous: ambiguous,
+        warnings: warnings,
+        parsedLines: parsedLines
+      };
+    }
+
+    function applyCollectionWantedImport(parsedImport, mode) {
+      if (mode === "replace") {
+        state.collection.wanted = [];
+      }
+
+      parsedImport.entries.forEach(function(entry) {
+        const nextCount = mode === "replace"
+          ? entry.count
+          : getCollectionWantedCount(entry.code) + entry.count;
+        setCollectionWantedCount(entry.code, nextCount, { persist: false });
+      });
+
+      persistCollectionState();
+      if (parsedImport.entries.length) state.selectedCardCode = parsedImport.entries[0].code;
+    }
+
+    function buildCollectionImportSummary(parsedImport, mode) {
+      const total = parsedImport.entries.reduce(function(sum, item) {
+        return sum + item.count;
+      }, 0);
+      const lines = [
+        (mode === "replace" ? "Replace" : "Add") + " " + total + " wanted copies across " + parsedImport.entries.length + " unique cards."
+      ];
+
+      if (parsedImport.ambiguous.length) {
+        lines.push("", "Ambiguous names skipped:");
+        parsedImport.ambiguous.slice(0, 8).forEach(function(item) { lines.push("- " + item); });
+      }
+
+      if (parsedImport.skipped.length) {
+        lines.push("", "Skipped:");
+        parsedImport.skipped.slice(0, 8).forEach(function(item) { lines.push("- " + item); });
+      }
+
+      if (parsedImport.warnings.length) {
+        lines.push("", "Warnings:");
+        parsedImport.warnings.slice(0, 8).forEach(function(item) { lines.push("- " + item); });
+      }
+
+      return lines.join("\n");
     }
 
     function getDeckCount(deck, code) {
