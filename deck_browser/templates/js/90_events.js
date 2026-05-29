@@ -22,6 +22,11 @@
         return;
       }
 
+      if (hash === "reveals") {
+        state.view = "reveals";
+        return;
+      }
+
       if (hash.startsWith("deck/")) {
         const deckId = decodeURIComponent(hash.slice("deck/".length));
         const deck = APP_DATA.decks.find(function(item) { return item.id === deckId; });
@@ -103,14 +108,26 @@
 
       if (state.view === "library") {
         libraryViewEl.classList.remove("hidden");
+        revealsViewEl.classList.add("hidden");
         editorViewEl.classList.add("hidden");
         testViewEl.classList.add("hidden");
         renderLibrary();
         return;
       }
 
+      if (state.view === "reveals") {
+        libraryViewEl.classList.add("hidden");
+        revealsViewEl.classList.remove("hidden");
+        editorViewEl.classList.add("hidden");
+        testViewEl.classList.add("hidden");
+        renderReveals();
+        loadReveals(false);
+        return;
+      }
+
       if (state.view === "collection") {
         libraryViewEl.classList.add("hidden");
+        revealsViewEl.classList.add("hidden");
         testViewEl.classList.add("hidden");
         editorViewEl.classList.remove("hidden");
         showCollectionCenter();
@@ -121,6 +138,7 @@
       if (state.view === "tester") {
         const deck = getSelectedDeck();
         libraryViewEl.classList.add("hidden");
+        revealsViewEl.classList.add("hidden");
         editorViewEl.classList.add("hidden");
         testViewEl.classList.remove("hidden");
         if (deck) renderTester(deck);
@@ -128,6 +146,7 @@
       }
 
       libraryViewEl.classList.add("hidden");
+      revealsViewEl.classList.add("hidden");
       testViewEl.classList.add("hidden");
       editorViewEl.classList.remove("hidden");
       showDeckEditorCenter();
@@ -224,6 +243,20 @@
       resetCollectionVisibleLimit();
       window.location.hash = "collection";
       render();
+    });
+
+    openRevealsBtn.addEventListener("click", function() {
+      window.location.hash = "reveals";
+      render();
+    });
+
+    revealsBackLibraryBtn.addEventListener("click", function() {
+      window.location.hash = "";
+      render();
+    });
+
+    revealsRefreshBtn.addEventListener("click", function() {
+      loadReveals(true);
     });
 
     collectionBackLibraryBtn.addEventListener("click", function() {

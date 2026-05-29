@@ -14,7 +14,7 @@
     }
 
     function pickSelectedCollectionCard() {
-      return pickSelectedCardFrom(APP_DATA.cardCatalog);
+      return pickSelectedCardFrom(COLLECTION_CARD_POOL);
     }
 
     async function openDeckEditor(deck) {
@@ -508,7 +508,7 @@
       catalogGridEl.innerHTML = "";
       catalogSummaryEl.textContent = hasActiveCatalogFilters(filters)
         ? totalCards + " matching cards"
-        : APP_DATA.cardCatalog.length + " cards loaded";
+        : COLLECTION_CARD_POOL.length + " cards loaded";
 
       const empty = document.createElement("div");
       empty.className = "empty-state";
@@ -786,10 +786,10 @@
       middle.textContent = card.illustrator ? "✒ " + card.illustrator : "";
       const rulings = document.createElement("a");
       rulings.className = "details-rulings-link";
-      rulings.href = "https://digimoncardgame.fandom.com/wiki/" + encodeURIComponent(card.cardNumber || card.code) + "/Rulings";
+      rulings.href = card.wikiUrl || ("https://digimoncardgame.fandom.com/wiki/" + encodeURIComponent(card.cardNumber || card.code) + "/Rulings");
       rulings.target = "_blank";
       rulings.rel = "noopener noreferrer";
-      rulings.textContent = "ℹ Rulings";
+      rulings.textContent = card.isRevealPlaceholder ? "Wiki" : "ℹ Rulings";
       footer.appendChild(left);
       footer.appendChild(middle);
       footer.appendChild(rulings);

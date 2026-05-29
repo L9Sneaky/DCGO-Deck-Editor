@@ -10,6 +10,8 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Any
 
+import reveals
+
 
 MANIFEST_URL = (
     "https://raw.githubusercontent.com/TakaOtaku/Digimon-Card-App/main/src/"
@@ -19,7 +21,7 @@ IMAGE_BASE_URL = "https://raw.githubusercontent.com/TakaOtaku/Digimon-Card-App/m
 CACHE_MAX_AGE_SECONDS = 12 * 60 * 60
 DECK_LINE_RE = re.compile(r"^\s*(\d+)\s+(.+?)\s+([A-Za-z0-9-]+(?:_[A-Za-z0-9-]+)?)\s*$")
 COLOR_ORDER = ["Red", "Blue", "Yellow", "Green", "Black", "Purple", "White"]
-APP_VERSION = "v1.1.4"
+APP_VERSION = "v1.1.5"
 
 
 def ensure_text(value: Any) -> str:
@@ -233,6 +235,14 @@ def copy_limit_for_entry(entry: dict[str, Any]) -> int:
     return 4
 
 
+def is_placeholder_manifest_entry(entry: dict[str, Any]) -> bool:
+    name = entry.get("name") or {}
+    english_name = str(name.get("english") or "").strip()
+    if re.match(r"^\[\[:Category:[^\]]*\]\]$", english_name, re.IGNORECASE):
+        return True
+    return False
+
+
 def card_metadata_for_code(
     code: str,
     fallback_name: str,
@@ -308,6 +318,9 @@ def build_card_catalog(raw_manifest: list[dict[str, Any]], by_id: dict[str, dict
     seen: set[str] = set()
 
     for entry in raw_manifest:
+        if is_placeholder_manifest_entry(entry):
+            continue
+
         card_id = ensure_text(entry.get("id"))
         if not card_id or card_id in seen:
             continue
@@ -547,6 +560,7 @@ def load_app_data(
     raw_manifest, manifest_source = load_manifest(cache_file, force_refresh=force_manifest_refresh)
     by_id, by_number = build_manifest_maps(raw_manifest)
     card_catalog = build_card_catalog(raw_manifest, by_id, by_number)
+    reveal_collection_cards = reveals.load_reveal_collection_cards(app_support_dir, card_catalog)
 
     decks: list[dict[str, Any]] = []
     for deck_path in sorted(deck_root.glob("*.txt"), key=lambda path: path.name.lower()):
@@ -560,5 +574,6 @@ def load_app_data(
         "deckRoot": str(deck_root),
         "appVersion": APP_VERSION,
         "cardCatalog": card_catalog,
+        "revealCollectionCards": reveal_collection_cards,
         "decks": decks,
     }
