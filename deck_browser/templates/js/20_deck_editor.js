@@ -118,18 +118,62 @@
       }).slice(0, 120);
     }
 
+    function collectionCardIdentity(card) {
+      return String(card && (card.cardNumber || card.code) || "").toUpperCase();
+    }
+
+    function collectionCardPreferenceScore(card) {
+      let score = 0;
+      if (!card.isRevealPlaceholder) score += 100;
+      if (!card.isAltArt) score += 50;
+      if (card.imageUrl) score += 20;
+      if (String(card.code || "").toUpperCase() === collectionCardIdentity(card)) score += 10;
+      return score;
+    }
+
+    function preferredCollectionCard(left, right) {
+      if (!left) return right;
+      if (!right) return left;
+      const leftScore = collectionCardPreferenceScore(left);
+      const rightScore = collectionCardPreferenceScore(right);
+      if (leftScore !== rightScore) return rightScore > leftScore ? right : left;
+      return String(right.code || "").localeCompare(String(left.code || "")) < 0 ? right : left;
+    }
+
+    function dedupeCollectionCards(cards) {
+      const byNumber = {};
+      const order = [];
+      cards.forEach(function(card) {
+        const key = collectionCardIdentity(card);
+        if (!key) {
+          order.push(card.code || String(order.length));
+          byNumber[card.code || String(order.length)] = card;
+          return;
+        }
+        if (!Object.prototype.hasOwnProperty.call(byNumber, key)) order.push(key);
+        byNumber[key] = preferredCollectionCard(byNumber[key], card);
+      });
+      return order.map(function(key) { return byNumber[key]; }).filter(Boolean);
+    }
+
     function findCatalogCardByCode(code) {
       return APP_DATA.cardCatalog.find(function(card) {
         return card.code === code;
       }) || null;
     }
 
+    function findCollectionCardByCode(code) {
+      return COLLECTION_CARD_POOL.find(function(card) {
+        return card.code === code;
+      }) || null;
+    }
+
     function getFilteredCollectionCards() {
       const filters = readCatalogFilters();
-      if (!hasActiveCatalogFilters(filters)) return APP_DATA.cardCatalog;
-      return APP_DATA.cardCatalog.filter(function(card) {
+      const cards = !hasActiveCatalogFilters(filters) ? COLLECTION_CARD_POOL : COLLECTION_CARD_POOL.filter(function(card) {
         return cardMatchesCatalogFilters(card, filters);
       });
+      return dedupeCollectionCards(cards);
     }
 
     function compareCollectionCards(left, right) {
@@ -148,11 +192,11 @@
 
     function getFilteredCollectionWantedCards() {
       const filters = readCatalogFilters();
-      return sortCollectionCards(getCollectionWantedCards().map(function(item) {
+      return sortCollectionCards(dedupeCollectionCards(getCollectionWantedCards().map(function(item) {
         return item.card;
       }).filter(function(card) {
         return !hasActiveCatalogFilters(filters) || cardMatchesCatalogFilters(card, filters);
-      }));
+      })));
     }
 
     function getVisibleCollectionCards() {
@@ -182,7 +226,7 @@
 
     function setCollectionWantedCount(cardOrCode, count, options) {
       let code = collectionCodeFor(cardOrCode);
-      const catalogCard = findCatalogCardByCode(code) || CARD_BY_CODE[String(code || "").trim().toUpperCase()];
+      const catalogCard = findCollectionCardByCode(code) || COLLECTION_CARD_BY_CODE[String(code || "").trim().toUpperCase()];
       if (!code || !catalogCard) return;
       code = catalogCard.code;
 
@@ -216,7 +260,7 @@
 
     function getCollectionWantedCards() {
       const wantedCards = state.collection.wanted.map(function(item) {
-        const card = findCatalogCardByCode(item.code);
+        const card = findCollectionCardByCode(item.code);
         if (!card) return null;
         return {
           card: card,
@@ -259,9 +303,9 @@
         const key = normalizeCollectionImportRef(candidates[index]);
         if (!key || checked[key]) continue;
         checked[key] = true;
-        if (CARD_BY_CODE[key]) return { card: CARD_BY_CODE[key], warning: "" };
+        if (COLLECTION_CARD_BY_CODE[key]) return { card: COLLECTION_CARD_BY_CODE[key], warning: "" };
 
-        const numberMatches = CARDS_BY_NUMBER[key] || [];
+        const numberMatches = COLLECTION_CARDS_BY_NUMBER[key] || [];
         if (numberMatches.length) {
           const card = preferredCollectionNumberMatch(numberMatches);
           return {
@@ -273,7 +317,7 @@
 
       const nameKey = normalizeCollectionName(rawRef);
       if (!nameKey) return { card: null, warning: "", ambiguous: false };
-      const nameMatches = APP_DATA.cardCatalog.filter(function(card) {
+      const nameMatches = COLLECTION_CARD_POOL.filter(function(card) {
         return normalizeCollectionName(card.name) === nameKey || normalizeCollectionName(card.printedName) === nameKey;
       });
       if (nameMatches.length === 1) return { card: nameMatches[0], warning: "" };

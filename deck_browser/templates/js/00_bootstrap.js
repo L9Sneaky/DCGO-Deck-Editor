@@ -6,6 +6,7 @@
     const COLLECTION_STORAGE_KEY = "dcgo.collectionWantedList.v1";
 
     const libraryViewEl = document.getElementById("library-view");
+    const revealsViewEl = document.getElementById("reveals-view");
     const editorViewEl = document.getElementById("editor-view");
     const testViewEl = document.getElementById("test-view");
     const libraryGridEl = document.getElementById("library-grid");
@@ -18,9 +19,15 @@
     const updateStatusLabelEl = document.getElementById("update-status-label");
     const newDeckButtonEl = document.getElementById("new-deck-button");
     const openCollectionBtn = document.getElementById("open-collection");
+    const openRevealsBtn = document.getElementById("open-reveals");
     const updateCardDatabaseBtn = document.getElementById("update-card-database");
     const checkAppUpdateBtn = document.getElementById("check-app-update");
     const installAppUpdateBtn = document.getElementById("install-app-update");
+    const revealsGridEl = document.getElementById("reveals-grid");
+    const revealsSummaryEl = document.getElementById("reveals-summary");
+    const revealsSourceEl = document.getElementById("reveals-source");
+    const revealsRefreshBtn = document.getElementById("reveals-refresh");
+    const revealsBackLibraryBtn = document.getElementById("reveals-back-library");
     const cardSearchEl = document.getElementById("card-search");
     const catalogGridEl = document.getElementById("catalog-grid");
     const catalogSummaryEl = document.getElementById("catalog-summary");
@@ -165,14 +172,24 @@
       "White": "#e7eef7"
     };
 
+    const REVEAL_COLLECTION_CARDS = Array.isArray(APP_DATA.revealCollectionCards) ? APP_DATA.revealCollectionCards : [];
+    const COLLECTION_CARD_POOL = APP_DATA.cardCatalog.concat(REVEAL_COLLECTION_CARDS);
     const CARD_BY_CODE = {};
     const CARDS_BY_NUMBER = {};
+    const COLLECTION_CARD_BY_CODE = {};
+    const COLLECTION_CARDS_BY_NUMBER = {};
     const TRAIT_WORDS = {};
     APP_DATA.cardCatalog.forEach(function(card) {
       CARD_BY_CODE[String(card.code).toUpperCase()] = card;
       const numberKey = String(card.cardNumber || card.code).toUpperCase();
       if (!CARDS_BY_NUMBER[numberKey]) CARDS_BY_NUMBER[numberKey] = [];
       CARDS_BY_NUMBER[numberKey].push(card);
+    });
+    COLLECTION_CARD_POOL.forEach(function(card) {
+      COLLECTION_CARD_BY_CODE[String(card.code).toUpperCase()] = card;
+      const numberKey = String(card.cardNumber || card.code).toUpperCase();
+      if (!COLLECTION_CARDS_BY_NUMBER[numberKey]) COLLECTION_CARDS_BY_NUMBER[numberKey] = [];
+      COLLECTION_CARDS_BY_NUMBER[numberKey].push(card);
       (card.digitype || []).forEach(function(trait) { TRAIT_WORDS[String(trait)] = true; });
       [card.stage, card.attribute].forEach(function(value) {
         if (value) TRAIT_WORDS[String(value)] = true;
@@ -196,6 +213,15 @@
         editEnabled: false,
         wantedOnly: false,
         wanted: []
+      },
+      reveals: {
+        loaded: false,
+        loading: false,
+        error: "",
+        source: "",
+        lastChecked: "",
+        items: [],
+        errors: []
       },
       testHand: {
         visible: false,
@@ -230,7 +256,7 @@
       const grouped = {};
       rawEntries.forEach(function(item) {
         const rawCode = typeof item === "string" ? item : item && item.code;
-        const card = CARD_BY_CODE[String(rawCode || "").trim().toUpperCase()];
+        const card = COLLECTION_CARD_BY_CODE[String(rawCode || "").trim().toUpperCase()];
         const count = typeof item === "string" ? 1 : Math.max(0, Math.floor(Number(item && item.count) || 0));
         if (!card || count <= 0) return;
         grouped[card.code] = (grouped[card.code] || 0) + count;

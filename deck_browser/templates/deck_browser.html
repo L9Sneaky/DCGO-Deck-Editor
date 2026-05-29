@@ -24,6 +24,7 @@ $deck_browser_css
         <div class="library-toolbar-left">
           <input id="library-search" class="input library-search" type="search" placeholder="Search decks or included cards">
           <button id="open-collection" class="button" type="button" title="Browse the card database and build a temporary wanted list">Collection</button>
+          <button id="open-reveals" class="button" type="button" title="View recent official reveal posts cached from X">New Reveals</button>
           <button id="new-deck-button" class="button primary" type="button" title="Create an empty deck file in the shared deck folder">New Deck</button>
           <button id="update-card-database" class="button" type="button" title="Force-refresh card metadata from GitHub">Update Card DB</button>
           <button id="check-app-update" class="button" type="button" title="Check GitHub Releases for a newer Deck Editor">Check for Updates</button>
@@ -38,6 +39,25 @@ $deck_browser_css
         Version: <span id="app-version-label"></span><br>
         Updates: <span id="update-status-label">Checking...</span>
       </div>
+    </section>
+
+    <section id="reveals-view" class="panel reveals-view hidden">
+      <div class="reveals-header">
+        <div class="reveals-heading">
+          <p class="eyebrow">Official X Reveals</p>
+          <h1 class="title">New Reveals</h1>
+          <p class="subtitle">Recent reveal images grouped by day.</p>
+        </div>
+        <div class="reveals-actions">
+          <button id="reveals-refresh" class="button primary" type="button">Refresh</button>
+          <button id="reveals-back-library" class="button" type="button">Back to Decks</button>
+        </div>
+      </div>
+      <div class="reveals-toolbar">
+        <div id="reveals-summary" class="tiny"></div>
+        <div id="reveals-source" class="tiny"></div>
+      </div>
+      <div id="reveals-grid" class="reveals-grid"></div>
     </section>
 
     <section id="editor-view" class="app editor-view hidden">

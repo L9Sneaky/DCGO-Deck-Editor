@@ -207,10 +207,12 @@
       "Your Turn": true,
       "All Turns": true,
       "Opponent's Turn": true,
+      "Opp Turn": true,
       "End of Opponent's Turn": true,
       "Start of Your Turn": true,
       "End of Your Turn": true,
       "Security": true,
+      "Security Condition": true,
       "Main": true,
       "Start of Your Main Phase": true,
       "Start of Opponent's Main Phase": true,
@@ -229,8 +231,12 @@
       "DigiXros -2": true,
       "DigiXros -3": true,
       "DigiXros -4": true,
+      "Ascension": true,
       "Burst Digivolve": true,
       "DNA Digivolve": true,
+      "Engage": true,
+      "Fortitude": true,
+      "Guard": true,
       "Link": true
     };
     const DETAIL_EVOLUTION_EFFECTS = {
@@ -249,7 +255,7 @@
       if (DETAIL_RECURRING_TIMINGS[word]) return "effect-token recurring";
       if (DETAIL_TIMINGS[word]) return "effect-token timing";
       if (word === "Rule") return "effect-token rule";
-      if (DETAIL_SPECIAL_EFFECTS[word]) return "effect-token special";
+      if (DETAIL_SPECIAL_EFFECTS[word] || /^DigiXros\s*-\d+$$/.test(word.replace(/\u00a0/g, " "))) return "effect-token special";
       if (DETAIL_EVOLUTION_EFFECTS[word] || word.indexOf("Assembly") >= 0) return "effect-token evolution";
       if (isTraitToken(word)) return "effect-token trait";
       return "effect-token name";

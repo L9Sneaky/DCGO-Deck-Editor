@@ -19,9 +19,10 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qsl, unquote, urlparse
 
 import build_deck_browser
+import reveals
 import updater
 
 
@@ -314,6 +315,16 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(encoded)
 
+    def send_file(self, path: Path, content_type: str | None = None) -> None:
+        resolved_content_type = content_type or mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+        self.send_response(200)
+        self.send_header("Content-Type", resolved_content_type)
+        self.send_header("Content-Length", str(path.stat().st_size))
+        self.send_header("Cache-Control", "public, max-age=86400")
+        self.end_headers()
+        with path.open("rb") as handle:
+            shutil.copyfileobj(handle, self.wfile)
+
     def current_deck_root(self) -> Path:
         return self.deck_root or self.app_support_dir / "userdata" / "Decks"
 
@@ -396,6 +407,25 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
 
         if path == "/api/version":
             self.send_json(200, updater.version_payload(self.package_root, self.app_support_dir))
+            return
+
+        if path == "/api/reveals":
+            try:
+                query = urlparse(self.path).query
+                params = dict(parse_qsl(query))
+                force_refresh = str(params.get("refresh", "")).lower() in {"1", "true", "yes"}
+                app_data = self.load_app_data()
+                self.send_json(200, reveals.load_reveals(self.app_support_dir, app_data["cardCatalog"], force_refresh=force_refresh))
+            except Exception as error:
+                self.send_json(400, {"error": str(error)})
+            return
+
+        if path.startswith("/api/reveals/image/"):
+            try:
+                file_name = unquote(path.rsplit("/", 1)[-1])
+                self.send_file(reveals.reveal_image_path(self.app_support_dir, file_name))
+            except Exception as error:
+                self.send_text(404, f"{error}\n")
             return
 
         if path == "/api/collection-wanted":
