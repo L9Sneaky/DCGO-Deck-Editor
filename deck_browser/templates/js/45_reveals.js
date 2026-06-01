@@ -118,6 +118,9 @@
         state.reveals.items = Array.isArray(payload.items) ? payload.items : [];
         state.reveals.errors = Array.isArray(payload.errors) ? payload.errors : [];
         state.reveals.error = state.reveals.errors.length && !state.reveals.items.length ? state.reveals.errors[0] : "";
+        if (forceRefresh && Array.isArray(payload.revealCollectionCards)) {
+          replaceRevealCollectionCards(payload.revealCollectionCards);
+        }
       } catch (error) {
         state.reveals.error = "Reveal check failed: " + error.message;
       } finally {

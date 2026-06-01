@@ -25,7 +25,7 @@ CHROME_USER_AGENT = (
 )
 CACHE_MAX_AGE_SECONDS = 3 * 60 * 60
 WIKI_CACHE_MAX_AGE_SECONDS = 7 * 24 * 60 * 60
-WIKI_CACHE_VERSION = 8
+WIKI_CACHE_VERSION = 12
 MAX_REVEALS = 140
 RECENT_REVEAL_WINDOW_DAYS = 31
 MAX_TWITTER_WEB_VIEWER_PAGES = 8
@@ -33,13 +33,18 @@ DEFAULT_SEED_STATUS_IDS = ["2060156669078974838"]
 FANDOM_API_URL = "https://digimoncardgame.fandom.com/api.php"
 
 REVEAL_HEADLINE_RE = re.compile(r"\[(?:card\s+reveals?|reveals?)\]", re.IGNORECASE)
-CARD_REF_RE = re.compile(r"\[([A-Z]{1,4}\d{1,2}-\d{2,3}(?:_[A-Z0-9]+)?)\s+([^\]]+)\]")
+REVEAL_CARD_CODE_RE = r"(?:BT\d{1,2}|EX\d{1,2}|P)-\d{2,3}(?:_[A-Z0-9]+)?"
+CARD_REF_RE = re.compile(rf"\[({REVEAL_CARD_CODE_RE})\s+([^\]]+)\]", re.IGNORECASE)
 STATUS_ID_RE = re.compile(r"(?:x|twitter)\.com/[^/]+/status/(\d+)|/status/(\d+)")
 NEXT_DATA_RE = re.compile(r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>', re.DOTALL)
 PBS_MEDIA_RE = re.compile(r"https://pbs\.twimg\.com/media/[^\"\\<>\s]+")
 WIKI_CARD_FIELD_RE = re.compile(r"\|([A-Za-z][A-Za-z0-9_]*)\s*=")
 WIKI_TEMPLATE_RE = re.compile(r"\{\{([^{}]+)\}\}")
 WIKI_LINK_RE = re.compile(r"\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]")
+PLAIN_TEXT_TOKEN_FIXES = [
+    (re.compile(r"(^|[\s,.;:])End Your Turn(?=\s)", re.IGNORECASE), r"\1[End of Your Turn]"),
+    (re.compile(r"(^|[\s,.;:])Recovery\s*\+?(\d+)(?:\s*\(Deck\))?", re.IGNORECASE), r"\1＜Recovery +\2 (Deck)＞"),
+]
 
 WIKI_TEMPLATE_LABELS = {
     "OnPlay": "[On Play]",
@@ -57,11 +62,14 @@ WIKI_TEMPLATE_LABELS = {
     "TwicePerTurn": "[Twice Per Turn]",
     "Main": "[Main]",
     "Security": "[Security]",
-    "SecurityCondition": "[Security Condition]",
+    "SecurityCondition": "[Security]",
     "StartOfYourMainPhase": "[Start of Your Main Phase]",
     "StartOfOpponentsMainPhase": "[Start of Opponent's Main Phase]",
     "StartYourTurn": "[Start of Your Turn]",
+    "StartYourMain": "[Start of Your Main Phase]",
     "MainTiming": "[Main]",
+    "EndYourTurn": "[End of Your Turn]",
+    "Rule": "[Rule]",
     "Blocker": "＜Blocker＞",
     "Reboot": "＜Reboot＞",
     "Retaliation": "＜Retaliation＞",
@@ -85,6 +93,7 @@ WIKI_TEMPLATE_LABELS = {
     "Evade": "＜Evade＞",
     "Fortitude": "＜Fortitude＞",
     "Guard": "＜Guard＞",
+    "Iceclad": "＜Iceclad＞",
 }
 
 
@@ -196,6 +205,27 @@ def camel_words(value: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def bracket_join(values: list[str]) -> str:
+    return "/".join(f"[{value}]" for value in values if value)
+
+
+def colour_level_text(values: list[str]) -> str:
+    values = [value for value in values if value]
+    if not values:
+        return ""
+    if values[-1].isdigit():
+        colors = values[:-1]
+        return f"{'/'.join(colors)} Lv.{values[-1]}".strip()
+    return " ".join(values)
+
+
+def normalize_plain_text_tokens(value: Any) -> str:
+    text = str(value or "")
+    for pattern, replacement in PLAIN_TEXT_TOKEN_FIXES:
+        text = pattern.sub(replacement, text)
+    return text
+
+
 def render_wiki_template(raw_template: str) -> str:
     parts = [part.strip() for part in raw_template.split("|")]
     name = parts[0] if parts else ""
@@ -222,19 +252,41 @@ def render_wiki_template(raw_template: str) -> str:
     if name == "DigivolveFromTraitsOr" and len(positional) >= 4:
         traits = "/".join(f"[{trait}]" for trait in positional[2:] if trait)
         return f"[Digivolve] Lv.{positional[1]} w/{traits} trait: Cost {positional[0]}"
+    if name == "DigivolveFromArchetypesOrTraits" and len(positional) >= 4:
+        return f"[Digivolve] Lv.{positional[1]} w/{bracket_join(positional[2:])} trait: Cost {positional[0]}"
     if name in {"DigivolveFromNamesOrTraits", "DigivolveFromNameOrTraits"} and len(positional) >= 4:
         return f"[Digivolve] Lv.{positional[2]} w/[{positional[1]}] in text or w/[{positional[3]}] trait: Cost {positional[0]}"
     if name == "DigivolveFromTextOrTraits" and len(positional) >= 4:
         return f"[Digivolve] Lv.{positional[1]} w/[{positional[2]}] in text or w/[{positional[3]}] trait: Cost {positional[0]}"
+    if name == "Digivolve" and len(positional) >= 2:
+        return f"[Digivolve] {positional[1]}: Cost {positional[0]}"
+    if name in {"DNADigivolve", "DNADigivolveOr"} and len(positional) >= 5:
+        cost = positional[0]
+        materials = positional[1:]
+        midpoint = len(materials) // 2
+        left = colour_level_text(materials[:midpoint])
+        right = colour_level_text(materials[midpoint:])
+        if left and right:
+            return f"[DNA Digivolve] {left} + {right}: Cost {cost}"
+        return f"[DNA Digivolve] {' '.join(materials)}: Cost {cost}"
+    if name == "BurstDigivolve" and positional:
+        return f"[Burst Digivolve] Cost {positional[0]}"
     if name in {"EffectLinkTraits", "TraitLink"} and positional:
-        return f"[{positional[0]}] trait"
+        suffix = kwargs["text"] if "text" in kwargs else "trait"
+        return f"{bracket_join(positional)} {suffix}".strip()
+    if name in {"EffectLinkNames", "EffectLink", "LinkTraits", "PartitionNames"} and positional:
+        return bracket_join(positional)
     if name == "EffectLinkSupports" and positional:
         suffix = kwargs.get("text") or "in text"
         return f"[{positional[0]}] {suffix}".strip()
+    if name == "Colour" and positional:
+        return "/".join(positional)
     if name in {"Name", "CardLink", "Card"} and positional:
         return positional[-1]
     if name == "Draw" and positional:
         return f"＜Draw {positional[0]}＞"
+    if name == "Recovery" and positional:
+        return f"＜Recovery +{positional[0]} (Deck)＞"
     if name == "Memory" and positional:
         return f"{positional[0]} memory"
     if name == "UseReq" and positional:
@@ -261,9 +313,14 @@ def render_wiki_template(raw_template: str) -> str:
     if name.endswith("Token"):
         token_name = camel_words(name[:-5])
         return f"[{token_name}] Token" if token_name else "Token"
+    label = camel_words(name)
+    if any(keyword in label for keyword in ("Digivolve", "Digi Xros", "Assembly")):
+        return " ".join(part for part in [f"[{label}]"] + args if part)
+    if any(keyword in label for keyword in ("Turn", "Phase", "Security", "Main")):
+        return " ".join(part for part in [f"[{label}]"] + args if part)
     if not args:
-        return camel_words(name)
-    return " ".join(part for part in [camel_words(name)] + args if part)
+        return label
+    return " ".join(part for part in [label] + args if part)
 
 
 def clean_wiki_markup(value: Any) -> str:
@@ -279,8 +336,8 @@ def clean_wiki_markup(value: Any) -> str:
     text = re.sub(r"''+", "", text)
     text = re.sub(r"<[^>]+>", "", text)
     lines = [re.sub(r"[ \t]+", " ", line).strip() for line in text.splitlines()]
-    return "\n".join(line for line in lines if line).strip()
-
+    cleaned = "\n".join(line for line in lines if line).strip()
+    return normalize_plain_text_tokens(cleaned)
 
 def wiki_int(value: Any) -> int | None:
     match = re.search(r"-?\d+", str(value or ""))
@@ -304,6 +361,7 @@ def wiki_multi_fields(fields: dict[str, str], prefix: str, count: int = 8) -> li
 
 def wiki_effect_sections(fields: dict[str, str], card_type: str | None) -> list[dict[str, str]]:
     assembly_label = "DigiXros" if str(fields.get("assembly") or "").lstrip().startswith("{{DigiXros") else "Assembly"
+    inherited_label = "Option Effect" if card_type == "Dual" else "Inherited"
     section_specs = [
         ("Special Digivolve", fields.get("evocon")),
         ("DigiXros", fields.get("digixros")),
@@ -311,7 +369,7 @@ def wiki_effect_sections(fields: dict[str, str], card_type: str | None) -> list[
         ("Arts Digivolve", fields.get("artsdigivolve") or fields.get("dual")),
         ("Rule", fields.get("rule")),
         ("Option Effect" if card_type == "Option" else "Main Effect", fields.get("effect")),
-        ("Inherited", fields.get("inheriteff")),
+        (inherited_label, fields.get("inheriteff")),
         ("Security", fields.get("boteff")),
         ("ACE", fields.get("ace")),
         ("Link Effect", fields.get("applink")),
@@ -324,6 +382,13 @@ def wiki_effect_sections(fields: dict[str, str], card_type: str | None) -> list[
         if value:
             sections.append({"label": label, "text": value})
     return sections
+
+
+def normalize_wiki_effect_section(section: dict[str, Any], card_type: str | None = None) -> dict[str, Any]:
+    label = str(section.get("label") or "")
+    if card_type == "Dual" and label == "Inherited":
+        label = "Option Effect"
+    return {**section, "label": label, "text": normalize_plain_text_tokens(section.get("text"))}
 
 
 def fetch_wiki_card_payload(code: str) -> dict[str, Any] | None:
@@ -811,21 +876,27 @@ def reveal_cards_from_cache(app_support_dir: Path) -> list[dict[str, Any]]:
     return cards
 
 
-def cached_or_fetch_wiki_card(app_support_dir: Path, code: str, wiki_cache: dict[str, Any]) -> dict[str, Any] | None:
+def cached_or_fetch_wiki_card(
+    app_support_dir: Path,
+    code: str,
+    wiki_cache: dict[str, Any],
+    allow_fetch: bool = False,
+    force_fetch: bool = False,
+) -> dict[str, Any] | None:
     key = normalize_wiki_page_code(code)
     if not key:
         return None
     entry = wiki_cache.get(key) if isinstance(wiki_cache, dict) else None
+    cached_card = None
     if isinstance(entry, dict):
-        fetched_at = float(entry.get("fetchedAt") or 0)
         card = entry.get("card")
-        parser_version = int(entry.get("parserVersion") or 0)
-        if (
-            parser_version == WIKI_CACHE_VERSION
-            and isinstance(card, dict)
-            and (time.time() - fetched_at) <= WIKI_CACHE_MAX_AGE_SECONDS
-        ):
-            return card
+        if isinstance(card, dict) and card:
+            cached_card = card
+            if not force_fetch:
+                return cached_card
+
+    if not allow_fetch:
+        return cached_card
 
     card = fetch_wiki_card_payload(key)
     wiki_cache[key] = {
@@ -842,7 +913,13 @@ def build_reveal_collection_card(reveal_item: dict[str, Any], wiki_card: dict[st
     code = normalize_wiki_page_code(str(reveal_item.get("code") or ""))
     wiki_card = wiki_card or {}
     name = str(wiki_card.get("name") or reveal_item.get("name") or code)
-    effect_sections = wiki_card.get("effectSections") if isinstance(wiki_card.get("effectSections"), list) else []
+    raw_effect_sections = wiki_card.get("effectSections") if isinstance(wiki_card.get("effectSections"), list) else []
+    effect_sections: list[dict[str, Any]] = []
+    card_type = str(wiki_card.get("type") or "") or None
+    for section in raw_effect_sections:
+        if not isinstance(section, dict):
+            continue
+        effect_sections.append(normalize_wiki_effect_section(section, card_type))
     image_url = str(reveal_item.get("imageUrl") or "")
     card = {
         "count": 0,
@@ -867,7 +944,9 @@ def build_reveal_collection_card(reveal_item: dict[str, Any], wiki_card: dict[st
         "isRevealPlaceholder": True,
         "restriction": wiki_card.get("restriction") or "Unknown",
         "copyLimit": wiki_card.get("copyLimit") or 4,
-        "effectText": wiki_card.get("effectText") or " ".join(section.get("text", "") for section in effect_sections if isinstance(section, dict)),
+        "effectText": normalize_plain_text_tokens(
+            wiki_card.get("effectText") or " ".join(section.get("text", "") for section in effect_sections if isinstance(section, dict))
+        ),
         "effectSections": effect_sections,
         "linkDP": wiki_card.get("linkDP"),
         "linkEffect": wiki_card.get("linkEffect") or "",
@@ -896,7 +975,11 @@ def build_reveal_collection_card(reveal_item: dict[str, Any], wiki_card: dict[st
     return card
 
 
-def load_reveal_collection_cards(app_support_dir: Path, card_catalog: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def load_reveal_collection_cards(
+    app_support_dir: Path,
+    card_catalog: list[dict[str, Any]],
+    refresh_wiki: bool = False,
+) -> list[dict[str, Any]]:
     official_numbers = official_card_numbers(card_catalog)
     wiki_cache = read_json(reveal_wiki_cache_path(app_support_dir), {})
     if not isinstance(wiki_cache, dict):
@@ -907,7 +990,13 @@ def load_reveal_collection_cards(app_support_dir: Path, card_catalog: list[dict[
         code = normalize_wiki_page_code(str(reveal_item.get("code") or ""))
         if not code or code in official_numbers:
             continue
-        wiki_card = cached_or_fetch_wiki_card(app_support_dir, code, wiki_cache)
+        wiki_card = cached_or_fetch_wiki_card(
+            app_support_dir,
+            code,
+            wiki_cache,
+            allow_fetch=refresh_wiki,
+            force_fetch=refresh_wiki,
+        )
         cards.append(build_reveal_collection_card(reveal_item, wiki_card))
 
     cards.sort(key=lambda card: (str(card.get("cardNumber") or ""), str(card.get("code") or "")))
@@ -952,10 +1041,17 @@ def load_reveals(app_support_dir: Path, card_catalog: list[dict[str, Any]], forc
     if items and visible_errors:
         visible_errors = []
 
+    reveal_collection_cards = (
+        load_reveal_collection_cards(app_support_dir, card_catalog, refresh_wiki=True)
+        if force_refresh
+        else []
+    )
+
     return {
         "source": TWITTER_WEB_VIEWER_URL,
         "lastChecked": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(cache.get("lastChecked") or time.time()) if isinstance(cache, dict) else time.time())),
         "cachePath": str(cache_path),
         "items": add_official_matches(items, card_catalog),
+        "revealCollectionCards": reveal_collection_cards,
         "errors": visible_errors,
     }

@@ -60,6 +60,7 @@
     }
 
     function renderEditor() {
+      renderIncludeRevealsToggle();
       const deck = getSelectedDeck();
       if (!deck) {
         heroTitleEl.textContent = "No deck selected";
@@ -193,6 +194,13 @@
     moreActionsMenuEl.addEventListener("click", function(event) {
       event.stopPropagation();
       if (event.target.closest(".menu-action")) closeMoreActionsMenu();
+    });
+
+    includeRevealsDeckEditorBtn.addEventListener("click", function() {
+      state.editor.includeReveals = !state.editor.includeReveals;
+      rebuildEditorCardPool();
+      persistAppSettings();
+      renderEditor();
     });
 
     document.addEventListener("click", function(event) {
@@ -985,6 +993,7 @@
     });
 
     render();
+    restoreAppSettingsFromServer();
     restoreCollectionStateFromServer().then(function(restored) {
       if (restored) render();
     });

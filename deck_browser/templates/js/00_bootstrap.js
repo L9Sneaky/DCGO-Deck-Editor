@@ -4,6 +4,7 @@
     const DECK_ROOT = $deck_root;
     const APP_VERSION = $app_version;
     const COLLECTION_STORAGE_KEY = "dcgo.collectionWantedList.v1";
+    const SETTINGS_STORAGE_KEY = "dcgo.deckBrowserSettings.v1";
 
     const libraryViewEl = document.getElementById("library-view");
     const revealsViewEl = document.getElementById("reveals-view");
@@ -64,6 +65,7 @@
     const saveChangesBtn = document.getElementById("save-changes");
     const moreActionsToggleBtn = document.getElementById("more-actions-toggle");
     const moreActionsMenuEl = document.getElementById("more-actions-menu");
+    const includeRevealsDeckEditorBtn = document.getElementById("include-reveals-deck-editor");
     const exportDeckImageBtn = document.getElementById("export-deck-image");
     const importClipboardBtn = document.getElementById("import-clipboard");
     const testHandBtn = document.getElementById("test-hand");
@@ -174,6 +176,7 @@
 
     const REVEAL_COLLECTION_CARDS = Array.isArray(APP_DATA.revealCollectionCards) ? APP_DATA.revealCollectionCards : [];
     const COLLECTION_CARD_POOL = APP_DATA.cardCatalog.concat(REVEAL_COLLECTION_CARDS);
+    const EDITOR_CARD_POOL = APP_DATA.cardCatalog.slice();
     const CARD_BY_CODE = {};
     const CARDS_BY_NUMBER = {};
     const COLLECTION_CARD_BY_CODE = {};
@@ -185,7 +188,7 @@
       if (!CARDS_BY_NUMBER[numberKey]) CARDS_BY_NUMBER[numberKey] = [];
       CARDS_BY_NUMBER[numberKey].push(card);
     });
-    COLLECTION_CARD_POOL.forEach(function(card) {
+    function indexCollectionCard(card) {
       COLLECTION_CARD_BY_CODE[String(card.code).toUpperCase()] = card;
       const numberKey = String(card.cardNumber || card.code).toUpperCase();
       if (!COLLECTION_CARDS_BY_NUMBER[numberKey]) COLLECTION_CARDS_BY_NUMBER[numberKey] = [];
@@ -194,11 +197,60 @@
       [card.stage, card.attribute].forEach(function(value) {
         if (value) TRAIT_WORDS[String(value)] = true;
       });
-    });
+    }
+
+    COLLECTION_CARD_POOL.forEach(indexCollectionCard);
+
+    function rebuildCollectionCardIndexes() {
+      Object.keys(COLLECTION_CARD_BY_CODE).forEach(function(key) { delete COLLECTION_CARD_BY_CODE[key]; });
+      Object.keys(COLLECTION_CARDS_BY_NUMBER).forEach(function(key) { delete COLLECTION_CARDS_BY_NUMBER[key]; });
+      COLLECTION_CARD_POOL.forEach(indexCollectionCard);
+    }
+
+    function replaceRevealCollectionCards(cards) {
+      const nextCards = Array.isArray(cards) ? cards : [];
+      REVEAL_COLLECTION_CARDS.splice(0, REVEAL_COLLECTION_CARDS.length);
+      nextCards.forEach(function(card) { REVEAL_COLLECTION_CARDS.push(card); });
+      COLLECTION_CARD_POOL.splice(APP_DATA.cardCatalog.length, COLLECTION_CARD_POOL.length - APP_DATA.cardCatalog.length);
+      nextCards.forEach(function(card) { COLLECTION_CARD_POOL.push(card); });
+      APP_DATA.revealCollectionCards = REVEAL_COLLECTION_CARDS;
+      rebuildCollectionCardIndexes();
+      rebuildEditorCardPool();
+    }
+
+    function normalizeAppSettings(payload) {
+      const source = payload && typeof payload === "object" ? payload : {};
+      return {
+        includeRevealsInDeckEditor: Boolean(source.includeRevealsInDeckEditor)
+      };
+    }
+
+    function initialAppSettings() {
+      const settings = normalizeAppSettings(APP_DATA.appSettings || {});
+      if (window.location.protocol === "file:") {
+        try {
+          const raw = window.localStorage && window.localStorage.getItem(SETTINGS_STORAGE_KEY);
+          if (raw) return normalizeAppSettings(JSON.parse(raw));
+        } catch (error) {
+          // Fall back to settings embedded in the generated page.
+        }
+      }
+      return settings;
+    }
+
+    function rebuildEditorCardPool() {
+      EDITOR_CARD_POOL.splice(0, EDITOR_CARD_POOL.length);
+      APP_DATA.cardCatalog.forEach(function(card) { EDITOR_CARD_POOL.push(card); });
+      if (state && state.editor && state.editor.includeReveals) {
+        REVEAL_COLLECTION_CARDS.forEach(function(card) { EDITOR_CARD_POOL.push(card); });
+      }
+    }
 
     APP_DATA.decks.forEach(function(deck) {
       deck.savedExportText = deck.exportText || "";
     });
+
+    const initialSettings = initialAppSettings();
 
     const state = {
       view: "library",
@@ -208,6 +260,9 @@
       insightsExpanded: false,
       selectedDeckId: APP_DATA.decks.length ? APP_DATA.decks[0].id : null,
       selectedCardCode: null,
+      editor: {
+        includeReveals: initialSettings.includeRevealsInDeckEditor
+      },
       collection: {
         visibleLimit: 120,
         editEnabled: false,
@@ -246,6 +301,62 @@
         log: []
       }
     };
+
+    rebuildEditorCardPool();
+
+    function currentAppSettings() {
+      return {
+        includeRevealsInDeckEditor: Boolean(state.editor.includeReveals)
+      };
+    }
+
+    function renderIncludeRevealsToggle() {
+      if (!includeRevealsDeckEditorBtn) return;
+      const enabled = Boolean(state.editor.includeReveals);
+      includeRevealsDeckEditorBtn.textContent = "Include Reveals: " + (enabled ? "On" : "Off");
+      includeRevealsDeckEditorBtn.setAttribute("aria-checked", String(enabled));
+      includeRevealsDeckEditorBtn.title = enabled
+        ? "Reveal cards are included in deck editor search."
+        : "Reveal cards are hidden from deck editor search.";
+    }
+
+    function persistAppSettings() {
+      const settings = currentAppSettings();
+      APP_DATA.appSettings = settings;
+      try {
+        if (window.localStorage) {
+          window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+        }
+      } catch (error) {
+        // Settings persistence should never block deck editing.
+      }
+      if (window.location.protocol !== "file:") {
+        fetch("/api/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(settings)
+        }).catch(function() {
+          // The embedded settings/localStorage fallback will keep the current session usable.
+        });
+      }
+    }
+
+    async function restoreAppSettingsFromServer() {
+      if (window.location.protocol === "file:") return false;
+      try {
+        const response = await fetch("/api/settings", { cache: "no-store" });
+        if (!response.ok) return false;
+        const settings = normalizeAppSettings(await response.json());
+        state.editor.includeReveals = settings.includeRevealsInDeckEditor;
+        APP_DATA.appSettings = settings;
+        rebuildEditorCardPool();
+        renderIncludeRevealsToggle();
+        render();
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
 
     function normalizeStoredCollectionWanted(payload) {
       const rawEntries = Array.isArray(payload)

@@ -10,7 +10,7 @@
     }
 
     function pickSelectedCard(deck) {
-      return pickSelectedCardFrom((deck && deck.cards ? deck.cards : []).concat(APP_DATA.cardCatalog));
+      return pickSelectedCardFrom((deck && deck.cards ? deck.cards : []).concat(EDITOR_CARD_POOL));
     }
 
     function pickSelectedCollectionCard() {
@@ -438,7 +438,7 @@
       catalogGridEl.innerHTML = "";
 
       if (!hasActiveCatalogFilters(filters)) {
-        catalogSummaryEl.textContent = APP_DATA.cardCatalog.length + " cards loaded";
+        catalogSummaryEl.textContent = EDITOR_CARD_POOL.length + " cards loaded" + (state.editor.includeReveals ? " incl. reveals" : "");
         const empty = document.createElement("div");
         empty.className = "empty-state";
         empty.textContent = "Use filters to add cards.";
@@ -479,6 +479,7 @@
         if (card.level !== null && card.level !== undefined) bits.push("Lv." + card.level);
         if (card.digivolveCosts && card.digivolveCosts.length) bits.push("Evo " + card.digivolveCosts.join("/"));
         if (card.colors && card.colors.length) bits.push(card.colors.join("/"));
+        if (card.isRevealPlaceholder) bits.push("Reveal");
         bits.push(getCardLimitLabel(card));
         meta.textContent = bits.join(" • ");
 

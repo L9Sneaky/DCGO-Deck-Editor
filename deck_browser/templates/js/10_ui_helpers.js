@@ -262,7 +262,14 @@
     }
 
     function appendHighlightedText(parent, text) {
-      const rawText = String(text || "");
+      const rawText = String(text || "")
+        .replace(/\[Security Condition\]/g, "[Security]")
+        .replace(
+          /(^|[\s,.;:])Recovery\s*\+?(\d+)(?:\s*\(Deck\))?/g,
+          function(match, prefix, amount) {
+            return prefix + "＜Recovery +" + amount + " (Deck)＞";
+          }
+        );
       const regex = /(\[([^\]]+)\]|＜([^＞]+)＞)/g;
       let match;
       let lastIndex = 0;

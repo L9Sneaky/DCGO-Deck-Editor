@@ -24,6 +24,7 @@ from urllib.parse import parse_qsl, unquote, urlparse
 import build_deck_browser
 import reveals
 import updater
+from deck_data import load_app_settings, save_app_settings
 
 
 SUFFIX_ALPHABET = string.ascii_letters + string.digits
@@ -420,6 +421,10 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
                 self.send_json(400, {"error": str(error)})
             return
 
+        if path == "/api/settings":
+            self.send_json(200, load_app_settings(self.app_support_dir))
+            return
+
         if path.startswith("/api/reveals/image/"):
             try:
                 file_name = unquote(path.rsplit("/", 1)[-1])
@@ -622,6 +627,14 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
                 temp_path.write_text(text, encoding="utf-8")
                 temp_path.replace(target_path)
                 self.send_json(200, {"savedPath": str(target_path)})
+            except Exception as error:
+                self.send_json(400, {"error": str(error)})
+            return
+
+        if path == "/api/settings":
+            try:
+                payload = self.read_json_body()
+                self.send_json(200, save_app_settings(self.app_support_dir, payload))
             except Exception as error:
                 self.send_json(400, {"error": str(error)})
             return

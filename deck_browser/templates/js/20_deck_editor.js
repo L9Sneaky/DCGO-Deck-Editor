@@ -113,7 +113,7 @@
     function getFilteredCatalogCards() {
       const filters = readCatalogFilters();
       if (!hasActiveCatalogFilters(filters)) return [];
-      return APP_DATA.cardCatalog.filter(function(card) {
+      return EDITOR_CARD_POOL.filter(function(card) {
         return cardMatchesCatalogFilters(card, filters);
       }).slice(0, 120);
     }
@@ -157,9 +157,25 @@
     }
 
     function findCatalogCardByCode(code) {
-      return APP_DATA.cardCatalog.find(function(card) {
+      return EDITOR_CARD_POOL.find(function(card) {
         return card.code === code;
       }) || null;
+    }
+
+    function findEditorCardByCode(code) {
+      const normalized = String(code || "").trim().toUpperCase();
+      if (!normalized) return null;
+      return EDITOR_CARD_POOL.find(function(card) {
+        return String(card.code || "").toUpperCase() === normalized;
+      }) || null;
+    }
+
+    function findEditorCardsByNumber(code) {
+      const normalized = String(code || "").trim().toUpperCase();
+      if (!normalized) return [];
+      return EDITOR_CARD_POOL.filter(function(card) {
+        return String(card.cardNumber || card.code || "").toUpperCase() === normalized;
+      });
     }
 
     function findCollectionCardByCode(code) {
@@ -173,13 +189,41 @@
       const cards = !hasActiveCatalogFilters(filters) ? COLLECTION_CARD_POOL : COLLECTION_CARD_POOL.filter(function(card) {
         return cardMatchesCatalogFilters(card, filters);
       });
-      return dedupeCollectionCards(cards);
+      return sortCollectionCards(dedupeCollectionCards(cards));
+    }
+
+    function cardNumberSortParts(value) {
+      const text = String(value || "").toUpperCase();
+      const base = text.split("_", 1)[0];
+      const match = text.match(/^([A-Z]+)(\d+)-(\d+)(?:[_-]([A-Z]+)(\d*)?)?$$/) || base.match(/^([A-Z]+)(\d+)-(\d+)$$/);
+      if (!match) return { prefix: base, set: -1, number: -1, variant: "", variantNumber: -1, text: text };
+      return {
+        prefix: match[1],
+        set: Number(match[2]) || 0,
+        number: Number(match[3]) || 0,
+        variant: match[4] || "",
+        variantNumber: Number(match[5] || 0) || 0,
+        text: text
+      };
+    }
+
+    function compareCardNumbers(leftValue, rightValue) {
+      const left = cardNumberSortParts(leftValue);
+      const right = cardNumberSortParts(rightValue);
+      const prefixCompare = left.prefix.localeCompare(right.prefix);
+      if (prefixCompare !== 0) return prefixCompare;
+      if (left.set !== right.set) return left.set - right.set;
+      if (left.number !== right.number) return left.number - right.number;
+      const variantCompare = left.variant.localeCompare(right.variant);
+      if (variantCompare !== 0) return variantCompare;
+      if (left.variantNumber !== right.variantNumber) return left.variantNumber - right.variantNumber;
+      return left.text.localeCompare(right.text);
     }
 
     function compareCollectionCards(left, right) {
       const leftNumber = String(left.cardNumber || left.code || "");
       const rightNumber = String(right.cardNumber || right.code || "");
-      const numberCompare = leftNumber.localeCompare(rightNumber);
+      const numberCompare = compareCardNumbers(leftNumber, rightNumber);
       if (numberCompare !== 0) return numberCompare;
       const codeCompare = String(left.code || "").localeCompare(String(right.code || ""));
       if (codeCompare !== 0) return codeCompare;
@@ -583,7 +627,7 @@
         const levelA = a.level !== null && a.level !== undefined ? a.level : -1;
         const levelB = b.level !== null && b.level !== undefined ? b.level : -1;
         if (a.type === "Digimon" && levelA !== levelB) return levelA - levelB;
-        const numberCompare = String(a.cardNumber || a.code).localeCompare(String(b.cardNumber || b.code));
+        const numberCompare = compareCardNumbers(a.cardNumber || a.code, b.cardNumber || b.code);
         if (numberCompare !== 0) return numberCompare;
         return String(a.code || "").localeCompare(String(b.code || ""));
       });
@@ -610,10 +654,13 @@
         illustrator: card.illustrator,
         hasAce: card.hasAce,
         isAltArt: card.isAltArt,
+        isRevealPlaceholder: Boolean(card.isRevealPlaceholder),
         restriction: card.restriction || "Unrestricted",
         copyLimit: getCardCopyLimit(card),
         effectText: card.effectText || "",
         effectSections: card.effectSections || [],
+        wikiUrl: card.wikiUrl || "",
+        source: card.source || "",
         searchBlob: card.searchBlob
       };
     }

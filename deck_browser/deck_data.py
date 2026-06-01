@@ -21,7 +21,11 @@ IMAGE_BASE_URL = "https://raw.githubusercontent.com/TakaOtaku/Digimon-Card-App/m
 CACHE_MAX_AGE_SECONDS = 12 * 60 * 60
 DECK_LINE_RE = re.compile(r"^\s*(\d+)\s+(.+?)\s+([A-Za-z0-9-]+(?:_[A-Za-z0-9-]+)?)\s*$")
 COLOR_ORDER = ["Red", "Blue", "Yellow", "Green", "Black", "Purple", "White"]
-APP_VERSION = "v1.1.5"
+APP_VERSION = "v1.1.6"
+DEFAULT_APP_SETTINGS = {
+    "includeRevealsInDeckEditor": False,
+}
+SET_NUMBER_RE = re.compile(r"^([A-Z]+)(\d+)-(\d+)(?:[_-]([A-Z]+)(\d*)?)?$", re.IGNORECASE)
 
 
 def ensure_text(value: Any) -> str:
@@ -147,6 +151,25 @@ def color_profile_for_cards(cards: list[dict[str, Any]]) -> list[dict[str, Any]]
 def card_number_key(card: dict[str, Any]) -> str:
     raw_value = ensure_text(card.get("cardNumber") or card.get("code"))
     return raw_value.split("_", 1)[0].upper()
+
+
+def natural_card_number_sort_key(value: Any) -> tuple[str, int, int, str, int, str]:
+    text = ensure_text(value).upper()
+    base = text.split("_", 1)[0]
+    match = SET_NUMBER_RE.match(text)
+    if match is None:
+        match = SET_NUMBER_RE.match(base)
+    if match is None:
+        return (base, -1, -1, "", -1, text)
+    prefix, set_number, card_number, variant_prefix, variant_number = match.groups()
+    return (
+        prefix,
+        int(set_number),
+        int(card_number),
+        variant_prefix or "",
+        int(variant_number or 0),
+        text,
+    )
 
 
 def unique_card_number_count(cards: list[dict[str, Any]]) -> int:
@@ -377,7 +400,7 @@ def build_card_catalog(raw_manifest: list[dict[str, Any]], by_id: dict[str, dict
         catalog.append(card)
         seen.add(card_id)
 
-    return sorted(catalog, key=lambda card: (card["cardNumber"] or card["code"], card["code"]))
+    return sorted(catalog, key=lambda card: (natural_card_number_sort_key(card["cardNumber"] or card["code"]), card["code"]))
 
 
 def deck_card_sort_key(card: dict[str, Any]) -> tuple[int, int, str, str]:
@@ -573,7 +596,39 @@ def load_app_data(
         "manifestSource": manifest_source,
         "deckRoot": str(deck_root),
         "appVersion": APP_VERSION,
+        "appSettings": load_app_settings(app_support_dir),
         "cardCatalog": card_catalog,
         "revealCollectionCards": reveal_collection_cards,
         "decks": decks,
     }
+
+
+def app_settings_path(app_support_dir: Path) -> Path:
+    return app_support_dir / "deck_browser" / "settings.json"
+
+
+def normalize_app_settings(payload: Any) -> dict[str, bool]:
+    source = payload if isinstance(payload, dict) else {}
+    return {
+        "includeRevealsInDeckEditor": bool(source.get("includeRevealsInDeckEditor")),
+    }
+
+
+def load_app_settings(app_support_dir: Path) -> dict[str, bool]:
+    path = app_settings_path(app_support_dir)
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        payload = {}
+    return {**DEFAULT_APP_SETTINGS, **normalize_app_settings(payload)}
+
+
+def save_app_settings(app_support_dir: Path, payload: Any) -> dict[str, bool]:
+    current = load_app_settings(app_support_dir)
+    next_settings = {**current, **normalize_app_settings(payload)}
+    path = app_settings_path(app_support_dir)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = path.with_name(path.name + ".tmp")
+    temp_path.write_text(json.dumps(next_settings, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temp_path.replace(path)
+    return next_settings

@@ -347,6 +347,11 @@
       background: rgba(95, 212, 255, 0.12);
     }
 
+    .menu-toggle-action[aria-checked="true"] {
+      color: #c8f7ff;
+      background: rgba(95, 212, 255, 0.14);
+    }
+
     .menu-action:disabled {
       cursor: not-allowed;
       opacity: 0.48;

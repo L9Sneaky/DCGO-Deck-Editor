@@ -351,9 +351,10 @@
     function findCatalogCardForImportCode(value) {
       const code = normalizeImportCode(value);
       if (!code) return null;
-      if (CARD_BY_CODE[code]) return CARD_BY_CODE[code];
+      const directMatch = findEditorCardByCode(code);
+      if (directMatch) return directMatch;
 
-      const numberMatches = CARDS_BY_NUMBER[code] || [];
+      const numberMatches = findEditorCardsByNumber(code);
       if (!numberMatches.length) return null;
       return (
         numberMatches.find(function(card) { return normalizeImportCode(card.code) === code; }) ||
