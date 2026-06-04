@@ -52,6 +52,34 @@ Keep the terminal/command window open while using the editor.
 - Test opening hands.
 - Update local card metadata from GitHub.
 - Check GitHub Releases for Deck Editor updates and install newer release ZIPs from inside the app.
+- Optional Supabase cloud sync for sharing decks with the mobile app.
+
+## Cloud Sync
+
+Cloud sync is optional and keeps the local `Assets/Decks` folder as the DCGO-compatible source of truth on desktop.
+
+1. Run `supabase/schema.sql` from this folder in your Supabase project.
+2. Enable Supabase email/password auth.
+3. Start the deck editor with these environment variables:
+
+```sh
+DCGO_SUPABASE_URL=https://your-project.supabase.co
+DCGO_SUPABASE_ANON_KEY=your-anon-key
+```
+
+Use the Cloud Sync panel in the Deck Library to create an account, sign in, and run Sync Now. Saving a deck also triggers an automatic sync when signed in. If the same deck changes on desktop and mobile, the newer `updated_at` value wins.
+
+## Local Mobile Sync
+
+The Deck Library also includes a local pairing panel for same-network mobile sync. The desktop editor generates one stable pairing token under:
+
+```text
+deck_browser/local_pairing.json
+```
+
+Copy the pairing payload into the mobile app, or encode that same payload as a QR code for the mobile scanner. The payload contains the local editor URL and token. Both devices must be on the same Wi-Fi/LAN, and the desktop server must be reachable from the phone. When launching manually, bind to a LAN-reachable host such as `0.0.0.0` instead of `127.0.0.1`.
+
+Local sync uses the same last-write-wins rule as cloud sync. The local `.txt` deck files remain the desktop source for DCGO compatibility.
 
 ## Updates
 
@@ -101,4 +129,4 @@ This can include cached card metadata, exported deck images, and recoverable del
 
 ## Privacy
 
-The editor starts a local-only server on `127.0.0.1`. It does not upload deck files anywhere.
+By default, the editor writes deck files locally and does not upload them. Cloud sync uploads decks only after Supabase is configured and you sign in. Local mobile sync is limited by the pairing token and your same-network access.

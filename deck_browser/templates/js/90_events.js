@@ -164,6 +164,48 @@
       render();
     });
 
+    function closeLibrarySettingsMenu() {
+      librarySettingsMenuEl.classList.add("hidden");
+      librarySettingsToggleBtn.setAttribute("aria-expanded", "false");
+    }
+
+    function toggleLibrarySettingsMenu() {
+      const willOpen = librarySettingsMenuEl.classList.contains("hidden");
+      librarySettingsMenuEl.classList.toggle("hidden", !willOpen);
+      librarySettingsToggleBtn.setAttribute("aria-expanded", String(willOpen));
+    }
+
+    function closeLocalSyncQrViewer() {
+      localSyncQrViewerEl.classList.add("hidden");
+      document.body.classList.remove("modal-open");
+    }
+
+    async function showLocalSyncQrViewer() {
+      if (!localSyncPayloadEl.value) await refreshLocalSyncStatus();
+      const payload = localSyncPayloadEl.value;
+      if (!payload) {
+        await showMessage("Local pairing unavailable", "No pairing payload is available yet.");
+        return;
+      }
+      if (typeof qrcode !== "function") {
+        await showMessage("QR code unavailable", "The QR code generator did not load.");
+        return;
+      }
+
+      try {
+        const qr = qrcode(0, "M");
+        qr.addData(payload);
+        qr.make();
+        localSyncQrCodeEl.innerHTML = qr.createSvgTag(6, 3, "Local pairing QR code", "Local Pairing");
+        localSyncQrPayloadEl.textContent = payload;
+        closeLibrarySettingsMenu();
+        localSyncQrViewerEl.classList.remove("hidden");
+        document.body.classList.add("modal-open");
+      } catch (error) {
+        await showMessage("Could not create QR code", error.message || String(error));
+      }
+    }
+
     function closeMoreActionsMenu() {
       moreActionsMenuEl.classList.add("hidden");
       moreActionsToggleBtn.setAttribute("aria-expanded", "false");
@@ -196,6 +238,22 @@
       if (event.target.closest(".menu-action")) closeMoreActionsMenu();
     });
 
+    librarySettingsToggleBtn.addEventListener("click", function(event) {
+      event.stopPropagation();
+      toggleLibrarySettingsMenu();
+    });
+
+    librarySettingsMenuEl.addEventListener("click", function(event) {
+      event.stopPropagation();
+    });
+
+    localSyncQrViewerEl.addEventListener("click", function(event) {
+      if (localSyncQrCodeEl.contains(event.target)) return;
+      closeLocalSyncQrViewer();
+    });
+
+    localSyncQrCloseBtn.addEventListener("click", closeLocalSyncQrViewer);
+
     includeRevealsDeckEditorBtn.addEventListener("click", function() {
       state.editor.includeReveals = !state.editor.includeReveals;
       rebuildEditorCardPool();
@@ -209,8 +267,18 @@
       closeMoreActionsMenu();
     });
 
+    document.addEventListener("click", function(event) {
+      if (librarySettingsMenuEl.classList.contains("hidden")) return;
+      if (librarySettingsMenuEl.contains(event.target) || librarySettingsToggleBtn.contains(event.target)) return;
+      closeLibrarySettingsMenu();
+    });
+
     document.addEventListener("keydown", function(event) {
-      if (event.key === "Escape") closeMoreActionsMenu();
+      if (event.key === "Escape") {
+        closeMoreActionsMenu();
+        closeLibrarySettingsMenu();
+        closeLocalSyncQrViewer();
+      }
     });
 
     Object.keys(filterEls).forEach(function(key) {
@@ -446,6 +514,70 @@
         newDeckButtonEl.textContent = original;
       }
     });
+
+    if (syncSignInBtn) {
+      syncSignInBtn.addEventListener("click", function() {
+        syncAuth("/api/sync/sign-in");
+      });
+    }
+
+    if (syncFormEl) {
+      syncFormEl.addEventListener("submit", function(event) {
+        event.preventDefault();
+        syncAuth("/api/sync/sign-in");
+      });
+    }
+
+    if (syncSignUpBtn) {
+      syncSignUpBtn.addEventListener("click", function() {
+        syncAuth("/api/sync/sign-up");
+      });
+    }
+
+    if (syncSignOutBtn) {
+      syncSignOutBtn.addEventListener("click", async function() {
+        const response = await fetch("/api/sync/sign-out", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({})
+        });
+        renderSyncStatus(await response.json().catch(function() { return {}; }));
+      });
+    }
+
+    if (syncNowBtn) {
+      syncNowBtn.addEventListener("click", function() {
+        triggerCloudSync(true);
+      });
+    }
+
+    refreshSyncStatus();
+    refreshLocalSyncStatus();
+
+    if (localSyncRefreshBtn) {
+      localSyncRefreshBtn.addEventListener("click", refreshLocalSyncStatus);
+    }
+
+    if (localSyncQrBtn) {
+      localSyncQrBtn.addEventListener("click", showLocalSyncQrViewer);
+    }
+
+    if (localSyncCopyBtn) {
+      localSyncCopyBtn.addEventListener("click", async function() {
+        const payload = localSyncPayloadEl ? localSyncPayloadEl.value : "";
+        if (!payload) {
+          await showMessage("Local pairing unavailable", "No pairing payload is available yet.");
+          return;
+        }
+        try {
+          await navigator.clipboard.writeText(payload);
+          localSyncCopyBtn.textContent = "Copied";
+          window.setTimeout(function() { localSyncCopyBtn.textContent = "Copy Pair Payload"; }, 1200);
+        } catch (error) {
+          await showMessage("Copy pairing payload", payload);
+        }
+      });
+    }
 
     function renderUpdateStatus(payload) {
       if (!updateStatusLabelEl) return;

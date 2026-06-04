@@ -12,8 +12,9 @@ from typing import Any
 from deck_data import load_app_data
 
 
-APP_VERSION = "v1.1.6"
+DEFAULT_APP_VERSION = "v0.0.0"
 SCRIPT_DIR = Path(__file__).resolve().parent
+PACKAGE_ROOT = SCRIPT_DIR.parent
 TEMPLATE_DIR = SCRIPT_DIR / "templates"
 HTML_TEMPLATE_PATH = TEMPLATE_DIR / "deck_browser.html"
 CSS_TEMPLATE_DIR = TEMPLATE_DIR / "css"
@@ -27,6 +28,15 @@ SIMULATOR_DIST_DIR = next((path for path in SIMULATOR_DIST_CANDIDATES if path.is
 SIMULATOR_MANIFEST_PATH = SIMULATOR_DIST_DIR / "manifest.json"
 SIMULATOR_MANIFEST_FALLBACK = SIMULATOR_DIST_DIR / ".vite" / "manifest.json"
 EMBED_ASSET_DIR = "decktest-assets"
+
+
+def current_app_version() -> str:
+    try:
+        payload = json.loads((PACKAGE_ROOT / "app_version.json").read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return DEFAULT_APP_VERSION
+    version = str(payload.get("version") or payload.get("tag") or "").strip()
+    return version or DEFAULT_APP_VERSION
 
 
 def load_template_text(path: Path) -> str:
@@ -140,7 +150,7 @@ def render_html(app_data: dict[str, Any]) -> str:
         generated_at=json.dumps(app_data["generatedAt"], ensure_ascii=False),
         manifest_source=json.dumps(app_data["manifestSource"], ensure_ascii=False),
         deck_root=json.dumps(app_data["deckRoot"], ensure_ascii=False),
-        app_version=json.dumps(app_data.get("appVersion", APP_VERSION), ensure_ascii=False),
+        app_version=json.dumps(app_data.get("appVersion", current_app_version()), ensure_ascii=False),
         deck_browser_embed_assets=build_embed_assets_html(),
     )
 

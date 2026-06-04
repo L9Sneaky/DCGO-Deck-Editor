@@ -22,6 +22,8 @@ from typing import Any
 from urllib.parse import parse_qsl, unquote, urlparse
 
 import build_deck_browser
+import deck_local_sync
+import deck_sync
 import reveals
 import updater
 from deck_data import load_app_settings, save_app_settings
@@ -38,7 +40,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--app-support-dir", required=True, help="DCGO app support directory")
     parser.add_argument("--deck-root", help="Deck folder to edit directly; defaults to app-support-dir/userdata/Decks")
     parser.add_argument("--output", required=True, help="Static HTML output path to keep in sync")
-    parser.add_argument("--host", default="127.0.0.1", help="Host to bind; keep this on localhost")
+    parser.add_argument("--host", default="127.0.0.1", help="Host to bind; use 0.0.0.0 for local mobile pairing")
     parser.add_argument("--port", type=int, default=0, help="Port to bind, or 0 for an available port")
     parser.add_argument("--open", action="store_true", help="Open the browser after the server starts")
     return parser.parse_args()
@@ -304,6 +306,7 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
+        self.send_cors_headers()
         self.end_headers()
         self.wfile.write(body)
 
@@ -313,8 +316,14 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(encoded)))
         self.send_header("Cache-Control", "no-store")
+        self.send_cors_headers()
         self.end_headers()
         self.wfile.write(encoded)
+
+    def send_cors_headers(self) -> None:
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
     def send_file(self, path: Path, content_type: str | None = None) -> None:
         resolved_content_type = content_type or mimetypes.guess_type(path.name)[0] or "application/octet-stream"
@@ -325,6 +334,12 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
         self.end_headers()
         with path.open("rb") as handle:
             shutil.copyfileobj(handle, self.wfile)
+
+    def do_OPTIONS(self) -> None:
+        self.send_response(204)
+        self.send_header("Cache-Control", "no-store")
+        self.send_cors_headers()
+        self.end_headers()
 
     def current_deck_root(self) -> Path:
         return self.deck_root or self.app_support_dir / "userdata" / "Decks"
@@ -423,6 +438,24 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
 
         if path == "/api/settings":
             self.send_json(200, load_app_settings(self.app_support_dir))
+            return
+
+        if path == "/api/sync/status":
+            self.send_json(200, deck_sync.public_status(self.app_support_dir))
+            return
+
+        if path == "/api/local-sync/status":
+            host, port = self.server.server_address[:2]
+            self.send_json(200, deck_local_sync.status_payload(self.app_support_dir, str(host), int(port)))
+            return
+
+        if path == "/api/local-sync/decks":
+            try:
+                query = urlparse(self.path).query
+                params = dict(parse_qsl(query))
+                self.send_json(200, deck_local_sync.list_decks(self.app_support_dir, self.current_deck_root(), params.get("token")))
+            except Exception as error:
+                self.send_json(400, {"error": str(error)})
             return
 
         if path.startswith("/api/reveals/image/"):
@@ -639,6 +672,47 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
                 self.send_json(400, {"error": str(error)})
             return
 
+        if path == "/api/sync/sign-in":
+            try:
+                payload = self.read_json_body()
+                self.send_json(200, deck_sync.sign_in(self.app_support_dir, payload.get("email"), payload.get("password")))
+            except Exception as error:
+                self.send_json(400, {"error": str(error)})
+            return
+
+        if path == "/api/sync/sign-up":
+            try:
+                payload = self.read_json_body()
+                self.send_json(200, deck_sync.sign_in(self.app_support_dir, payload.get("email"), payload.get("password"), create_account=True))
+            except Exception as error:
+                self.send_json(400, {"error": str(error)})
+            return
+
+        if path == "/api/sync/sign-out":
+            try:
+                self.read_json_body()
+                self.send_json(200, deck_sync.sign_out(self.app_support_dir))
+            except Exception as error:
+                self.send_json(400, {"error": str(error)})
+            return
+
+        if path == "/api/sync/run":
+            try:
+                self.read_json_body()
+                result = deck_sync.sync_now(self.app_support_dir, self.current_deck_root())
+                self.send_json(200, result)
+            except Exception as error:
+                self.send_json(400, {"error": str(error)})
+            return
+
+        if path == "/api/local-sync/decks":
+            try:
+                payload = self.read_json_body()
+                self.send_json(200, deck_local_sync.apply_mobile_decks(self.app_support_dir, self.current_deck_root(), payload))
+            except Exception as error:
+                self.send_json(400, {"error": str(error)})
+            return
+
         else:
             self.send_json(404, {"error": "Not found"})
             return
@@ -682,9 +756,12 @@ def main() -> int:
 
     server = ThreadingHTTPServer((args.host, args.port), handler_class)
     host, port = server.server_address[:2]
-    url = f"http://{host}:{port}/"
+    display_host = "127.0.0.1" if str(host) in {"0.0.0.0", "::"} else host
+    url = f"http://{display_host}:{port}/"
 
     print(f"DCGO deck browser server: {url}", flush=True)
+    if str(host) in {"0.0.0.0", "::"}:
+        print("Local mobile sync is reachable on your LAN using the Local Pairing payload.", flush=True)
     print("Keep this window open while using deck write actions and card database updates.", flush=True)
     if args.open:
         webbrowser.open(url)

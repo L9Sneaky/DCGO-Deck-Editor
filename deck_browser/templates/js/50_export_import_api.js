@@ -554,6 +554,7 @@
         applySavedDeck(deck, payload.deck);
         saveChangesBtn.textContent = "Saved";
         renderEditor();
+        triggerCloudSync(false);
         window.setTimeout(function() {
           saveChangesBtn.textContent = original;
           renderDirtyStatus(deck);

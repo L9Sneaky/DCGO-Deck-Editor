@@ -3,6 +3,7 @@ set -eu
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 PYTHON_BIN=${PYTHON_BIN:-python3}
+EDITOR_HOST=${DCGO_EDITOR_HOST:-0.0.0.0}
 OUTPUT_HTML="$SCRIPT_DIR/deck_browser/output/current_decks.html"
 BUILDER_SCRIPT="$SCRIPT_DIR/deck_browser/build_deck_browser.py"
 DATA_SCRIPT="$SCRIPT_DIR/deck_browser/deck_data.py"
@@ -92,4 +93,5 @@ printf 'Editor data: %s\n' "$APP_SUPPORT_DIR"
   --app-support-dir "$APP_SUPPORT_DIR" \
   --deck-root "$DECK_ROOT" \
   --output "$OUTPUT_HTML" \
+  --host "$EDITOR_HOST" \
   --open

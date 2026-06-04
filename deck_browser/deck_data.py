@@ -21,7 +21,8 @@ IMAGE_BASE_URL = "https://raw.githubusercontent.com/TakaOtaku/Digimon-Card-App/m
 CACHE_MAX_AGE_SECONDS = 12 * 60 * 60
 DECK_LINE_RE = re.compile(r"^\s*(\d+)\s+(.+?)\s+([A-Za-z0-9-]+(?:_[A-Za-z0-9-]+)?)\s*$")
 COLOR_ORDER = ["Red", "Blue", "Yellow", "Green", "Black", "Purple", "White"]
-APP_VERSION = "v1.1.6"
+DEFAULT_APP_VERSION = "v0.0.0"
+PACKAGE_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_APP_SETTINGS = {
     "includeRevealsInDeckEditor": False,
 }
@@ -32,6 +33,15 @@ def ensure_text(value: Any) -> str:
     if value is None:
         return ""
     return str(value).strip()
+
+
+def current_app_version() -> str:
+    try:
+        payload = json.loads((PACKAGE_ROOT / "app_version.json").read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return DEFAULT_APP_VERSION
+    version = ensure_text(payload.get("version") or payload.get("tag"))
+    return version or DEFAULT_APP_VERSION
 
 
 def none_if_dash(value: Any) -> str | None:
@@ -595,7 +605,7 @@ def load_app_data(
         "generatedAt": time.strftime("%Y-%m-%d %H:%M:%S"),
         "manifestSource": manifest_source,
         "deckRoot": str(deck_root),
-        "appVersion": APP_VERSION,
+        "appVersion": current_app_version(),
         "appSettings": load_app_settings(app_support_dir),
         "cardCatalog": card_catalog,
         "revealCollectionCards": reveal_collection_cards,

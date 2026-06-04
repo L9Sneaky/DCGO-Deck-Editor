@@ -18,12 +18,31 @@
     const libraryDeckRootEl = document.getElementById("library-deck-root-label");
     const appVersionEl = document.getElementById("app-version-label");
     const updateStatusLabelEl = document.getElementById("update-status-label");
+    const librarySettingsToggleBtn = document.getElementById("library-settings-toggle");
+    const librarySettingsMenuEl = document.getElementById("library-settings-menu");
     const newDeckButtonEl = document.getElementById("new-deck-button");
     const openCollectionBtn = document.getElementById("open-collection");
     const openRevealsBtn = document.getElementById("open-reveals");
     const updateCardDatabaseBtn = document.getElementById("update-card-database");
     const checkAppUpdateBtn = document.getElementById("check-app-update");
     const installAppUpdateBtn = document.getElementById("install-app-update");
+    const syncEmailEl = document.getElementById("sync-email");
+    const syncPasswordEl = document.getElementById("sync-password");
+    const syncFormEl = document.getElementById("sync-form");
+    const syncSignInBtn = document.getElementById("sync-sign-in");
+    const syncSignUpBtn = document.getElementById("sync-sign-up");
+    const syncSignOutBtn = document.getElementById("sync-sign-out");
+    const syncNowBtn = document.getElementById("sync-now");
+    const syncStatusLabelEl = document.getElementById("sync-status-label");
+    const localSyncRefreshBtn = document.getElementById("local-sync-refresh");
+    const localSyncQrBtn = document.getElementById("local-sync-qr");
+    const localSyncCopyBtn = document.getElementById("local-sync-copy");
+    const localSyncPayloadEl = document.getElementById("local-sync-payload");
+    const localSyncStatusLabelEl = document.getElementById("local-sync-status-label");
+    const localSyncQrViewerEl = document.getElementById("local-sync-qr-viewer");
+    const localSyncQrCodeEl = document.getElementById("local-sync-qr-code");
+    const localSyncQrPayloadEl = document.getElementById("local-sync-qr-payload");
+    const localSyncQrCloseBtn = document.getElementById("local-sync-qr-close");
     const revealsGridEl = document.getElementById("reveals-grid");
     const revealsSummaryEl = document.getElementById("reveals-summary");
     const revealsSourceEl = document.getElementById("reveals-source");
@@ -355,6 +374,114 @@
         return true;
       } catch (error) {
         return false;
+      }
+    }
+
+    function renderSyncStatus(payload) {
+      if (!syncStatusLabelEl) return;
+      const status = payload && typeof payload === "object" ? payload : {};
+      state.sync = {
+        configured: Boolean(status.configured),
+        authenticated: Boolean(status.authenticated),
+        email: status.email || "",
+        message: status.message || ""
+      };
+      const configured = Boolean(status.configured);
+      const authenticated = Boolean(status.authenticated);
+      const email = status.email || "";
+      const message = status.message || (configured ? "Ready." : "Not configured.");
+      syncStatusLabelEl.textContent = authenticated && email ? email + " - " + message : message;
+      if (syncEmailEl) syncEmailEl.classList.toggle("hidden", authenticated);
+      if (syncPasswordEl) {
+        syncPasswordEl.classList.toggle("hidden", authenticated);
+        if (authenticated) syncPasswordEl.value = "";
+      }
+      if (syncSignInBtn) syncSignInBtn.classList.toggle("hidden", authenticated);
+      if (syncSignUpBtn) syncSignUpBtn.classList.toggle("hidden", authenticated);
+      if (syncSignOutBtn) syncSignOutBtn.classList.toggle("hidden", !authenticated);
+      if (syncNowBtn) syncNowBtn.disabled = !configured || !authenticated;
+    }
+
+    async function refreshSyncStatus() {
+      if (window.location.protocol === "file:") {
+        renderSyncStatus({ configured: false, message: "Open the local server to use cloud sync." });
+        return;
+      }
+      try {
+        const response = await fetch("/api/sync/status", { cache: "no-store" });
+        renderSyncStatus(await response.json());
+      } catch (error) {
+        renderSyncStatus({ configured: false, message: "Sync status unavailable." });
+      }
+    }
+
+    function renderLocalSyncStatus(payload) {
+      const status = payload && typeof payload === "object" ? payload : {};
+      if (localSyncPayloadEl) localSyncPayloadEl.value = status.pairingPayload || "";
+      if (localSyncStatusLabelEl) {
+        const urls = Array.isArray(status.urls) ? status.urls.join(", ") : "";
+        localSyncStatusLabelEl.textContent = urls ? "Same Wi-Fi only: " + urls : (status.message || "Unavailable.");
+      }
+    }
+
+    async function refreshLocalSyncStatus() {
+      if (window.location.protocol === "file:") {
+        renderLocalSyncStatus({ message: "Open the local server to use local sync." });
+        return;
+      }
+      try {
+        const response = await fetch("/api/local-sync/status", { cache: "no-store" });
+        renderLocalSyncStatus(await response.json());
+      } catch (error) {
+        renderLocalSyncStatus({ message: "Local sync unavailable." });
+      }
+    }
+
+    async function syncAuth(path) {
+      if (window.location.protocol === "file:") return;
+      const email = syncEmailEl ? syncEmailEl.value.trim() : "";
+      const password = syncPasswordEl ? syncPasswordEl.value : "";
+      try {
+        const response = await fetch(path, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email, password: password })
+        });
+        const payload = await response.json().catch(function() { return {}; });
+        if (!response.ok) throw new Error(payload.error || "Sync auth failed.");
+        renderSyncStatus(payload);
+      } catch (error) {
+        renderSyncStatus({ configured: true, authenticated: false, message: error.message });
+      }
+    }
+
+    async function triggerCloudSync(showDialog) {
+      if (window.location.protocol === "file:") return false;
+      if (!state.sync || !state.sync.configured || !state.sync.authenticated) {
+        if (showDialog) {
+          await showMessage("Cloud sync unavailable", state.sync && state.sync.message ? state.sync.message : "Sign in to cloud sync first.");
+        }
+        return false;
+      }
+      if (syncNowBtn) syncNowBtn.disabled = true;
+      renderSyncStatus({ configured: true, authenticated: true, message: "Syncing..." });
+      try {
+        const response = await fetch("/api/sync/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({})
+        });
+        const payload = await response.json().catch(function() { return {}; });
+        if (!response.ok) throw new Error(payload.error || "Sync failed.");
+        renderSyncStatus(payload);
+        if (showDialog) await showMessage("Cloud sync complete", payload.message || "Synced.");
+        return true;
+      } catch (error) {
+        renderSyncStatus({ configured: true, authenticated: false, message: error.message });
+        if (showDialog) await showMessage("Cloud sync failed", error.message);
+        return false;
+      } finally {
+        await refreshSyncStatus();
       }
     }
 

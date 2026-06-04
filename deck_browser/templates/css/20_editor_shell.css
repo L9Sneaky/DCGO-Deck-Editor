@@ -352,6 +352,26 @@
       background: rgba(95, 212, 255, 0.14);
     }
 
+    .menu-action.primary {
+      color: #c8f7ff;
+      background: rgba(95, 212, 255, 0.10);
+    }
+
+    .menu-action.success {
+      color: #c4ffe1;
+      background: rgba(111, 238, 174, 0.10);
+    }
+
+    .menu-action.primary:hover,
+    .menu-action.primary:focus-visible {
+      background: rgba(95, 212, 255, 0.16);
+    }
+
+    .menu-action.success:hover,
+    .menu-action.success:focus-visible {
+      background: rgba(111, 238, 174, 0.16);
+    }
+
     .menu-action:disabled {
       cursor: not-allowed;
       opacity: 0.48;

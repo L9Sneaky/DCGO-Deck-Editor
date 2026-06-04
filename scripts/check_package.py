@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import json
 import py_compile
 import sys
 import tempfile
@@ -25,6 +26,11 @@ REQUIRED_FILES = [
     "Open Deck Editor.bat",
     "app_version.json",
 ]
+
+
+def expected_version(root: Path) -> str:
+    payload = json.loads((root / "app_version.json").read_text(encoding="utf-8"))
+    return str(payload.get("version") or "").strip()
 
 
 def parse_args() -> argparse.Namespace:
@@ -69,6 +75,7 @@ def check_python_compile(root: Path) -> list[str]:
 
 def check_html_build(root: Path) -> list[str]:
     errors: list[str] = []
+    version = expected_version(root)
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_root = Path(tmp_dir)
         app_support = tmp_root / "support"
@@ -91,7 +98,7 @@ def check_html_build(root: Path) -> list[str]:
             return [f"HTML build failed: {error}"]
 
         html = output_path.read_text(encoding="utf-8")
-        for needle in ["DCGO Deck Browser", "CheckDeck", "app-version-label", "v1.1.6", "deck-test-react-root", "open-collection", "collection-main", "collection-import-list", "collection-edit-enabled"]:
+        for needle in ["DCGO Deck Browser", "CheckDeck", "app-version-label", version, "deck-test-react-root", "open-collection", "collection-main", "collection-import-list", "collection-edit-enabled"]:
             if needle not in html:
                 errors.append(f"Generated HTML is missing: {needle}")
     return errors

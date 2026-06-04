@@ -18,7 +18,42 @@ $deck_browser_css
           <h1 class="title">Deck Library</h1>
           <p class="subtitle">Browse the current shared deck folder. Open a deck to inspect and edit it on its own page.</p>
         </div>
-        <div class="tiny" id="library-summary"></div>
+        <div class="library-header-actions">
+          <div class="tiny" id="library-summary"></div>
+          <div class="library-settings">
+            <button id="library-settings-toggle" class="button library-settings-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Deck library settings" title="Deck library settings">...</button>
+            <div id="library-settings-menu" class="more-actions-menu library-settings-menu hidden" role="dialog" aria-label="Deck library settings">
+              <div class="settings-menu-section">
+                <div class="settings-menu-title">Maintenance</div>
+                <button id="update-card-database" class="menu-action" type="button" title="Force-refresh card metadata from GitHub">Update Card DB</button>
+                <button id="check-app-update" class="menu-action" type="button" title="Check GitHub Releases for a newer Deck Editor">Check for Updates</button>
+                <button id="install-app-update" class="menu-action success hidden" type="button" title="Install the downloaded GitHub release update">Install Update</button>
+              </div>
+              <span class="menu-separator" aria-hidden="true"></span>
+              <div class="settings-menu-section">
+                <div class="settings-menu-title">Cloud Sync</div>
+                <form class="settings-menu-form" id="sync-form" action="#" autocomplete="on">
+                  <input id="sync-email" class="input sync-input" type="email" autocomplete="email" placeholder="Supabase email">
+                  <input id="sync-password" class="input sync-input" type="password" autocomplete="current-password" placeholder="Password">
+                  <button id="sync-sign-in" class="menu-action primary" type="button">Sign In</button>
+                  <button id="sync-sign-up" class="menu-action" type="button">Create</button>
+                  <button id="sync-sign-out" class="menu-action hidden" type="button">Sign Out</button>
+                  <button id="sync-now" class="menu-action success" type="button">Sync Now</button>
+                </form>
+                <div class="tiny settings-status-line">Cloud Sync: <span id="sync-status-label">Checking...</span></div>
+              </div>
+              <span class="menu-separator" aria-hidden="true"></span>
+              <div class="settings-menu-section">
+                <div class="settings-menu-title">Local Pairing</div>
+                <button id="local-sync-refresh" class="menu-action primary" type="button">Refresh Pairing</button>
+                <button id="local-sync-qr" class="menu-action" type="button">Show QR Code</button>
+                <button id="local-sync-copy" class="menu-action" type="button">Copy Pair Payload</button>
+                <input id="local-sync-payload" class="input local-sync-payload" type="text" readonly value="">
+                <div class="tiny settings-status-line">Local Sync: <span id="local-sync-status-label">Preparing...</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="library-toolbar">
         <div class="library-toolbar-left">
@@ -26,9 +61,6 @@ $deck_browser_css
           <button id="open-collection" class="button" type="button" title="Browse the card database and build a temporary wanted list">Collection</button>
           <button id="open-reveals" class="button" type="button" title="View recent official reveal posts cached from X">New Reveals</button>
           <button id="new-deck-button" class="button primary" type="button" title="Create an empty deck file in the shared deck folder">New Deck</button>
-          <button id="update-card-database" class="button" type="button" title="Force-refresh card metadata from GitHub">Update Card DB</button>
-          <button id="check-app-update" class="button" type="button" title="Check GitHub Releases for a newer Deck Editor">Check for Updates</button>
-          <button id="install-app-update" class="button success hidden" type="button" title="Install the downloaded GitHub release update">Install Update</button>
         </div>
         <div class="library-toolbar-right tiny">Generated: <span id="library-generated-at-label"></span></div>
       </div>
@@ -417,6 +449,14 @@ $deck_browser_css
       <img id="image-viewer-img" alt="">
       <div id="image-viewer-caption" class="image-viewer-caption"></div>
     </div>
+  </div>
+  <div id="local-sync-qr-viewer" class="local-sync-qr-viewer hidden" role="dialog" aria-modal="true" aria-label="Local pairing QR code">
+    <section class="local-sync-qr-panel">
+      <button id="local-sync-qr-close" class="local-sync-qr-close" type="button" aria-label="Close QR code">×</button>
+      <h2 class="local-sync-qr-title">Local Pairing</h2>
+      <div id="local-sync-qr-code" class="local-sync-qr-code" aria-label="Scan this QR code from the mobile app"></div>
+      <div id="local-sync-qr-payload" class="local-sync-qr-payload tiny"></div>
+    </section>
   </div>
   <div id="tester-context-menu" class="tester-context-menu hidden" role="menu"></div>
   <div id="tester-stack-viewer" class="tester-stack-viewer hidden" role="dialog" aria-modal="true" aria-label="Stack viewer">

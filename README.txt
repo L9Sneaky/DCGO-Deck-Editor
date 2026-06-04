@@ -60,6 +60,35 @@ What the editor can do
 - Test opening hands.
 - Update the local card database from GitHub.
 - Check GitHub Releases for editor updates and install newer release ZIPs.
+- Optional Supabase cloud sync for sharing decks with the mobile app.
+- Same-network local mobile sync with a pairing payload or QR code.
+
+Cloud sync
+----------
+Cloud sync is optional and keeps the local Assets/Decks folder as the
+DCGO-compatible source of truth on desktop.
+
+1. Run supabase/schema.sql from this folder in your Supabase project.
+2. Enable Supabase email/password auth.
+3. Start the deck editor with these environment variables:
+
+DCGO_SUPABASE_URL=https://your-project.supabase.co
+DCGO_SUPABASE_ANON_KEY=your-anon-key
+
+Use the Cloud Sync panel in the Deck Library to create an account, sign in,
+and run Sync Now. Saving a deck also triggers sync when signed in. If the same
+deck changes on desktop and mobile, the newer updated_at value wins.
+
+Local mobile sync
+-----------------
+The Deck Library includes a local pairing panel for same-network mobile sync.
+The desktop editor generates one stable pairing token under:
+
+deck_browser/local_pairing.json
+
+Copy the pairing payload into the mobile app, or use the QR code. Both devices
+must be on the same Wi-Fi/LAN, and the desktop server must be reachable from
+the phone.
 
 Updates
 -------
@@ -102,5 +131,6 @@ Those are generated or local-only files.
 
 Privacy
 -------
-The editor starts a local-only server on 127.0.0.1 and opens your browser.
-It does not upload deck files anywhere.
+By default, the editor writes deck files locally and does not upload them.
+Cloud sync uploads decks only after Supabase is configured and you sign in.
+Local mobile sync is limited by the pairing token and your same-network access.

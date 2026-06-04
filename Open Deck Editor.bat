@@ -34,6 +34,8 @@ if defined DCGO_APP_SUPPORT_DIR (
   set "APP_SUPPORT_DIR=%SCRIPT_DIR%deck_browser_data"
 )
 
+if not defined DCGO_EDITOR_HOST set "DCGO_EDITOR_HOST=0.0.0.0"
+
 if not exist "%BUILDER_SCRIPT%" (
   echo Missing deck editor file:
   echo %BUILDER_SCRIPT%
@@ -93,7 +95,7 @@ if not exist "%APP_SUPPORT_DIR%" mkdir "%APP_SUPPORT_DIR%"
 if defined DECK_ROOT (
   echo Deck folder: %DECK_ROOT%
   echo Editor data: %APP_SUPPORT_DIR%
-  %PYTHON_CMD% "%SERVER_SCRIPT%" --app-support-dir "%APP_SUPPORT_DIR%" --deck-root "%DECK_ROOT%" --output "%OUTPUT_HTML%" --open
+  %PYTHON_CMD% "%SERVER_SCRIPT%" --app-support-dir "%APP_SUPPORT_DIR%" --deck-root "%DECK_ROOT%" --output "%OUTPUT_HTML%" --host "%DCGO_EDITOR_HOST%" --open
 ) else (
   echo Could not find Assets\Decks automatically.
   echo Put this Deck Editor folder inside the DCGO client folder, or set DCGO_DECK_ROOT.
