@@ -43,6 +43,7 @@ WIKI_TEMPLATE_RE = re.compile(r"\{\{([^{}]+)\}\}")
 WIKI_LINK_RE = re.compile(r"\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]")
 PLAIN_TEXT_TOKEN_FIXES = [
     (re.compile(r"(^|[\s,.;:])End Your Turn(?=\s)", re.IGNORECASE), r"\1[End of Your Turn]"),
+    (re.compile(r"\[\s*Recovery\s*\+?(\d+)(?:\s*\(Deck\))?\s*\]", re.IGNORECASE), r"＜Recovery +\1 (Deck)＞"),
     (re.compile(r"(^|[\s,.;:])Recovery\s*\+?(\d+)(?:\s*\(Deck\))?", re.IGNORECASE), r"\1＜Recovery +\2 (Deck)＞"),
 ]
 

@@ -265,7 +265,13 @@
       const rawText = String(text || "")
         .replace(/\[Security Condition\]/g, "[Security]")
         .replace(
-          /(^|[\s,.;:])Recovery\s*\+?(\d+)(?:\s*\(Deck\))?/g,
+          /\[\s*Recovery\s*\+?(\d+)(?:\s*\(Deck\))?\s*\]/gi,
+          function(match, amount) {
+            return "＜Recovery +" + amount + " (Deck)＞";
+          }
+        )
+        .replace(
+          /(^|[\s,.;:])Recovery\s*\+?(\d+)(?:\s*\(Deck\))?/gi,
           function(match, prefix, amount) {
             return prefix + "＜Recovery +" + amount + " (Deck)＞";
           }
