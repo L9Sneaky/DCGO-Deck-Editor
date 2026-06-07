@@ -28,6 +28,11 @@ import reveals
 import updater
 from deck_data import load_app_settings, save_app_settings
 
+try:
+    import x_reveals
+except ModuleNotFoundError:
+    x_reveals = None  # type: ignore[assignment]
+
 
 SUFFIX_ALPHABET = string.ascii_letters + string.digits
 MAX_REQUEST_BYTES = 64 * 1024 * 1024
@@ -560,6 +565,27 @@ class DeckBrowserHandler(BaseHTTPRequestHandler):
                 self.send_json(400, {"error": str(error)})
             return
 
+        if path == "/api/reveals/check-x-now":
+            try:
+                if x_reveals is None:
+                    self.send_json(404, {"error": "Official X API reveal checker is not available."})
+                    return
+                payload = self.read_json_body()
+                max_results = int(payload.get("maxResults") or x_reveals.DEFAULT_MAX_RESULTS)
+                dry_run = bool(payload.get("dryRun"))
+                result = x_reveals.check_x_reveals_now(
+                    self.app_support_dir,
+                    user_id=payload.get("userId"),
+                    username=payload.get("username"),
+                    profile_url=payload.get("profileUrl") or payload.get("profile_url"),
+                    max_results=max_results,
+                    dry_run=dry_run,
+                )
+                self.send_json(200, result)
+            except Exception as error:
+                self.send_json(400, {"error": str(error)})
+            return
+
         if path == "/api/check-update":
             try:
                 self.read_json_body()
@@ -767,6 +793,8 @@ def main() -> int:
         webbrowser.open(url)
 
     threading.Thread(target=startup_update_check, daemon=True).start()
+    if x_reveals is not None:
+        x_reveals.start_watcher_thread(handler_class.app_support_dir)
 
     try:
         server.serve_forever()

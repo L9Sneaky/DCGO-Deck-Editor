@@ -79,6 +79,19 @@
       });
     }
 
+    async function loadCardImageBitmap(card) {
+      const urls = cardImageUrls(card);
+      let lastError = null;
+      for (const url of urls) {
+        try {
+          return await loadImageBitmap(url);
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError || new Error("Image load failed");
+    }
+
     async function buildDeckImageBlob(deck) {
       const cards = deck.cards || [];
       if (!cards.length) throw new Error("No cards in this deck.");
@@ -112,9 +125,9 @@
         ctx.fillStyle = "rgba(16, 39, 62, 1)";
         ctx.fillRect(x, y, cardWidth, cardHeight);
 
-        if (card.imageUrl) {
+        if (cardImageUrls(card).length) {
           try {
-            const image = await loadImageBitmap(card.imageUrl);
+            const image = await loadCardImageBitmap(card);
             drawCoverImage(ctx, image, x, y, cardWidth, cardHeight);
           } catch (error) {
             // Keep fallback background when image fails.
@@ -169,9 +182,9 @@
         ctx.fillStyle = "rgba(16, 39, 62, 1)";
         ctx.fillRect(x, y, imageWidth, imageHeight);
 
-        if (card.imageUrl) {
+        if (cardImageUrls(card).length) {
           try {
-            const image = await loadImageBitmap(card.imageUrl);
+            const image = await loadCardImageBitmap(card);
             drawCoverImage(ctx, image, x, y, imageWidth, imageHeight);
           } catch (error) {
             // Keep fallback background when image fails.

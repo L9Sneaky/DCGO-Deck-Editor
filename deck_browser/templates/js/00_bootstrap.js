@@ -71,6 +71,7 @@
       altArts: document.getElementById("filter-alt-arts"),
       clear: document.getElementById("filter-clear")
     };
+    const activeCatalogFiltersEl = document.getElementById("active-filter-chips");
     const heroTitleEl = document.getElementById("hero-title");
     const heroSubtitleEl = document.getElementById("hero-subtitle");
     const deckInfoContentEl = document.getElementById("deck-info-content");
@@ -294,6 +295,8 @@
         error: "",
         source: "",
         lastChecked: "",
+        sourceMessage: "",
+        nextLiveRefreshAt: "",
         items: [],
         errors: []
       },

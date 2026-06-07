@@ -51,6 +51,36 @@ def none_if_dash(value: Any) -> str | None:
     return text
 
 
+def image_url_for_path(image_path: str) -> str:
+    return IMAGE_BASE_URL + image_path
+
+
+def image_fallback_urls_for_entry(entry: dict[str, Any], code: str, image_path: str | None) -> list[str]:
+    if not image_path:
+        return []
+
+    primary_url = image_url_for_path(image_path)
+    fallback_paths: list[str] = []
+    directory, _, file_name = image_path.rpartition("/")
+    stem, dot, extension = file_name.rpartition(".")
+    if not stem or not dot:
+        return []
+
+    def add_path(path: str) -> None:
+        if path and path != image_path and path not in fallback_paths:
+            fallback_paths.append(path)
+
+    if "-Sample" not in stem:
+        add_path(f"{directory}/{stem}-Sample.{extension}" if directory else f"{stem}-Sample.{extension}")
+
+    card_number = none_if_dash(entry.get("cardNumber")) or code.split("_", 1)[0]
+    if card_number and card_number != stem:
+        sample_name = f"{card_number}-Sample.{extension}"
+        add_path(f"{directory}/{sample_name}" if directory else sample_name)
+
+    return [url for url in (image_url_for_path(path) for path in fallback_paths) if url != primary_url]
+
+
 def parse_intish(value: Any) -> int | None:
     text = none_if_dash(value)
     if text is None:
@@ -293,6 +323,7 @@ def card_metadata_for_code(
             "resolvedName": fallback_name,
             "cardNumber": code.split("_", 1)[0],
             "imageUrl": None,
+            "imageFallbackUrls": [],
             "type": None,
             "colors": [],
             "attribute": None,
@@ -322,7 +353,8 @@ def card_metadata_for_code(
     return {
         "resolvedName": none_if_dash(name.get("english")) or fallback_name,
         "cardNumber": none_if_dash(entry.get("cardNumber")) or code.split("_", 1)[0],
-        "imageUrl": (IMAGE_BASE_URL + image_path) if image_path else None,
+        "imageUrl": image_url_for_path(image_path) if image_path else None,
+        "imageFallbackUrls": image_fallback_urls_for_entry(entry, code, image_path),
         "type": none_if_dash(entry.get("cardType")),
         "colors": split_multi_value(entry.get("color")),
         "attribute": none_if_dash(entry.get("attribute")),
@@ -368,6 +400,7 @@ def build_card_catalog(raw_manifest: list[dict[str, Any]], by_id: dict[str, dict
             "code": card_id,
             "cardNumber": meta["cardNumber"],
             "imageUrl": meta["imageUrl"],
+            "imageFallbackUrls": meta["imageFallbackUrls"],
             "type": meta["type"],
             "colors": meta["colors"],
             "attribute": meta["attribute"],
@@ -465,6 +498,7 @@ def parse_deck_file(deck_path: Path, by_id: dict[str, dict[str, Any]], by_number
                 "code": code,
                 "cardNumber": meta["cardNumber"],
                 "imageUrl": meta["imageUrl"],
+                "imageFallbackUrls": meta["imageFallbackUrls"],
                 "type": meta["type"],
                 "colors": meta["colors"],
                 "attribute": meta["attribute"],

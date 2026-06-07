@@ -114,6 +114,52 @@
       });
     }
 
+    function cardImageUrls(card) {
+      const urls = [];
+      function addUrl(value) {
+        const url = String(value || "").trim();
+        if (url && !urls.includes(url)) urls.push(url);
+      }
+      if (card) {
+        addUrl(card.imageUrl);
+        (Array.isArray(card.imageFallbackUrls) ? card.imageFallbackUrls : []).forEach(addUrl);
+      }
+      return urls;
+    }
+
+    function attachImageFallbacks(img, urls, onFailure) {
+      let index = 0;
+      function tryNext() {
+        if (index >= urls.length) {
+          img.removeEventListener("error", tryNext);
+          if (onFailure) onFailure();
+          return;
+        }
+        img.src = urls[index];
+        index += 1;
+      }
+      img.addEventListener("error", tryNext);
+      tryNext();
+    }
+
+    function appendCardImageWithFallback(parent, card, fallbackClass, loading) {
+      const urls = cardImageUrls(card);
+      if (!urls.length) {
+        parent.appendChild(createFallbackLabel(card && card.name, fallbackClass));
+        return null;
+      }
+
+      const img = document.createElement("img");
+      img.alt = card.name || "Card image";
+      if (loading) img.loading = loading;
+      attachImageFallbacks(img, urls, function() {
+        img.remove();
+        parent.appendChild(createFallbackLabel(card.name, fallbackClass));
+      });
+      parent.appendChild(img);
+      return img;
+    }
+
     function showAppDialog(options) {
       return new Promise(function(resolve) {
         const config = options || {};

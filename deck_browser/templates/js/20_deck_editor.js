@@ -855,6 +855,34 @@
     }
 
     function renderValidationPanel(deck) {
-      validationPanelEl.className = "validation-panel hidden";
+      const validation = validateDeck(deck);
       validationPanelEl.innerHTML = "";
+      if (!validation.errors.length && !validation.warnings.length) {
+        validationPanelEl.className = "validation-panel hidden";
+        return;
+      }
+
+      validationPanelEl.className = "validation-panel " + (validation.errors.length ? "error" : "warning");
+
+      const title = document.createElement("h3");
+      title.className = "validation-title";
+      title.textContent = validation.errors.length ? "Deck needs fixes" : "Deck warning";
+
+      const list = document.createElement("ul");
+      list.className = "validation-list";
+      validation.errors.forEach(function(message) {
+        const item = document.createElement("li");
+        item.className = "error";
+        item.textContent = "Error: " + message;
+        list.appendChild(item);
+      });
+      validation.warnings.forEach(function(message) {
+        const item = document.createElement("li");
+        item.className = "warning";
+        item.textContent = "Warning: " + message;
+        list.appendChild(item);
+      });
+
+      validationPanelEl.appendChild(title);
+      validationPanelEl.appendChild(list);
     }

@@ -3,41 +3,42 @@ from __future__ import annotations
 import email.utils
 import html
 import json
-import mimetypes
 import re
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
 
-SCREEN_NAME = "digimon_tcg_EN"
-TIMELINE_URL = f"https://syndication.twitter.com/srv/timeline-profile/screen-name/{SCREEN_NAME}"
-TWITTER_WEB_VIEWER_URL = f"https://twitterwebviewer.com/?user={SCREEN_NAME}"
-TWITTER_WEB_VIEWER_TWEETS_URL = f"https://twitterwebviewer.com/api/tweets/{SCREEN_NAME}"
-OEMBED_URL = "https://publish.twitter.com/oembed"
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15"
-CHROME_USER_AGENT = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36"
-)
-CACHE_MAX_AGE_SECONDS = 3 * 60 * 60
-WIKI_CACHE_MAX_AGE_SECONDS = 7 * 24 * 60 * 60
 WIKI_CACHE_VERSION = 12
-MAX_REVEALS = 140
-RECENT_REVEAL_WINDOW_DAYS = 31
-MAX_TWITTER_WEB_VIEWER_PAGES = 8
-DEFAULT_SEED_STATUS_IDS = ["2060156669078974838"]
+RECENT_REVEAL_WINDOW_DAYS = 14
 FANDOM_API_URL = "https://digimoncardgame.fandom.com/api.php"
-
-REVEAL_HEADLINE_RE = re.compile(r"\[(?:card\s+reveals?|reveals?)\]", re.IGNORECASE)
-REVEAL_CARD_CODE_RE = r"(?:BT\d{1,2}|EX\d{1,2}|P)-\d{2,3}(?:_[A-Z0-9]+)?"
+TWITTERWEBVIEWER_URL = "https://twitterwebviewer.com/"
+TWITTERWEBVIEWER_USER = "digimon_tcg_EN"
+DIGIMONCARD_IO_API_URL = "https://digimoncard.io/api-public/search"
+DIGIMONCARD_IO_IMAGE_URL = "https://images.digimoncard.io/images/cards/{code}.jpg"
+DIGIMONCARD_IO_DEFAULT_PREFIXES = ("EX12",)
+DIGIMONCARD_IO_MAX_PREFIXES = 6
+WIKIMON_URL = "https://wikimon.net/"
+WIKIMON_API_URL = "https://wikimon.net/api.php"
+WIKIMON_DEFAULT_PREFIXES = DIGIMONCARD_IO_DEFAULT_PREFIXES
+WIKIMON_DISCOVERY_FAMILIES = ("BT", "EX", "ST", "AD", "LM")
+WIKIMON_DISCOVERY_RECENT_PER_FAMILY = 2
+WIKIMON_MAX_PREFIXES = 12
+TWITTER_SNOWFLAKE_EPOCH_MS = 1288834974657
+STATUS_LINK_RE = re.compile(r"""(?:https?://(?:mobile\.)?(?:x|twitter)\.com)?/[^"'<>\s/]+/status(?:es)?/(\d+)""", re.IGNORECASE)
+IMAGE_URL_RE = re.compile(r"""https?://[^"'<>\s]+""", re.IGNORECASE)
+REVEAL_CARD_CODE_RE = r"(?:BT\d{1,2}|EX\d{1,2}|ST\d{1,2}|AD\d{1,2}|LM|P)-\d{2,3}(?:_[A-Z0-9]+)?"
 CARD_REF_RE = re.compile(rf"\[({REVEAL_CARD_CODE_RE})\s+([^\]]+)\]", re.IGNORECASE)
-STATUS_ID_RE = re.compile(r"(?:x|twitter)\.com/[^/]+/status/(\d+)|/status/(\d+)")
-NEXT_DATA_RE = re.compile(r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>', re.DOTALL)
-PBS_MEDIA_RE = re.compile(r"https://pbs\.twimg\.com/media/[^\"\\<>\s]+")
+CARD_PREFIX_RE = re.compile(r"^(BT\d{1,2}|EX\d{1,2}|ST\d{1,2}|AD\d{1,2}|LM)-", re.IGNORECASE)
+CARD_PREFIX_PARTS_RE = re.compile(r"^([A-Z]+)(\d{1,2})$", re.IGNORECASE)
+WIKIMON_DCG_TABLE_RE = re.compile(r"\{\{DCGTable\s*(.*?)\}\}", re.DOTALL | re.IGNORECASE)
+WIKIMON_IMAGE_RE = re.compile(r"""<img[^>]+alt=["']Dcg-([A-Z]+\d{1,2}-\d{2,3})(?:_[^"']+)?\.jpg["'][^>]+src=["']([^"']+)["']""", re.IGNORECASE)
+
 WIKI_CARD_FIELD_RE = re.compile(r"\|([A-Za-z][A-Za-z0-9_]*)\s*=")
 WIKI_TEMPLATE_RE = re.compile(r"\{\{([^{}]+)\}\}")
 WIKI_LINK_RE = re.compile(r"\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]")
@@ -45,6 +46,7 @@ PLAIN_TEXT_TOKEN_FIXES = [
     (re.compile(r"(^|[\s,.;:])End Your Turn(?=\s)", re.IGNORECASE), r"\1[End of Your Turn]"),
     (re.compile(r"\[\s*Recovery\s*\+?(\d+)(?:\s*\(Deck\))?\s*\]", re.IGNORECASE), r"＜Recovery +\1 (Deck)＞"),
     (re.compile(r"(^|[\s,.;:])Recovery\s*\+?(\d+)(?:\s*\(Deck\))?", re.IGNORECASE), r"\1＜Recovery +\2 (Deck)＞"),
+    (re.compile(r"(^|[\s,.;:])Fragment\s*(\d+)", re.IGNORECASE), r"\1＜Fragment \2＞"),
 ]
 
 WIKI_TEMPLATE_LABELS = {
@@ -106,12 +108,12 @@ def reveals_cache_path(app_support_dir: Path) -> Path:
     return reveals_root(app_support_dir) / "reveals_cache.json"
 
 
-def reveal_sources_path(app_support_dir: Path) -> Path:
-    return reveals_root(app_support_dir) / "reveal_sources.txt"
-
-
 def reveal_wiki_cache_path(app_support_dir: Path) -> Path:
     return reveals_root(app_support_dir) / "wiki_cache.json"
+
+
+def twitterwebviewer_state_path(app_support_dir: Path) -> Path:
+    return reveals_root(app_support_dir) / "twitterwebviewer_state.json"
 
 
 def reveal_images_dir(app_support_dir: Path) -> Path:
@@ -158,8 +160,27 @@ def fetch_json(url: str, extra_headers: dict[str, str] | None = None) -> Any:
     return json.loads(fetch_text(url, extra_headers=extra_headers))
 
 
+def fetch_digimoncard_io_json(url: str, extra_headers: dict[str, str] | None = None) -> Any:
+    headers = {"Accept": "application/json"}
+    if extra_headers:
+        headers.update(extra_headers)
+    return fetch_json(url, extra_headers=headers)
+
+
 def normalize_wiki_page_code(code: str) -> str:
     return str(code or "").strip().split("_", 1)[0].upper()
+
+
+def extract_card_refs(text: str) -> list[dict[str, str]]:
+    refs: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for match in CARD_REF_RE.finditer(str(text or "")):
+        code = match.group(1).strip().upper()
+        name = re.sub(r"\s+", " ", match.group(2).strip())
+        if code and code not in seen:
+            refs.append({"code": code, "name": name})
+            seen.add(code)
+    return refs
 
 
 def split_wiki_card_fields(wikitext: str) -> dict[str, str]:
@@ -408,7 +429,7 @@ def fetch_wiki_card_payload(code: str) -> dict[str, Any] | None:
     try:
         payload = fetch_json(
             f"{FANDOM_API_URL}?{query}",
-            extra_headers={"Accept": "application/json", "User-Agent": CHROME_USER_AGENT},
+            extra_headers={"Accept": "application/json", "User-Agent": USER_AGENT},
         )
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
         return None
@@ -453,31 +474,253 @@ def fetch_wiki_card_payload(code: str) -> dict[str, Any] | None:
     }
 
 
-def parse_twitter_datetime(value: str) -> str:
+def parse_twitter_datetime_value(value: str) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
     try:
-        parsed = email.utils.parsedate_to_datetime(value)
-        return parsed.isoformat()
+        parsed = email.utils.parsedate_to_datetime(text)
     except (TypeError, ValueError):
+        parsed = None
+    if parsed is None:
+        try:
+            parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
+def twitter_datetime_from_status_id(status_id: Any) -> datetime | None:
+    text = str(status_id or "").strip()
+    if not text.isdigit():
+        return None
+    try:
+        timestamp_ms = (int(text) >> 22) + TWITTER_SNOWFLAKE_EPOCH_MS
+        return datetime.fromtimestamp(timestamp_ms / 1000, tz=timezone.utc)
+    except (OverflowError, OSError, ValueError):
+        return None
+
+
+def parse_twitter_datetime(value: str) -> str:
+    parsed = parse_twitter_datetime_value(value)
+    return parsed.isoformat() if parsed else ""
+
+
+def local_date_from_datetime(value: datetime | None) -> str:
+    if value is None:
         return ""
+    return value.astimezone().date().isoformat()
 
 
 def reveal_date_from_created_at(value: str) -> str:
-    iso_value = parse_twitter_datetime(value)
-    return iso_value[:10] if iso_value else ""
+    return local_date_from_datetime(parse_twitter_datetime_value(value))
+
+
+def twitterwebviewer_profile_url(user: str = TWITTERWEBVIEWER_USER) -> str:
+    return f"{TWITTERWEBVIEWER_URL}?{urllib.parse.urlencode({'user': user})}"
+
+
+def load_twitterwebviewer_state(app_support_dir: Path) -> dict[str, Any]:
+    state = read_json(twitterwebviewer_state_path(app_support_dir), {})
+    return state if isinstance(state, dict) else {}
+
+
+def save_twitterwebviewer_state(app_support_dir: Path, state: dict[str, Any]) -> None:
+    write_json(twitterwebviewer_state_path(app_support_dir), state)
+
+
+def state_mapping(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def normalize_tweet_id(value: Any) -> str:
+    return str(value or "").strip()
+
+
+def recent_cutoff(now: datetime | None = None, window_days: int = RECENT_REVEAL_WINDOW_DAYS) -> datetime:
+    base = now or datetime.now(timezone.utc)
+    if base.tzinfo is None:
+        base = base.replace(tzinfo=timezone.utc)
+    return base.astimezone(timezone.utc) - timedelta(days=window_days)
+
+
+def seed_twitterwebviewer_state_from_items(state: dict[str, Any], items: list[dict[str, Any]], now: datetime | None = None) -> dict[str, Any]:
+    next_state = dict(state)
+    cards = dict(state_mapping(next_state.get("cards")))
+    tweets = dict(state_mapping(next_state.get("tweets")))
+    cutoff = recent_cutoff(now)
+
+    for item in items or []:
+        if not isinstance(item, dict):
+            continue
+        parsed = reveal_item_datetime(item)
+        if parsed is not None and parsed.astimezone(timezone.utc) < cutoff:
+            continue
+        tweet_id = normalize_tweet_id(item.get("tweetId") or item.get("postId"))
+        date_text = str(item.get("date") or local_date_from_datetime(parsed) or "")
+        if tweet_id and tweet_id not in tweets:
+            tweets[tweet_id] = {"status": "seen", "date": date_text}
+        code = normalize_wiki_page_code(str(item.get("code") or ""))
+        if code and code not in cards:
+            cards[code] = {
+                "status": "seen",
+                "tweetId": tweet_id,
+                "date": date_text,
+                "firstSeenAt": str(item.get("createdAt") or ""),
+            }
+
+    next_state.update({"cards": cards, "tweets": tweets, "source": "twitterwebviewer", "windowDays": RECENT_REVEAL_WINDOW_DAYS})
+    return next_state
+
+
+def seen_tweet_ids_from_state_and_cache(state: dict[str, Any], cached_items: list[dict[str, Any]]) -> set[str]:
+    seen = {normalize_tweet_id(tweet_id) for tweet_id in state_mapping(state.get("tweets")).keys()}
+    for item in cached_items or []:
+        tweet_id = normalize_tweet_id(item.get("tweetId") or item.get("postId"))
+        if tweet_id:
+            seen.add(tweet_id)
+    return {tweet_id for tweet_id in seen if tweet_id}
+
+
+def plain_text_from_html(raw_html: str) -> str:
+    text = re.sub(r"(?is)<script[^>]*>.*?</script>", " ", str(raw_html or ""))
+    text = re.sub(r"(?is)<style[^>]*>.*?</style>", " ", text)
+    text = re.sub(r"(?i)<br\s*/?>", "\n", text)
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = html.unescape(text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def image_urls_from_html(raw_html: str) -> list[str]:
+    urls: list[str] = []
+    seen: set[str] = set()
+    for match in IMAGE_URL_RE.finditer(html.unescape(str(raw_html or ""))):
+        url = match.group(0).rstrip(").,;")
+        if "twimg.com/media/" not in url and "pbs.twimg.com/media/" not in url:
+            continue
+        if url not in seen:
+            urls.append(url)
+            seen.add(url)
+    return urls
+
+
+def likely_twitterwebviewer_reveal(text: str) -> bool:
+    if not text:
+        return False
+    return bool(
+        re.search(r"\[(?:card\s+reveals?|reveals?)\]", text, re.IGNORECASE)
+        or re.search(r"\btoday[’']?s\s+(?:alt-art\s+)?cards?\s+(?:is|are)\b", text, re.IGNORECASE)
+        or extract_card_refs(text)
+    )
+
+
+def twitterwebviewer_segments(page_html: str) -> list[tuple[str, str]]:
+    matches: list[tuple[str, int]] = []
+    seen: set[str] = set()
+    for match in STATUS_LINK_RE.finditer(str(page_html or "")):
+        tweet_id = normalize_tweet_id(match.group(1))
+        if not tweet_id or tweet_id in seen:
+            continue
+        seen.add(tweet_id)
+        matches.append((tweet_id, match.start()))
+
+    segments: list[tuple[str, str]] = []
+    for index, (tweet_id, start) in enumerate(matches):
+        end = matches[index + 1][1] if index + 1 < len(matches) else len(page_html)
+        segments.append((tweet_id, page_html[start:end]))
+    return segments
+
+
+def normalize_twitterwebviewer_item(
+    tweet_id: str,
+    text: str,
+    card: dict[str, str],
+    image_url: str,
+    index: int,
+    created_at: datetime | None,
+) -> dict[str, Any]:
+    created = created_at or twitter_datetime_from_status_id(tweet_id)
+    created_text = created.isoformat() if created else ""
+    code = normalize_wiki_page_code(str(card.get("code") or ""))
+    return {
+        "id": f"{tweet_id}-{index}",
+        "tweetId": tweet_id,
+        "tweetUrl": f"https://x.com/{TWITTERWEBVIEWER_USER}/status/{tweet_id}",
+        "createdAt": created_text,
+        "date": local_date_from_datetime(created) if created else "",
+        "code": code,
+        "name": card.get("name") or "Official Reveal",
+        "cards": [card] if card else [],
+        "text": text,
+        "mediaUrls": [image_url] if image_url else [],
+        "imageUrl": image_url,
+        "source": "twitterwebviewer",
+        "sourceLabel": "TwitterWebViewer",
+    }
+
+
+def parse_twitterwebviewer_reveals(
+    page_html: str,
+    *,
+    seen_tweet_ids: set[str] | None = None,
+    now: datetime | None = None,
+    window_days: int = RECENT_REVEAL_WINDOW_DAYS,
+) -> dict[str, Any]:
+    seen = set(seen_tweet_ids or set())
+    cutoff = recent_cutoff(now, window_days=window_days)
+    items: list[dict[str, Any]] = []
+    stopped_at_seen_id = ""
+    stopped_at_old_id = ""
+    scanned = 0
+
+    for tweet_id, segment in twitterwebviewer_segments(page_html):
+        if tweet_id in seen:
+            stopped_at_seen_id = tweet_id
+            break
+        created = twitter_datetime_from_status_id(tweet_id)
+        if created is not None and created.astimezone(timezone.utc) < cutoff:
+            stopped_at_old_id = tweet_id
+            break
+        scanned += 1
+        text = plain_text_from_html(segment)
+        refs = extract_card_refs(text)
+        images = image_urls_from_html(segment)
+        if not refs or not likely_twitterwebviewer_reveal(text):
+            continue
+        for index, ref in enumerate(refs, start=1):
+            image_url = images[index - 1] if index - 1 < len(images) else (images[0] if images else "")
+            items.append(normalize_twitterwebviewer_item(tweet_id, text, ref, image_url, index, created))
+
+    return {
+        "items": items,
+        "scannedTweetCount": scanned,
+        "stoppedAtSeenTweetId": stopped_at_seen_id,
+        "stoppedAtOldTweetId": stopped_at_old_id,
+    }
+
+
+def tweet_datetime(tweet: dict[str, Any]) -> datetime | None:
+    created_at = str(tweet.get("created_at") or tweet.get("createdAt") or tweet.get("timelineAt") or "")
+    return parse_twitter_datetime_value(created_at) or twitter_datetime_from_status_id(tweet.get("id_str") or tweet.get("id"))
 
 
 def tweet_is_recent(tweet: dict[str, Any]) -> bool:
-    created_at = str(tweet.get("created_at") or "")
-    if not created_at:
+    parsed = tweet_datetime(tweet)
+    if parsed is None:
         return True
-    try:
-        parsed = email.utils.parsedate_to_datetime(created_at)
-    except (TypeError, ValueError):
-        return True
-    return (time.time() - parsed.timestamp()) <= RECENT_REVEAL_WINDOW_DAYS * 24 * 60 * 60
+    return (datetime.now(timezone.utc) - parsed.astimezone(timezone.utc)).total_seconds() <= RECENT_REVEAL_WINDOW_DAYS * 24 * 60 * 60
+
+
+def reveal_item_datetime(item: dict[str, Any]) -> datetime | None:
+    return parse_twitter_datetime_value(str(item.get("createdAt") or "")) or twitter_datetime_from_status_id(item.get("tweetId"))
 
 
 def reveal_item_is_recent(item: dict[str, Any]) -> bool:
+    parsed = reveal_item_datetime(item)
+    if parsed is not None:
+        return (datetime.now(timezone.utc) - parsed.astimezone(timezone.utc)).total_seconds() <= RECENT_REVEAL_WINDOW_DAYS * 24 * 60 * 60
     date_text = str(item.get("date") or "")
     try:
         item_time = time.mktime(time.strptime(date_text, "%Y-%m-%d"))
@@ -486,349 +729,604 @@ def reveal_item_is_recent(item: dict[str, Any]) -> bool:
     return (time.time() - item_time) <= RECENT_REVEAL_WINDOW_DAYS * 24 * 60 * 60
 
 
-def clean_tweet_text(value: str) -> str:
-    text = html.unescape(str(value or "")).replace("\r\n", "\n").replace("\r", "\n")
-    text = re.sub(r"https://t\.co/\S+", "", text)
-    text = re.sub(r"pic\.twitter\.com/\S+", "", text)
-    lines = [line.strip() for line in text.split("\n")]
-    return "\n".join(line for line in lines if line).strip()
+def normalize_reveal_item_dates(item: dict[str, Any]) -> dict[str, Any]:
+    clone = dict(item)
+    parsed = reveal_item_datetime(clone)
+    if parsed is not None:
+        clone["createdAt"] = parsed.isoformat()
+        clone["date"] = local_date_from_datetime(parsed)
+    elif not clone.get("date"):
+        clone["date"] = ""
+    return clone
 
 
-def extract_card_refs(text: str) -> list[dict[str, str]]:
-    refs: list[dict[str, str]] = []
-    seen: set[str] = set()
-    for match in CARD_REF_RE.finditer(html.unescape(text or "")):
-        code = match.group(1).strip().upper()
-        name = re.sub(r"\s+", " ", match.group(2).strip())
-        if not code or code in seen:
-            continue
-        refs.append({"code": code, "name": name})
-        seen.add(code)
-    return refs
+def normalize_reveal_items(items: Any) -> list[dict[str, Any]]:
+    normalized: list[dict[str, Any]] = []
+    for item in items or []:
+        if isinstance(item, dict):
+            normalized.append(normalize_reveal_item_dates(item))
+    return normalized
 
 
-def normalize_media_url(url: str) -> str:
-    cleaned = html.unescape(str(url or "")).replace("\\/", "/")
-    if "?" in cleaned:
-        return cleaned
-    if "pbs.twimg.com/media/" in cleaned:
-        suffix = Path(urllib.parse.urlparse(cleaned).path).suffix.lstrip(".").lower() or "jpg"
-        if suffix == "jpeg":
-            suffix = "jpg"
-        return f"{cleaned}?format={suffix}&name=orig"
-    return cleaned
-
-
-def media_extension(url: str, content_type: str | None = None) -> str:
-    if content_type:
-        guessed = mimetypes.guess_extension(content_type.split(";", 1)[0].strip())
-        if guessed:
-            return ".jpg" if guessed == ".jpe" else guessed
-    suffix = Path(urllib.parse.urlparse(url).path).suffix.lower()
-    if suffix in {".jpg", ".jpeg", ".png", ".webp"}:
-        return ".jpg" if suffix == ".jpeg" else suffix
-    return ".jpg"
-
-
-def download_image(app_support_dir: Path, tweet_id: str, media_id: str, url: str) -> str:
-    image_dir = reveal_images_dir(app_support_dir)
-    image_dir.mkdir(parents=True, exist_ok=True)
-    normalized_url = normalize_media_url(url)
-    existing = sorted(image_dir.glob(f"{tweet_id}_{media_id}.*"))
-    if existing:
-        return existing[0].name
-
-    request = urllib.request.Request(normalized_url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=40) as response:
-        content_type = response.headers.get("Content-Type")
-        raw = response.read()
-    suffix = media_extension(normalized_url, content_type)
-    target = image_dir / f"{tweet_id}_{media_id}{suffix}"
-    target.write_bytes(raw)
-    return target.name
-
-
-def parse_timeline_tweets(raw_html: str) -> list[dict[str, Any]]:
-    match = NEXT_DATA_RE.search(raw_html)
-    if not match:
-        return []
-    try:
-        data = json.loads(match.group(1))
-    except json.JSONDecodeError:
-        return []
-    entries = (
-        data.get("props", {})
-        .get("pageProps", {})
-        .get("timeline", {})
-        .get("entries", [])
-    )
-    tweets: list[dict[str, Any]] = []
-    seen: set[str] = set()
-    for entry in entries:
-        tweet = entry.get("content", {}).get("tweet") if isinstance(entry, dict) else None
-        if not isinstance(tweet, dict):
-            continue
-        tweet_id = str(tweet.get("id_str") or "")
-        if not tweet_id or tweet_id in seen:
-            continue
-        seen.add(tweet_id)
-        tweets.append(tweet)
-    return tweets
-
-
-def twitter_web_viewer_headers() -> dict[str, str]:
-    return {
-        "User-Agent": CHROME_USER_AGENT,
-        "Accept": "application/json, text/plain, */*",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Referer": TWITTER_WEB_VIEWER_URL,
-    }
-
-
-def normalize_twitter_web_viewer_tweet(tweet: dict[str, Any]) -> dict[str, Any]:
-    media_items = []
-    for index, media in enumerate(tweet.get("media") or []):
-        media_url = str(media.get("url") or "")
-        if not media_url:
-            continue
-        media_type = str(media.get("type") or "").lower()
-        if media_type not in {"image", "photo"}:
-            continue
-        media_items.append(
-            {
-                "id_str": str(media.get("id") or index + 1),
-                "type": "photo",
-                "media_url_https": media_url,
-            }
-        )
-
-    return {
-        "id_str": str(tweet.get("id") or ""),
-        "created_at": str(tweet.get("createdAt") or tweet.get("timelineAt") or ""),
-        "full_text": str(tweet.get("content") or ""),
-        "permalink": f"/{SCREEN_NAME}/status/{tweet.get('id')}",
-        "extended_entities": {"media": media_items},
-        "entities": {"media": media_items},
-    }
-
-
-def fetch_twitter_web_viewer_tweets() -> tuple[list[dict[str, Any]], list[str]]:
-    tweets: list[dict[str, Any]] = []
-    errors: list[str] = []
-    cursor = ""
+def merge_reveal_items(existing_items: list[dict[str, Any]], new_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    merged: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
-    found_recent = False
-
-    for _ in range(MAX_TWITTER_WEB_VIEWER_PAGES):
-        params = {"cursor": cursor} if cursor else {}
-        url = TWITTER_WEB_VIEWER_TWEETS_URL
-        if params:
-            url += "?" + urllib.parse.urlencode(params)
-
-        try:
-            payload = fetch_json(url, extra_headers=twitter_web_viewer_headers())
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
-            errors.append(f"Could not fetch Twitter Web Viewer tweets: {error}")
-            break
-
-        data = payload.get("data") if isinstance(payload, dict) else None
-        raw_tweets = data.get("tweets") if isinstance(data, dict) else []
-        if not isinstance(raw_tweets, list) or not raw_tweets:
-            break
-
-        page_has_recent = False
-        for raw_tweet in raw_tweets:
-            if not isinstance(raw_tweet, dict):
-                continue
-            normalized = normalize_twitter_web_viewer_tweet(raw_tweet)
-            tweet_id = str(normalized.get("id_str") or "")
-            if not tweet_id or tweet_id in seen_ids:
-                continue
-            seen_ids.add(tweet_id)
-            if tweet_is_recent(normalized):
-                page_has_recent = True
-                found_recent = True
-                tweets.append(normalized)
-
-        cursor = str(data.get("nextCursor") or "") if isinstance(data, dict) else ""
-        if not cursor or not data.get("hasNextPage"):
-            break
-        if found_recent and not page_has_recent:
-            break
-
-    return tweets, errors
-
-
-def parse_tweet_from_oembed(status_id: str) -> dict[str, Any] | None:
-    url = f"https://x.com/{SCREEN_NAME}/status/{status_id}"
-    query = urllib.parse.urlencode({"url": url, "omit_script": "1"})
-    try:
-        payload = fetch_json(f"{OEMBED_URL}?{query}")
-    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
-        return None
-
-    raw_html = str(payload.get("html") or "")
-    paragraph = re.search(r"<p[^>]*>(.*?)</p>", raw_html, flags=re.IGNORECASE | re.DOTALL)
-    raw_html = paragraph.group(1) if paragraph else raw_html
-    text = re.sub(r"<br\s*/?>", "\n", raw_html, flags=re.IGNORECASE)
-    text = re.sub(r"<[^>]+>", "", text)
-    return {
-        "id_str": status_id,
-        "created_at": "",
-        "full_text": html.unescape(text),
-        "permalink": f"/{SCREEN_NAME}/status/{status_id}",
-        "extended_entities": {"media": []},
-        "entities": {"media": []},
-    }
-
-
-def merge_media_from_status_page(tweet: dict[str, Any]) -> dict[str, Any]:
-    tweet_id = str(tweet.get("id_str") or "")
-    if not tweet_id:
-        return tweet
-    media = (tweet.get("extended_entities") or {}).get("media") or (tweet.get("entities") or {}).get("media") or []
-    if media:
-        return tweet
-    try:
-        raw_html = fetch_text(f"https://x.com/{SCREEN_NAME}/status/{tweet_id}")
-    except (urllib.error.URLError, TimeoutError):
-        return tweet
-    urls = []
-    seen: set[str] = set()
-    for raw_url in PBS_MEDIA_RE.findall(raw_html):
-        url = html.unescape(raw_url).replace("\\/", "/")
-        if "/profile_" in url or "profile_images" in url or "profile_banners" in url:
+    seen_card_tweets: set[tuple[str, str]] = set()
+    for item in list(new_items) + list(existing_items):
+        if not isinstance(item, dict):
             continue
-        base = url.split("?", 1)[0]
-        if base in seen:
+        item_id = str(item.get("id") or "")
+        if item_id and item_id in seen_ids:
             continue
-        seen.add(base)
-        urls.append(url)
-    if not urls:
-        return tweet
-    tweet["extended_entities"] = {
-        "media": [
-            {
-                "id_str": str(index + 1),
-                "type": "photo",
-                "media_url_https": url,
-            }
-            for index, url in enumerate(urls)
-        ]
-    }
-    return tweet
-
-
-def status_ids_from_source_file(app_support_dir: Path) -> list[str]:
-    path = reveal_sources_path(app_support_dir)
-    if not path.is_file():
-        return []
-    ids: list[str] = []
-    seen: set[str] = set()
-    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
+        tweet_id = normalize_tweet_id(item.get("tweetId") or item.get("postId"))
+        code = normalize_wiki_page_code(str(item.get("code") or ""))
+        card_tweet_key = (tweet_id, code)
+        if tweet_id and code and card_tweet_key in seen_card_tweets:
             continue
-        match = STATUS_ID_RE.search(stripped)
-        status_id = (match.group(1) or match.group(2)) if match else stripped if stripped.isdigit() else ""
-        if status_id and status_id not in seen:
-            ids.append(status_id)
-            seen.add(status_id)
-    return ids
+        if item_id:
+            seen_ids.add(item_id)
+        if tweet_id and code:
+            seen_card_tweets.add(card_tweet_key)
+        merged.append(item)
+    merged.sort(key=lambda item: (str(item.get("date") or ""), str(item.get("createdAt") or ""), str(item.get("tweetId") or item.get("id") or "")), reverse=True)
+    return merged
 
 
-def tweet_is_reveal(tweet: dict[str, Any]) -> bool:
-    text = str(tweet.get("full_text") or tweet.get("text") or "")
-    return bool(REVEAL_HEADLINE_RE.search(text) and extract_card_refs(text))
-
-
-def reveal_items_from_tweet(app_support_dir: Path, tweet: dict[str, Any], previous_items: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
-    tweet_id = str(tweet.get("id_str") or "")
-    text = clean_tweet_text(str(tweet.get("full_text") or tweet.get("text") or ""))
-    refs = extract_card_refs(text)
-    if not tweet_id or not refs:
-        return []
-
-    media = (tweet.get("extended_entities") or {}).get("media") or (tweet.get("entities") or {}).get("media") or []
-    photos = [item for item in media if item.get("type") == "photo" and item.get("media_url_https")]
-    if not photos:
-        return []
-
-    created_at = str(tweet.get("created_at") or "")
-    date = reveal_date_from_created_at(created_at)
-    if not date:
-        date = time.strftime("%Y-%m-%d")
-
-    items: list[dict[str, Any]] = []
-    for index, media_item in enumerate(photos):
-        ref = refs[index] if index < len(refs) else refs[0]
-        media_id = str(media_item.get("id_str") or media_item.get("media_key") or index + 1)
-        item_id = f"{tweet_id}-{media_id}"
-        previous = previous_items.get(item_id, {})
-        image_file = previous.get("imageFile")
-        if not image_file:
-            try:
-                image_file = download_image(app_support_dir, tweet_id, media_id, str(media_item.get("media_url_https") or ""))
-            except (urllib.error.URLError, TimeoutError, OSError):
-                image_file = ""
-        items.append(
-            {
-                "id": item_id,
+def update_twitterwebviewer_state_from_items(
+    state: dict[str, Any],
+    items: list[dict[str, Any]],
+    *,
+    checked_at: datetime,
+    stopped_at_seen_id: str = "",
+) -> dict[str, Any]:
+    next_state = seed_twitterwebviewer_state_from_items(state, items, now=checked_at)
+    cards = dict(state_mapping(next_state.get("cards")))
+    tweets = dict(state_mapping(next_state.get("tweets")))
+    for item in items:
+        tweet_id = normalize_tweet_id(item.get("tweetId") or item.get("postId"))
+        code = normalize_wiki_page_code(str(item.get("code") or ""))
+        date_text = str(item.get("date") or "")
+        if tweet_id:
+            tweets[tweet_id] = {"status": "seen", "date": date_text}
+        if code:
+            cards[code] = {
+                "status": "seen",
                 "tweetId": tweet_id,
-                "tweetUrl": f"https://x.com/{SCREEN_NAME}/status/{tweet_id}",
-                "createdAt": parse_twitter_datetime(created_at),
-                "date": date,
-                "code": ref["code"],
-                "name": ref["name"],
-                "cards": refs,
-                "text": text,
-                "imageFile": image_file,
-                "imageUrl": f"/api/reveals/image/{urllib.parse.quote(image_file)}" if image_file else normalize_media_url(str(media_item.get("media_url_https") or "")),
-                "source": "x",
+                "date": date_text,
+                "firstSeenAt": checked_at.astimezone(timezone.utc).isoformat(),
             }
-        )
+    next_state.update(
+        {
+            "cards": cards,
+            "tweets": tweets,
+            "lastCheckedAt": checked_at.astimezone(timezone.utc).isoformat(),
+            "source": "twitterwebviewer",
+            "windowDays": RECENT_REVEAL_WINDOW_DAYS,
+        }
+    )
+    next_state.pop("cooldownUntil", None)
+    if stopped_at_seen_id:
+        next_state["stoppedAtSeenTweetId"] = stopped_at_seen_id
+    return next_state
+
+
+def check_twitterwebviewer_reveals_now(
+    app_support_dir: Path,
+    *,
+    user: str = TWITTERWEBVIEWER_USER,
+    fetcher: Any = fetch_text,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    checked_at = now or datetime.now(timezone.utc)
+    if checked_at.tzinfo is None:
+        checked_at = checked_at.replace(tzinfo=timezone.utc)
+
+    cache_path = reveals_cache_path(app_support_dir)
+    cache = read_json(cache_path, {})
+    existing_items = normalize_reveal_items(cache.get("items")) if isinstance(cache, dict) else []
+
+    state = seed_twitterwebviewer_state_from_items(load_twitterwebviewer_state(app_support_dir), existing_items, now=checked_at)
+
+    try:
+        page_html = fetcher(twitterwebviewer_profile_url(user))
+    except urllib.error.HTTPError as error:
+        state.pop("cooldownUntil", None)
+        state["lastError"] = f"HTTP {int(error.code)}"
+        state["lastCheckedAt"] = checked_at.astimezone(timezone.utc).isoformat()
+        state["source"] = "twitterwebviewer"
+        state["windowDays"] = RECENT_REVEAL_WINDOW_DAYS
+        save_twitterwebviewer_state(app_support_dir, state)
+        raise RuntimeError(f"TwitterWebViewer returned HTTP {int(error.code)}.") from error
+    except (urllib.error.URLError, TimeoutError) as error:
+        state.pop("cooldownUntil", None)
+        state["lastError"] = str(error)
+        state["lastCheckedAt"] = checked_at.astimezone(timezone.utc).isoformat()
+        state["source"] = "twitterwebviewer"
+        state["windowDays"] = RECENT_REVEAL_WINDOW_DAYS
+        save_twitterwebviewer_state(app_support_dir, state)
+        raise RuntimeError("Could not fetch TwitterWebViewer.") from error
+
+    parsed = parse_twitterwebviewer_reveals(
+        page_html,
+        seen_tweet_ids=seen_tweet_ids_from_state_and_cache(state, existing_items),
+        now=checked_at,
+        window_days=RECENT_REVEAL_WINDOW_DAYS,
+    )
+    new_items = normalize_reveal_items(parsed["items"])
+    merged_items = merge_reveal_items(existing_items, new_items)
+    next_state = update_twitterwebviewer_state_from_items(
+        state,
+        merged_items,
+        checked_at=checked_at,
+        stopped_at_seen_id=str(parsed.get("stoppedAtSeenTweetId") or ""),
+    )
+
+    next_cache = dict(cache) if isinstance(cache, dict) else {}
+    next_cache.update(
+        {
+            "lastChecked": checked_at.timestamp(),
+            "source": "twitterwebviewer",
+            "items": merged_items,
+            "errors": [],
+        }
+    )
+    next_cache.pop("nextTwitterWebViewerAttemptAt", None)
+    next_cache.pop("twitterWebViewerPauseReason", None)
+    write_json(cache_path, next_cache)
+    save_twitterwebviewer_state(app_support_dir, next_state)
+
+    return {
+        "ok": True,
+        "source": "twitterwebviewer",
+        "skipped": False,
+        "newRevealCount": len(new_items),
+        "stoppedAtSeenTweetId": parsed.get("stoppedAtSeenTweetId") or "",
+        "stoppedAtOldTweetId": parsed.get("stoppedAtOldTweetId") or "",
+        "scannedTweetCount": parsed.get("scannedTweetCount") or 0,
+        "items": new_items,
+    }
+
+
+def reveal_card_prefix(code: Any) -> str:
+    match = CARD_PREFIX_RE.match(normalize_wiki_page_code(str(code or "")))
+    return match.group(1).upper() if match else ""
+
+
+def append_unique_prefix(prefixes: list[str], prefix: Any, *, limit: int | None = None) -> None:
+    normalized = normalize_wiki_page_code(str(prefix or ""))
+    if not normalized or normalized in prefixes:
+        return
+    if limit is not None and len(prefixes) >= limit:
+        return
+    prefixes.append(normalized)
+
+
+def card_prefix_family_number(prefix: Any) -> tuple[str, int] | None:
+    match = CARD_PREFIX_PARTS_RE.match(normalize_wiki_page_code(str(prefix or "")))
+    if not match:
+        return None
+    try:
+        number = int(match.group(2))
+    except ValueError:
+        return None
+    return match.group(1).upper(), number
+
+
+def next_card_prefix(prefix: Any) -> str:
+    parts = card_prefix_family_number(prefix)
+    if not parts:
+        return ""
+    family, number = parts
+    return f"{family}{number + 1}"
+
+
+def append_prefix_and_next(prefixes: list[str], prefix: Any, *, limit: int | None = None) -> None:
+    append_unique_prefix(prefixes, prefix, limit=limit)
+    append_unique_prefix(prefixes, next_card_prefix(prefix), limit=limit)
+
+
+def digimoncard_io_search_url(prefix: str) -> str:
+    query = urllib.parse.urlencode(
+        {
+            "card": normalize_wiki_page_code(prefix),
+            "sort": "date_added",
+            "sortdirection": "desc",
+        }
+    )
+    return f"{DIGIMONCARD_IO_API_URL}?{query}"
+
+
+def digimoncard_io_prefixes_from_items(items: list[dict[str, Any]]) -> list[str]:
+    prefixes: list[str] = []
+    for item in items or []:
+        append_prefix_and_next(prefixes, reveal_card_prefix(item.get("code")), limit=DIGIMONCARD_IO_MAX_PREFIXES)
+        if len(prefixes) >= DIGIMONCARD_IO_MAX_PREFIXES:
+            break
+    for prefix in DIGIMONCARD_IO_DEFAULT_PREFIXES:
+        append_prefix_and_next(prefixes, prefix, limit=DIGIMONCARD_IO_MAX_PREFIXES)
+    return prefixes[:DIGIMONCARD_IO_MAX_PREFIXES]
+
+
+def digimoncard_io_card_datetime(card: dict[str, Any]) -> datetime | None:
+    value = str(card.get("date_added") or "").strip()
+    return parse_twitter_datetime_value(value)
+
+
+def normalize_digimoncard_io_card(card: dict[str, Any], *, checked_at: datetime) -> dict[str, Any] | None:
+    code = normalize_wiki_page_code(str(card.get("id") or ""))
+    name = re.sub(r"\s+", " ", str(card.get("name") or code)).strip()
+    if not code or not name:
+        return None
+    created = digimoncard_io_card_datetime(card) or checked_at
+    set_names = card.get("set_name") if isinstance(card.get("set_name"), list) else []
+    set_name = str(set_names[0] if set_names else "").strip()
+    pretty_url = str(card.get("pretty_url") or "").strip()
+    source_url = f"https://digimoncard.io/card/{urllib.parse.quote(pretty_url)}" if pretty_url else ""
+    image_url = DIGIMONCARD_IO_IMAGE_URL.format(code=urllib.parse.quote(code))
+    text_parts = [f"[{code} {name}]"]
+    if set_name:
+        text_parts.append(set_name)
+    return {
+        "id": f"digimoncardio-{code}",
+        "postId": f"digimoncardio-{code}",
+        "postUrl": source_url,
+        "createdAt": created.astimezone(timezone.utc).isoformat(),
+        "date": local_date_from_datetime(created),
+        "code": code,
+        "name": name,
+        "cards": [{"code": code, "name": name}],
+        "text": " ".join(text_parts),
+        "mediaUrls": [image_url],
+        "imageUrl": image_url,
+        "source": "digimoncard_io",
+        "sourceLabel": "DigimonCard.io",
+        "sourceSetName": set_name,
+    }
+
+
+def parse_digimoncard_io_reveals(payload: Any, *, checked_at: datetime) -> list[dict[str, Any]]:
+    if not isinstance(payload, list):
+        return []
+    items: list[dict[str, Any]] = []
+    seen_codes: set[str] = set()
+    for card in payload:
+        if not isinstance(card, dict):
+            continue
+        item = normalize_digimoncard_io_card(card, checked_at=checked_at)
+        if not item:
+            continue
+        code = normalize_wiki_page_code(str(item.get("code") or ""))
+        if code in seen_codes:
+            continue
+        seen_codes.add(code)
+        items.append(item)
     return items
 
 
-def fetch_reveal_items(app_support_dir: Path, previous_items: dict[str, dict[str, Any]]) -> tuple[list[dict[str, Any]], list[str]]:
+def check_digimoncard_io_reveals_now(
+    app_support_dir: Path,
+    *,
+    prefixes: list[str] | None = None,
+    fetcher: Any = fetch_digimoncard_io_json,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    checked_at = now or datetime.now(timezone.utc)
+    if checked_at.tzinfo is None:
+        checked_at = checked_at.replace(tzinfo=timezone.utc)
+
+    cache_path = reveals_cache_path(app_support_dir)
+    cache = read_json(cache_path, {})
+    existing_items = normalize_reveal_items(cache.get("items")) if isinstance(cache, dict) else []
+    selected_prefixes = [normalize_wiki_page_code(prefix) for prefix in (prefixes or digimoncard_io_prefixes_from_items(existing_items))]
+    selected_prefixes = [prefix for prefix in selected_prefixes if prefix][:DIGIMONCARD_IO_MAX_PREFIXES]
+    existing_codes = {normalize_wiki_page_code(str(item.get("code") or "")) for item in existing_items if isinstance(item, dict)}
+
     errors: list[str] = []
-    tweets_by_id: dict[str, dict[str, Any]] = {}
-
-    twitter_web_viewer_tweets, twitter_web_viewer_errors = fetch_twitter_web_viewer_tweets()
-    errors.extend(twitter_web_viewer_errors)
-    for tweet in twitter_web_viewer_tweets:
-        if tweet_is_reveal(tweet):
-            tweets_by_id[str(tweet.get("id_str"))] = tweet
-
-    try:
-        for tweet in parse_timeline_tweets(fetch_text(TIMELINE_URL)):
-            if tweet_is_recent(tweet) and tweet_is_reveal(tweet):
-                tweets_by_id.setdefault(str(tweet.get("id_str")), tweet)
-    except (urllib.error.URLError, TimeoutError) as error:
-        errors.append(f"Could not fetch X profile timeline: {error}")
-
-    seed_ids = DEFAULT_SEED_STATUS_IDS + status_ids_from_source_file(app_support_dir)
-    for status_id in seed_ids:
-        if status_id in tweets_by_id:
+    new_items: list[dict[str, Any]] = []
+    seen_new_codes: set[str] = set()
+    for prefix in selected_prefixes:
+        try:
+            payload = fetcher(digimoncard_io_search_url(prefix))
+        except urllib.error.HTTPError as error:
+            errors.append(f"DigimonCard.io {prefix} returned HTTP {int(error.code)}.")
             continue
-        tweet = parse_tweet_from_oembed(status_id)
-        if tweet and tweet_is_reveal(tweet):
-            tweets_by_id[status_id] = merge_media_from_status_page(tweet)
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
+            errors.append(f"Could not fetch DigimonCard.io {prefix}: {error}")
+            continue
+        if isinstance(payload, dict) and payload.get("error"):
+            errors.append(f"DigimonCard.io {prefix}: {payload.get('error')}")
+            continue
+        for item in parse_digimoncard_io_reveals(payload, checked_at=checked_at):
+            code = normalize_wiki_page_code(str(item.get("code") or ""))
+            if not code or code in existing_codes or code in seen_new_codes:
+                continue
+            new_items.append(item)
+            seen_new_codes.add(code)
 
+    if not new_items and errors and not existing_items:
+        raise RuntimeError(errors[0])
+
+    merged_items = merge_reveal_items(existing_items, new_items)
+    next_cache = dict(cache) if isinstance(cache, dict) else {}
+    next_cache.update(
+        {
+            "lastChecked": checked_at.timestamp(),
+            "source": "digimoncard_io",
+            "items": merged_items,
+            "errors": errors,
+        }
+    )
+    write_json(cache_path, next_cache)
+
+    return {
+        "ok": True,
+        "source": "digimoncard_io",
+        "skipped": False,
+        "newRevealCount": len(new_items),
+        "prefixes": selected_prefixes,
+        "errors": errors,
+        "items": new_items,
+    }
+
+
+def wikimon_set_page_name(prefix: str) -> str:
+    match = CARD_PREFIX_PARTS_RE.match(normalize_wiki_page_code(prefix))
+    if not match:
+        return ""
+    family = match.group(1).upper()
+    number = match.group(2)
+    if family in {"AD", "LM"}:
+        number = number.zfill(2)
+    return f"{family}-{number}"
+
+
+def wikimon_set_page_url(prefix: str) -> str:
+    page_name = wikimon_set_page_name(prefix)
+    return urllib.parse.urljoin(WIKIMON_URL, urllib.parse.quote(page_name)) if page_name else ""
+
+
+def wikimon_raw_set_page_url(prefix: str) -> str:
+    page_name = wikimon_set_page_name(prefix)
+    if not page_name:
+        return ""
+    query = urllib.parse.urlencode({"title": page_name, "action": "raw"})
+    return urllib.parse.urljoin(WIKIMON_URL, f"index.php?{query}")
+
+
+def wikimon_allpages_url(family: str, apcontinue: str = "") -> str:
+    params = {
+        "action": "query",
+        "list": "allpages",
+        "apprefix": f"{str(family or '').upper()}-",
+        "aplimit": "100",
+        "format": "json",
+    }
+    if apcontinue:
+        params["apcontinue"] = apcontinue
+    return f"{WIKIMON_API_URL}?{urllib.parse.urlencode(params)}"
+
+
+def wikimon_prefix_from_set_page_name(title: Any) -> str:
+    match = re.match(r"^(BT|EX|ST|AD|LM)-(\d{1,2})$", str(title or "").strip(), re.IGNORECASE)
+    if not match:
+        return ""
+    return f"{match.group(1).upper()}{int(match.group(2))}"
+
+
+def wikimon_prefix_sort_key(prefix: str) -> tuple[str, int]:
+    parts = card_prefix_family_number(prefix)
+    return parts if parts else ("", 0)
+
+
+def fetch_wikimon_discovered_prefixes(
+    *,
+    fetcher: Any = fetch_json,
+    families: tuple[str, ...] = WIKIMON_DISCOVERY_FAMILIES,
+    recent_per_family: int = WIKIMON_DISCOVERY_RECENT_PER_FAMILY,
+) -> tuple[list[str], list[str]]:
+    prefixes: list[str] = []
+    errors: list[str] = []
+    for family in families:
+        family_prefixes: list[str] = []
+        apcontinue = ""
+        for _ in range(4):
+            try:
+                payload = fetcher(wikimon_allpages_url(family, apcontinue=apcontinue))
+            except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
+                errors.append(f"Could not discover Wikimon {family} set pages: {error}")
+                break
+            pages = payload.get("query", {}).get("allpages", []) if isinstance(payload, dict) else []
+            for page in pages:
+                title = page.get("title") if isinstance(page, dict) else ""
+                prefix = wikimon_prefix_from_set_page_name(title)
+                if prefix and prefix not in family_prefixes:
+                    family_prefixes.append(prefix)
+            apcontinue = str(payload.get("continue", {}).get("apcontinue") or "") if isinstance(payload, dict) else ""
+            if not apcontinue:
+                break
+        family_prefixes.sort(key=lambda prefix: wikimon_prefix_sort_key(prefix)[1], reverse=True)
+        for prefix in family_prefixes[: max(0, recent_per_family)]:
+            append_unique_prefix(prefixes, prefix)
+    return prefixes, errors
+
+
+def wikimon_prefixes_from_items(items: list[dict[str, Any]], discovered_prefixes: list[str] | None = None) -> list[str]:
+    prefixes: list[str] = []
+    for item in items or []:
+        append_prefix_and_next(prefixes, reveal_card_prefix(item.get("code")), limit=WIKIMON_MAX_PREFIXES)
+        if len(prefixes) >= WIKIMON_MAX_PREFIXES:
+            break
+    for prefix in WIKIMON_DEFAULT_PREFIXES:
+        append_prefix_and_next(prefixes, prefix, limit=WIKIMON_MAX_PREFIXES)
+    for prefix in discovered_prefixes or []:
+        append_prefix_and_next(prefixes, prefix, limit=WIKIMON_MAX_PREFIXES)
+    return prefixes[:WIKIMON_MAX_PREFIXES]
+
+
+def wikimon_card_code(prefix: str, number: str) -> str:
+    normalized_prefix = normalize_wiki_page_code(prefix)
+    digits = re.sub(r"\D+", "", str(number or ""))
+    if not normalized_prefix or not digits:
+        return ""
+    if normalized_prefix.startswith("LM"):
+        return f"LM-{digits.zfill(3)}"
+    width = 2 if normalized_prefix.startswith("ST") else 3
+    return f"{normalized_prefix}-{digits.zfill(width)}"
+
+
+def parse_wikimon_dcg_table_fields(body: str) -> dict[str, str]:
+    fields: dict[str, str] = {}
+    for chunk in re.split(r"\n\s*\|", "\n" + str(body or "")):
+        if "=" not in chunk:
+            continue
+        key, value = chunk.split("=", 1)
+        key = key.strip().lower()
+        if key:
+            fields[key] = clean_wiki_markup(value)
+    return fields
+
+
+def wikimon_original_image_url(url: str) -> str:
+    joined = urllib.parse.urljoin(WIKIMON_URL, html.unescape(str(url or "")))
+    parsed = urllib.parse.urlparse(joined)
+    match = re.match(r"^/images/thumb/((?:[^/]+/){2}Dcg-[^/]+\.jpg)/[^/]+$", parsed.path)
+    if match:
+        return urllib.parse.urlunparse(parsed._replace(path=f"/images/{match.group(1)}", query="", fragment=""))
+    return urllib.parse.urlunparse(parsed._replace(query="", fragment=""))
+
+
+def wikimon_image_urls_from_html(page_html: str) -> dict[str, str]:
+    images: dict[str, str] = {}
+    for match in WIKIMON_IMAGE_RE.finditer(str(page_html or "")):
+        code = normalize_wiki_page_code(match.group(1))
+        if code and code not in images:
+            images[code] = wikimon_original_image_url(match.group(2))
+    return images
+
+
+def normalize_wikimon_card(
+    fields: dict[str, str],
+    *,
+    prefix: str,
+    image_urls: dict[str, str],
+    checked_at: datetime,
+) -> dict[str, Any] | None:
+    code = wikimon_card_code(prefix, fields.get("no", ""))
+    name = re.sub(r"\s+", " ", str(fields.get("n") or fields.get("n2") or code)).strip()
+    if fields.get("n") and fields.get("n2"):
+        name = f"{fields['n']} / {fields['n2']}"
+    image_url = image_urls.get(code, "")
+    if not code or not name or not image_url:
+        return None
+    page_url = wikimon_set_page_url(prefix)
+    created = checked_at.astimezone(timezone.utc)
+    return {
+        "id": f"wikimon-{code}",
+        "postId": f"wikimon-{code}",
+        "postUrl": page_url,
+        "createdAt": created.isoformat(),
+        "date": local_date_from_datetime(created),
+        "code": code,
+        "name": name,
+        "cards": [{"code": code, "name": name}],
+        "text": f"[{code} {name}] {wikimon_set_page_name(prefix)}",
+        "mediaUrls": [image_url],
+        "imageUrl": image_url,
+        "source": "wikimon",
+        "sourceLabel": "Wikimon",
+        "sourceSetName": wikimon_set_page_name(prefix),
+    }
+
+
+def parse_wikimon_reveals(raw_page: str, page_html: str, *, prefix: str, checked_at: datetime) -> list[dict[str, Any]]:
+    image_urls = wikimon_image_urls_from_html(page_html)
     items: list[dict[str, Any]] = []
-    for tweet in tweets_by_id.values():
-        items.extend(reveal_items_from_tweet(app_support_dir, merge_media_from_status_page(tweet), previous_items))
-    for previous in previous_items.values():
-        if isinstance(previous, dict) and reveal_item_is_recent(previous):
-            items.append(previous)
-    deduped: dict[str, dict[str, Any]] = {}
-    for item in items:
-        item_id = str(item.get("id") or "")
-        if item_id and item_id not in deduped:
-            deduped[item_id] = item
-    items = list(deduped.values())
-    items.sort(key=lambda item: (item.get("date") or "", item.get("tweetId") or "", item.get("id") or ""), reverse=True)
-    return items[:MAX_REVEALS], errors
+    seen_codes: set[str] = set()
+    for match in WIKIMON_DCG_TABLE_RE.finditer(str(raw_page or "")):
+        fields = parse_wikimon_dcg_table_fields(match.group(1))
+        item = normalize_wikimon_card(fields, prefix=prefix, image_urls=image_urls, checked_at=checked_at)
+        if not item:
+            continue
+        code = normalize_wiki_page_code(str(item.get("code") or ""))
+        if code in seen_codes:
+            continue
+        seen_codes.add(code)
+        items.append(item)
+    return items
+
+
+def check_wikimon_reveals_now(
+    app_support_dir: Path,
+    *,
+    prefixes: list[str] | None = None,
+    fetcher: Any = fetch_text,
+    discovery_fetcher: Any = fetch_json,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    checked_at = now or datetime.now(timezone.utc)
+    if checked_at.tzinfo is None:
+        checked_at = checked_at.replace(tzinfo=timezone.utc)
+
+    cache_path = reveals_cache_path(app_support_dir)
+    cache = read_json(cache_path, {})
+    existing_items = normalize_reveal_items(cache.get("items")) if isinstance(cache, dict) else []
+    existing_codes = {normalize_wiki_page_code(str(item.get("code") or "")) for item in existing_items if isinstance(item, dict)}
+
+    errors: list[str] = []
+    discovered_prefixes: list[str] = []
+    if prefixes is None:
+        discovered_prefixes, discovery_errors = fetch_wikimon_discovered_prefixes(fetcher=discovery_fetcher)
+        errors.extend(discovery_errors)
+    selected_prefixes = [normalize_wiki_page_code(prefix) for prefix in (prefixes or wikimon_prefixes_from_items(existing_items, discovered_prefixes))]
+    selected_prefixes = [prefix for prefix in selected_prefixes if prefix][:WIKIMON_MAX_PREFIXES]
+
+    new_items: list[dict[str, Any]] = []
+    seen_new_codes: set[str] = set()
+    for prefix in selected_prefixes:
+        raw_url = wikimon_raw_set_page_url(prefix)
+        page_url = wikimon_set_page_url(prefix)
+        if not raw_url or not page_url:
+            continue
+        try:
+            raw_page = fetcher(raw_url)
+            page_html = fetcher(page_url)
+        except urllib.error.HTTPError as error:
+            errors.append(f"Wikimon {prefix} returned HTTP {int(error.code)}.")
+            continue
+        except (urllib.error.URLError, TimeoutError) as error:
+            errors.append(f"Could not fetch Wikimon {prefix}: {error}")
+            continue
+        for item in parse_wikimon_reveals(raw_page, page_html, prefix=prefix, checked_at=checked_at):
+            code = normalize_wiki_page_code(str(item.get("code") or ""))
+            if not code or code in existing_codes or code in seen_new_codes:
+                continue
+            new_items.append(item)
+            seen_new_codes.add(code)
+
+    if not new_items and errors and not existing_items:
+        raise RuntimeError(errors[0])
+
+    merged_items = merge_reveal_items(existing_items, new_items)
+    next_cache = dict(cache) if isinstance(cache, dict) else {}
+    next_cache.update(
+        {
+            "lastChecked": checked_at.timestamp(),
+            "source": "wikimon",
+            "items": merged_items,
+            "errors": errors,
+        }
+    )
+    write_json(cache_path, next_cache)
+
+    return {
+        "ok": True,
+        "source": "wikimon",
+        "skipped": False,
+        "newRevealCount": len(new_items),
+        "prefixes": selected_prefixes,
+        "errors": errors,
+        "items": new_items,
+    }
 
 
 def add_official_matches(items: list[dict[str, Any]], card_catalog: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -860,7 +1358,7 @@ def official_card_numbers(card_catalog: list[dict[str, Any]]) -> set[str]:
 
 def reveal_cards_from_cache(app_support_dir: Path) -> list[dict[str, Any]]:
     cache = read_json(reveals_cache_path(app_support_dir), {})
-    items = cache.get("items") if isinstance(cache, dict) else []
+    items = normalize_reveal_items(cache.get("items")) if isinstance(cache, dict) else []
     cards: list[dict[str, Any]] = []
     seen: set[str] = set()
     for item in items or []:
@@ -868,8 +1366,6 @@ def reveal_cards_from_cache(app_support_dir: Path) -> list[dict[str, Any]]:
             continue
         code = normalize_wiki_page_code(str(item.get("code") or ""))
         if not code or code in seen:
-            continue
-        if not reveal_item_is_recent(item):
             continue
         cards.append(item)
         seen.add(code)
@@ -1007,39 +1503,53 @@ def load_reveal_collection_cards(
 def load_reveals(app_support_dir: Path, card_catalog: list[dict[str, Any]], force_refresh: bool = False) -> dict[str, Any]:
     cache_path = reveals_cache_path(app_support_dir)
     cache = read_json(cache_path, {})
-    cached_items = cache.get("items") if isinstance(cache, dict) else []
-    previous_items = {
-        str(item.get("id")): item
-        for item in cached_items or []
-        if isinstance(item, dict) and item.get("id")
-    }
+    raw_cached_items = cache.get("items") if isinstance(cache, dict) else []
+    cached_items = normalize_reveal_items(raw_cached_items) if isinstance(raw_cached_items, list) else []
 
-    last_checked = float(cache.get("lastChecked") or 0) if isinstance(cache, dict) else 0
-    should_refresh = force_refresh or not cached_items or (time.time() - last_checked) > CACHE_MAX_AGE_SECONDS
     errors: list[str] = []
     items = cached_items if isinstance(cached_items, list) else []
+    source_message = ""
+    next_live_refresh_at = ""
 
-    if should_refresh:
+    if force_refresh:
         try:
-            items, errors = fetch_reveal_items(app_support_dir, previous_items)
-            checked_at = time.time()
-            write_json(
-                cache_path,
-                {
-                    "lastChecked": checked_at,
-                    "source": TWITTER_WEB_VIEWER_URL,
-                    "items": items,
-                    "errors": errors,
-                },
-            )
-            cache = {"lastChecked": checked_at, "errors": errors}
+            result = check_twitterwebviewer_reveals_now(app_support_dir)
+            source_message = f"TwitterWebViewer check complete: {result.get('newRevealCount', 0)} new reveal posts."
+            if result.get("stoppedAtSeenTweetId"):
+                source_message += f" Stopped at seen tweet {result.get('stoppedAtSeenTweetId')}."
+            cache = read_json(cache_path, {})
+            items = normalize_reveal_items(cache.get("items")) if isinstance(cache, dict) else []
         except Exception as error:
-            errors = [f"Could not update reveal cache: {error}"]
-            items = cached_items if isinstance(cached_items, list) else []
+            twitterwebviewer_error = f"Could not check TwitterWebViewer reveals: {error}"
+            fallback_summaries: list[str] = []
+            fallback_errors: list[str] = []
+            for label, checker in (
+                ("DigimonCard.io", check_digimoncard_io_reveals_now),
+                ("Wikimon", check_wikimon_reveals_now),
+            ):
+                try:
+                    result = checker(app_support_dir)
+                except Exception as fallback_error:
+                    fallback_errors.append(f"Could not check {label} fallback: {fallback_error}")
+                    continue
+                fallback_summaries.append(f"{label} fallback complete: {result.get('newRevealCount', 0)} new reveal cards.")
+                result_errors = result.get("errors") if isinstance(result.get("errors"), list) else []
+                if result_errors:
+                    fallback_errors.append(str(result_errors[0]))
+            if fallback_summaries:
+                source_message = f"{twitterwebviewer_error} {' '.join(fallback_summaries)}"
+                if fallback_errors:
+                    source_message += f" {fallback_errors[0]}"
+                cache = read_json(cache_path, {})
+                items = normalize_reveal_items(cache.get("items")) if isinstance(cache, dict) else []
+            else:
+                errors = [twitterwebviewer_error] + fallback_errors
+                items = cached_items if isinstance(cached_items, list) else []
 
     cached_errors = cache.get("errors") if isinstance(cache, dict) and isinstance(cache.get("errors"), list) else []
     visible_errors = errors or cached_errors
     if items and visible_errors:
+        source_message = visible_errors[0]
         visible_errors = []
 
     reveal_collection_cards = (
@@ -1049,10 +1559,12 @@ def load_reveals(app_support_dir: Path, card_catalog: list[dict[str, Any]], forc
     )
 
     return {
-        "source": TWITTER_WEB_VIEWER_URL,
+        "source": str(cache.get("source") or "twitterwebviewer") if isinstance(cache, dict) else "twitterwebviewer",
         "lastChecked": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(cache.get("lastChecked") or time.time()) if isinstance(cache, dict) else time.time())),
         "cachePath": str(cache_path),
         "items": add_official_matches(items, card_catalog),
         "revealCollectionCards": reveal_collection_cards,
         "errors": visible_errors,
+        "sourceMessage": source_message,
+        "nextLiveRefreshAt": next_live_refresh_at,
     }

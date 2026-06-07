@@ -81,6 +81,49 @@ Copy the pairing payload into the mobile app, or encode that same payload as a Q
 
 Local sync uses the same last-write-wins rule as cloud sync. The local `.txt` deck files remain the desktop source for DCGO compatibility.
 
+## New Reveals
+
+New reveal refreshes use `https://twitterwebviewer.com/?user=digimon_tcg_EN` and keep a 14-day reveal window. Normal page loads use the local cache. The scraper runs only when the New Reveals page is refreshed from the local Python server.
+
+The refresh state is stored locally under:
+
+```text
+deck_browser/reveals/twitterwebviewer_state.json
+```
+
+The saved state tracks seen tweet ids and card ids, for example:
+
+```json
+{
+  "cards": {
+    "BT25-063": {
+      "status": "seen",
+      "tweetId": "1234567890123456789",
+      "date": "2026-06-06",
+      "firstSeenAt": "2026-06-06T18:46:44+00:00"
+    }
+  },
+  "tweets": {
+    "1234567890123456789": {
+      "status": "seen",
+      "date": "2026-06-06"
+    }
+  },
+  "source": "twitterwebviewer",
+  "windowDays": 14
+}
+```
+
+During a refresh, the scraper scans newest tweets first and stops as soon as it reaches a seen tweet id. This avoids crawling older already-cached reveals and reduces pressure on TwitterWebViewer. Fetch errors and rate limits are recorded in state while keeping cached cards visible, but they do not block the next manual refresh.
+
+Run mocked reveal tests without calling TwitterWebViewer:
+
+```sh
+python3 -m unittest tests.test_twitterwebviewer_reveals
+```
+
+The default New Reveals refresh path is TwitterWebViewer.
+
 ## Updates
 
 The editor checks the latest GitHub release on startup and shows update status in the Deck Library footer.

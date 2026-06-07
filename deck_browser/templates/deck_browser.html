@@ -21,7 +21,7 @@ $deck_browser_css
         <div class="library-header-actions">
           <div class="tiny" id="library-summary"></div>
           <div class="library-settings">
-            <button id="library-settings-toggle" class="button library-settings-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Deck library settings" title="Deck library settings">...</button>
+            <button id="library-settings-toggle" class="button library-settings-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Deck library settings" title="Deck library settings">Settings</button>
             <div id="library-settings-menu" class="more-actions-menu library-settings-menu hidden" role="dialog" aria-label="Deck library settings">
               <div class="settings-menu-section">
                 <div class="settings-menu-title">Maintenance</div>
@@ -111,7 +111,7 @@ $deck_browser_css
               <button id="save-changes" class="button success" type="button">Save Changes</button>
               <button id="test-hand" class="button primary" type="button">Test Hand</button>
               <div class="more-actions">
-                <button id="more-actions-toggle" class="button" type="button" aria-haspopup="true" aria-expanded="false">...</button>
+                <button id="more-actions-toggle" class="button" type="button" aria-haspopup="true" aria-expanded="false" aria-label="More deck actions" title="More deck actions">More</button>
                 <div id="more-actions-menu" class="more-actions-menu hidden" role="menu">
                   <button id="include-reveals-deck-editor" class="menu-action menu-toggle-action" type="button" role="menuitemcheckbox" aria-checked="false">Include Reveals: Off</button>
                   <span class="menu-separator" aria-hidden="true"></span>
@@ -175,7 +175,7 @@ $deck_browser_css
               <button id="collection-wanted-only" class="button collection-toggle-button" type="button" aria-pressed="false">Wanted Only</button>
               <button id="collection-import-list" class="button" type="button">Import List</button>
               <button id="collection-export-image" class="button primary" type="button" disabled>Export</button>
-              <button id="collection-clear-wanted" class="button" type="button" disabled>Clear</button>
+              <button id="collection-clear-wanted" class="button danger" type="button" disabled>Clear</button>
               <button id="collection-back-library" class="button collection-back-button" type="button">Back to Decks</button>
               <input id="collection-import-file" class="hidden" type="file" accept=".txt,text/plain">
             </div>
@@ -267,7 +267,7 @@ $deck_browser_css
             <input id="filter-effect" class="filter-input" type="search" placeholder="Effect Text">
 
             <div class="filter-row bottom">
-              <select id="filter-color-1" class="filter-select filter-color-select" title="Color 1">
+              <select id="filter-color-1" class="filter-select filter-color-select" title="Color 1" aria-label="Color filter 1">
                 <option value="">🌈</option>
                 <option value="Red">🟥</option>
                 <option value="Blue">🟦</option>
@@ -277,7 +277,7 @@ $deck_browser_css
                 <option value="Black">⬛</option>
                 <option value="White">⬜</option>
               </select>
-              <select id="filter-color-2" class="filter-select filter-color-select" title="Color 2">
+              <select id="filter-color-2" class="filter-select filter-color-select" title="Color 2" aria-label="Color filter 2">
                 <option value="">🌈</option>
                 <option value="Red">🟥</option>
                 <option value="Blue">🟦</option>
@@ -287,7 +287,7 @@ $deck_browser_css
                 <option value="Black">⬛</option>
                 <option value="White">⬜</option>
               </select>
-              <select id="filter-color-3" class="filter-select filter-color-select" title="Color 3">
+              <select id="filter-color-3" class="filter-select filter-color-select" title="Color 3" aria-label="Color filter 3">
                 <option value="">🌈</option>
                 <option value="Red">🟥</option>
                 <option value="Blue">🟦</option>
@@ -299,8 +299,9 @@ $deck_browser_css
               </select>
               <label class="filter-check"><input id="filter-ace" type="checkbox"> ACE</label>
               <label class="filter-check"><input id="filter-alt-arts" type="checkbox" checked> Alt Arts</label>
-              <button id="filter-clear" class="button" type="button">Clear</button>
+              <button id="filter-clear" class="button" type="button" aria-label="Clear active card filters">Clear Filters</button>
             </div>
+            <div id="active-filter-chips" class="active-filter-chips hidden" aria-live="polite"></div>
           </div>
         </div>
         <div id="catalog-grid" class="catalog-results"></div>

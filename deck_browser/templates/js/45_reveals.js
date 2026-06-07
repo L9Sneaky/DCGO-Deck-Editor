@@ -13,6 +13,17 @@
       return count === 1 ? "1 recent reveal cached" : count + " recent reveals cached";
     }
 
+    function revealSourceText() {
+      const parts = [];
+      if (state.reveals.lastChecked) parts.push("Last checked: " + state.reveals.lastChecked);
+      if (state.reveals.sourceMessage) {
+        parts.push(state.reveals.sourceMessage);
+      } else if (state.reveals.errors.length) {
+        parts.push("Source warning: " + state.reveals.errors[0]);
+      }
+      return parts.join(" | ");
+    }
+
     function createRevealCard(item) {
       const card = document.createElement("article");
       card.className = "reveal-card";
@@ -31,12 +42,25 @@
         openImageViewer({ imageUrl: item.imageUrl, name: item.name, code: item.code });
       });
       card.appendChild(mediaButton);
+      if (item.source === "x_api") {
+        const meta = document.createElement("div");
+        meta.className = "reveal-card-meta";
+        const source = document.createElement("span");
+        source.textContent = item.sourceLabel || "Official X Reveal";
+        meta.appendChild(source);
+        if (item.pendingCardMatch || !item.code) {
+          const pending = document.createElement("span");
+          pending.textContent = "Pending card match";
+          meta.appendChild(pending);
+        }
+        card.appendChild(meta);
+      }
       return card;
     }
 
     function renderReveals() {
       revealsSummaryEl.textContent = revealStatusText();
-      revealsSourceEl.textContent = state.reveals.lastChecked ? "Last checked: " + state.reveals.lastChecked : "";
+      revealsSourceEl.textContent = revealSourceText();
       revealsGridEl.innerHTML = "";
 
       if (state.reveals.loading && !state.reveals.items.length) {
@@ -115,6 +139,8 @@
         state.reveals.loaded = true;
         state.reveals.source = payload.source || "";
         state.reveals.lastChecked = payload.lastChecked || "";
+        state.reveals.sourceMessage = payload.sourceMessage || "";
+        state.reveals.nextLiveRefreshAt = payload.nextLiveRefreshAt || "";
         state.reveals.items = Array.isArray(payload.items) ? payload.items : [];
         state.reveals.errors = Array.isArray(payload.errors) ? payload.errors : [];
         state.reveals.error = state.reveals.errors.length && !state.reveals.items.length ? state.reveals.errors[0] : "";

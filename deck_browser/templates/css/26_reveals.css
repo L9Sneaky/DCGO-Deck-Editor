@@ -34,7 +34,14 @@
       padding: 10px 28px;
       justify-content: space-between;
       border-bottom: 1px solid var(--line);
-      background: rgba(1, 8, 14, 0.28);
+      background: var(--panel-strong);
+    }
+
+    #reveals-source {
+      min-width: 240px;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      text-align: right;
     }
 
     .reveals-grid {
@@ -57,7 +64,7 @@
       justify-content: space-between;
       gap: 14px;
       padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
+      border-bottom: 1px solid var(--border);
     }
 
     .reveal-day-heading h2 {
@@ -76,9 +83,9 @@
     .reveal-card {
       display: block;
       padding: 10px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.036);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
     }
 
     .reveal-image-button {
@@ -86,8 +93,8 @@
       border: 0;
       padding: 0;
       margin: 0;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.045);
+      border-radius: 8px;
+      background: #07111F;
       cursor: zoom-in;
       overflow: hidden;
       width: 100%;
@@ -99,6 +106,23 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
+    }
+
+    .reveal-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 11px;
+      line-height: 1.2;
+      color: var(--muted);
+    }
+
+    .reveal-card-meta span {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 6px;
+      background: var(--panel);
     }
 
     @media (max-width: 760px) {

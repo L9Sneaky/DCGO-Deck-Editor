@@ -135,6 +135,7 @@
           heroChipsEl.appendChild(createColorChip(color));
         });
       }
+      heroChipsEl.classList.toggle("hidden", !heroChipsEl.children.length);
     }
 
     function renderDeckSummary(deck, stats, validation) {
@@ -311,19 +312,7 @@
     function createCardThumb(card, className) {
       const thumb = document.createElement("div");
       thumb.className = className;
-      if (card.imageUrl) {
-        const img = document.createElement("img");
-        img.src = card.imageUrl;
-        img.alt = card.name;
-        img.loading = "lazy";
-        img.addEventListener("error", function() {
-          img.remove();
-          thumb.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
-        });
-        thumb.appendChild(img);
-      } else {
-        thumb.appendChild(createFallbackLabel(card.name, "thumb-fallback"));
-      }
+      appendCardImageWithFallback(thumb, card, "thumb-fallback", "lazy");
       attachCardImageViewerTrigger(thumb, card);
       return thumb;
     }
@@ -340,7 +329,21 @@
       const config = options || {};
       const tile = document.createElement("div");
       tile.className = "card-tile" + (config.active ? " active" : "") + (config.extraClass ? " " + config.extraClass : "");
+      tile.tabIndex = 0;
+      tile.setAttribute("role", "button");
+      tile.setAttribute("aria-pressed", String(Boolean(config.active)));
+      tile.setAttribute(
+        "aria-label",
+        (config.active ? "Selected card: " : "Select card: ") +
+          [card.name, card.code].filter(Boolean).join(" ")
+      );
       tile.addEventListener("click", function(event) {
+        if (config.onSelect) config.onSelect(card, event);
+      });
+      tile.addEventListener("keydown", function(event) {
+        if (event.target !== tile) return;
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
         if (config.onSelect) config.onSelect(card, event);
       });
       if (config.onContextMenu) {
@@ -377,6 +380,8 @@
       minus.type = "button";
       minus.className = "count-button minus";
       minus.textContent = "-";
+      minus.title = "Remove one copy";
+      minus.setAttribute("aria-label", "Remove one copy of " + (card.name || card.code) + " from deck");
       minus.addEventListener("click", function(event) {
         event.stopPropagation();
         removeCardFromDeck(deck, card);
@@ -385,6 +390,7 @@
       const count = document.createElement("div");
       count.className = "deck-card-count";
       count.textContent = "x" + card.count;
+      count.setAttribute("aria-label", "Current quantity " + card.count);
 
       const plus = document.createElement("button");
       plus.type = "button";
@@ -392,6 +398,7 @@
       plus.textContent = "+";
       plus.disabled = !canAddCard(deck, card);
       plus.title = plus.disabled ? "Copy limit reached for " + (card.cardNumber || card.code) : "Add one copy";
+      plus.setAttribute("aria-label", "Add one copy of " + (card.name || card.code) + " to deck");
       plus.addEventListener("click", function(event) {
         event.stopPropagation();
         addCardToDeck(deck, card);
@@ -432,10 +439,53 @@
       });
     }
 
+    function activeCatalogFilterLabels(filters) {
+      const labels = [];
+      if (filters.name) labels.push("Name: " + filters.name);
+      if (filters.number) labels.push("Set: " + filters.number);
+      if (filters.dp !== null) labels.push("DP: " + filters.dp);
+      filters.colors.forEach(function(color, index) {
+        labels.push("Color " + (index + 1) + ": " + color);
+      });
+      if (filters.type) labels.push("Type: " + filters.type);
+      if (filters.attribute) labels.push("Attr: " + filters.attribute);
+      if (filters.playCost !== null) labels.push("Play: " + filters.playCost);
+      if (filters.digivolutionCost !== null) labels.push("Digi cost: " + filters.digivolutionCost);
+      if (filters.level !== null) labels.push("Lv: " + filters.level);
+      if (filters.stage) labels.push("Stage: " + filters.stage);
+      if (filters.trait) labels.push("Trait: " + filters.trait);
+      if (filters.illustrator) labels.push("Artist: " + filters.illustrator);
+      if (filters.effect) labels.push("Effect: " + filters.effect);
+      if (filters.ace) labels.push("ACE only");
+      if (!filters.altArts) labels.push("Alt arts hidden");
+      return labels;
+    }
+
+    function renderActiveCatalogFilters(filters) {
+      const labels = activeCatalogFilterLabels(filters);
+      filterEls.clear.disabled = !labels.length;
+      activeCatalogFiltersEl.innerHTML = "";
+      activeCatalogFiltersEl.classList.toggle("hidden", !labels.length);
+      if (!labels.length) return;
+
+      const heading = document.createElement("span");
+      heading.className = "active-filter-label";
+      heading.textContent = "Active";
+      activeCatalogFiltersEl.appendChild(heading);
+
+      labels.forEach(function(labelText) {
+        const chip = document.createElement("span");
+        chip.className = "filter-chip";
+        chip.textContent = labelText;
+        activeCatalogFiltersEl.appendChild(chip);
+      });
+    }
+
     function renderCatalog(deck) {
       const cards = getFilteredCatalogCards();
       const filters = readCatalogFilters();
       catalogGridEl.innerHTML = "";
+      renderActiveCatalogFilters(filters);
 
       if (!hasActiveCatalogFilters(filters)) {
         catalogSummaryEl.textContent = EDITOR_CARD_POOL.length + " cards loaded" + (state.editor.includeReveals ? " incl. reveals" : "");
@@ -458,7 +508,17 @@
       cards.forEach(function(card) {
         const item = document.createElement("div");
         item.className = "catalog-card";
+        item.tabIndex = 0;
+        item.setAttribute("role", "button");
+        item.setAttribute("aria-label", "Inspect " + [card.name, card.code].filter(Boolean).join(" "));
         item.addEventListener("click", function() {
+          state.selectedCardCode = card.code;
+          renderDetails(deck);
+        });
+        item.addEventListener("keydown", function(event) {
+          if (event.target !== item) return;
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
           state.selectedCardCode = card.code;
           renderDetails(deck);
         });
@@ -489,6 +549,7 @@
         addButton.textContent = getDeckCardNumberCount(deck, card) ? "Add another" : "Add to deck";
         addButton.disabled = !canAddCard(deck, card);
         addButton.title = addButton.disabled ? "Copy limit reached for " + (card.cardNumber || card.code) : "Add one copy";
+        addButton.setAttribute("aria-label", "Add one copy of " + (card.name || card.code) + " to deck");
         addButton.addEventListener("click", function(event) {
           event.stopPropagation();
           addCardToDeck(deck, card);
@@ -507,6 +568,7 @@
     function renderCollectionCatalogStatus(totalCards) {
       const filters = readCatalogFilters();
       catalogGridEl.innerHTML = "";
+      renderActiveCatalogFilters(filters);
       catalogSummaryEl.textContent = hasActiveCatalogFilters(filters)
         ? totalCards + " matching cards"
         : COLLECTION_CARD_POOL.length + " cards loaded";
@@ -645,18 +707,7 @@
 
       const art = document.createElement("div");
       art.className = "details-art";
-      if (card.imageUrl) {
-        const img = document.createElement("img");
-        img.src = card.imageUrl;
-        img.alt = card.name;
-        img.addEventListener("error", function() {
-          img.remove();
-          art.appendChild(createFallbackLabel(card.name, "cover-fallback"));
-        });
-        art.appendChild(img);
-      } else {
-        art.appendChild(createFallbackLabel(card.name, "cover-fallback"));
-      }
+      appendCardImageWithFallback(art, card, "cover-fallback");
       attachCardImageViewerTrigger(art, card);
       targetEl.appendChild(art);
 
@@ -938,8 +989,18 @@
     }
 
     function openImageViewer(card) {
-      if (!card || !card.imageUrl) return;
-      imageViewerImgEl.src = card.imageUrl;
+      const urls = cardImageUrls(card);
+      if (!urls.length) return;
+      imageViewerImgEl.removeAttribute("src");
+      imageViewerImgEl.onerror = null;
+      let index = 0;
+      imageViewerImgEl.onerror = function() {
+        if (index >= urls.length) return;
+        imageViewerImgEl.src = urls[index];
+        index += 1;
+      };
+      imageViewerImgEl.src = urls[index];
+      index += 1;
       imageViewerImgEl.alt = card.name || "Card image";
       imageViewerCaptionEl.textContent = [card.name, card.code].filter(Boolean).join(" · ");
       imageViewerEl.classList.remove("hidden");
@@ -951,12 +1012,13 @@
       imageViewerEl.classList.add("hidden");
       document.body.classList.remove("modal-open");
       imageViewerImgEl.removeAttribute("src");
+      imageViewerImgEl.onerror = null;
       imageViewerImgEl.alt = "";
       imageViewerCaptionEl.textContent = "";
     }
 
     function attachCardImageViewerTrigger(element, card) {
-      if (!element || !card || !card.imageUrl) return;
+      if (!element || !card || !cardImageUrls(card).length) return;
       element.classList.add("image-zoomable");
       element.title = "Double-click to enlarge";
       element.tabIndex = 0;
