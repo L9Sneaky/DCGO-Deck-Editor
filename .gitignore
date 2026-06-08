@@ -5,3 +5,4 @@ deck_browser/output/
 deck_browser_data/
 *.log
 automation/DCGO.CardEffects/
+artifacts/
